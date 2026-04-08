@@ -186,7 +186,7 @@ class DataAccess:
     
     def get_lead_base_info(self , phone_number):
         self.cursor.execute(
-        "SELECT lead_id , name , current_field , attempt_number FROM leads_info WHERE phone_number = ?" , 
+        "SELECT lead_id , name , current_field , attempt_number , status , summary FROM leads_info WHERE phone_number = ?" , 
         (phone_number , )
         )
         
@@ -195,10 +195,13 @@ class DataAccess:
             return None
     
         return {
+            "phone_number" : phone_number , 
             "lead_id" : result[0] ,
             "name" : result[1] ,
             "current_field" : result[2] ,
-            "attempt_number" : result[3]
+            "attempt_number" : result[3] ,
+            "status" : result[4] ,
+            "summary" : result[5]
         }
     
 
@@ -253,7 +256,7 @@ class DataAccess:
 
     def get_all_lead_field_data(self , lead_id):
         self.cursor.execute(
-        "SELECT * FROM leads_fields_data WHERE lead_id = ?" , 
+        "SELECT goal_user , budget_user , urgency_user FROM leads_fields_data WHERE lead_id = ?" , 
         (lead_id , )
         )
 
@@ -261,7 +264,11 @@ class DataAccess:
         if result is None:
             return None
         
-        return result
+        return {
+            "goal_user" : result[0] ,
+            "budget_user" : result[1] ,
+            "urgency_user" : result[2]
+        }
     
 
 
@@ -393,6 +400,9 @@ class ConversationBuilder:
         return ai_content
     
 
+
+    
+
     
     
     def analyze_prompt(self, current_field , content):
@@ -489,6 +499,86 @@ class ConversationBuilder:
             {
                 "role": "user",
                 "content": f"Current field: {current_field}\nUser message: {content}"
+            }
+        ]
+
+
+    def main_prompt(self , current_field , attempt_number , name , content):
+        return [
+            {
+                "role": "system",
+                "content": (
+                    "אתה נציג שירות של מאמן כושר אישי.\n"
+                    "אתה מדבר עם לקוח אמיתי, ותמיד מתייחס להודעה האחרונה שלו כדי לענות בצורה טבעית.\n\n"
+
+                    "המטרה שלך בכל תשובה:\n"
+                    "1. לבדוק אם המשתמש נתן מידע תקין על השדה הנוכחי\n"
+                    "2. להחזיר תגובה קצרה וטבעית להמשך השיחה\n\n"
+
+                    "החזר JSON בלבד באחד משני הפורמטים:\n"
+                    "אם יש מידע:\n"
+                    "{\"extracted_field\":\"goal/budget/urgency\",\"extracted_data\":NUMBER,\"response\":\"TEXT\"}\n"
+                    "אם אין מידע:\n"
+                    "{\"message\":\"THERE IS NO INFO\",\"response\":\"TEXT\"}\n\n"
+
+                    f"שדה נוכחי: {current_field} | ניסיון: {attempt_number} | שם: {name}\n\n"
+
+                    "- איך לחשוב (שלב פנימי):\n"
+                    "- valid = יש מידע ברור ורלוונטי לשדה הנוכחי שניתן להמיר למספר אחד.\n"
+                    "- invalid = המשתמש ניסה לענות, אבל לא נתן מידע מספיק, ברור או תקין.\n"
+                    "- confused = המשתמש לא הבין את השאלה או מבקש הבהרה אמיתית עליה.\n"
+                    "- סלנג, בדיחות, צחוקים, ציניות, קללות או ניסוחים לא רציניים אינם confused אלא invalid,\n"
+                    "  אלא אם המשתמש באמת מבקש הבהרה על השאלה.\n"
+                    "- אם ההודעה כוללת גם שטויות וגם מידע ברור על השדה הנוכחי, התעלם מהשטויות וחלץ רק את המידע הברור.\n"
+                    "- אם יש ספק אם המידע ברור מספיק להמרה למספר אחד, החזר THERE IS NO INFO.\n\n"
+
+                    "זיהוי confused:\n"
+                    "אם המשתמש מביע חוסר הבנה או מבקש הבהרה על השאלה — זה confused.\n"
+                    "דוגמאות: 'לא הבנתי', 'מה?', 'למה אתה מתכוון', 'על מה אתה מדבר'\n"
+                    "גם אם הניסוח שונה אבל המשמעות זהה (בלבול או בקשת הבהרה) — זה confused.\n\n"
+
+                    "חוקים:\n"
+                    "- אם אין ביטחון גבוה במידע → אין מידע\n"
+                    "- אסור לנחש מספרים\n"
+                    "- אסור להמציא מידע\n"
+                    "- אם ההודעה לא קשורה → התעלם ושאל שוב\n\n"
+
+                    "איך לבנות response:\n"
+                    "- valid → המשך שיחה טבעי (לרוב השדה הבא)\n"
+                    "- invalid → שאל שוב לפי attempt\n"
+                    "- confused → הבהר בקצרה בטבעיות ואז שאל שוב\n"
+                    "- תמיד להתבסס על הודעת המשתמש לניסוח טבעי\n\n"
+
+                    "חוקי שדות:\n"
+                    "budget → רק סכום ברור או טווח (קח גבוה). התקציב יכול להינתן במספרים או במילים, ויש להמיר תמיד לספרות.\n"
+                    "אם המשתמש כותב סכום במילים (למשל: 'חמש מאות', 'אלף', 'אלפיים חמש מאות') → המר למספר.\n"
+                    "אם זה טווח (גם במילים וגם במספרים) → קח את המספר הגבוה לאחר ההמרה.\n"
+                    "urgency → 1-10 לפי כמה מהר רוצה להתחיל\n"
+                    "goal → 1-10 לפי בהירות המטרה (אין מטרה ברורה = 1)\n\n"
+
+                    "urgency mapping קצר:\n"
+                    "10=מייד | 9=השבוע | 8=שבוע הבא | 7=2-3 שבועות | 6=חודש הבא\n"
+                    "5=1-2 חודשים | 3-4=לא בקרוב | 1-2=רק בודק\n"
+                    "אל תסתמך רק על המילים המדויקות במדריך.\n"
+                    "הבן את הכוונה הכללית של המשתמש והמר אותה לרמת הדחיפות המתאימה.\n\n"
+
+                    "attempt:\n"
+                    "1=שאלה כללית\n"
+                    "2=ממוקדת יותר\n"
+                    "3+=ישירה וברורה\n\n"
+
+                    "כללים:\n"
+                    "- רק על השדה הנוכחי\n"
+                    "- עד 16 מילים\n"
+                    "- בלי הסברים מיותרים\n"
+                    "- בלי תגובות חברתיות\n"
+                    "- תמיד להחזיר response\n"
+                    "- JSON בלבד"
+                )
+            },
+            {
+                "role": "user",
+                "content": f"User message: {content}"
             }
         ]
 
@@ -665,7 +755,7 @@ class MessageScorer:
         
             return {"field" :  message_to_rank["extracted_field"] , "rank_score" : rank_score}
         
-        return {"field" :  "none" , "rank_score" : rank_score}
+        return {"field" : None , "rank_score" : rank_score}
     
 
 
@@ -821,96 +911,146 @@ class ServiceLayer:
         
 
 
-    
-    
-    
-    def prepare_lead_context(self , phone_number , account_status="sign up" , lead_name=None):
+    def lead_exists_check(self , phone_number , lead_name=None , new=False):
         validate_str(phone_number , "phone number")
 
-        
-        lead_info_exist_check = self.ensure_lead_info_ready(phone_number=phone_number)
-        
-        if lead_info_exist_check["result"] == "not exist":
-            if account_status == "sign up":        
-                return "new account"
-            
+        if not new:
+            lead_info_exist_check = self.data_access.get_lead_base_info(phone_number)
+            if lead_info_exist_check is None:
+                return
             else:
-                validate_str(lead_name , "lead name")
-                self.data_access.create_new_lead(phone_number=phone_number , name=lead_name) 
-
-        
-        if account_status == "login":
-            lead_info_exist_check = self.ensure_lead_info_ready(phone_number=phone_number)
-        
-        lead_id = lead_info_exist_check["result"]["lead_id"]
-        
-        lead_score_exist_check = self.ensure_lead_score_ready(lead_id)
-        
-        if lead_score_exist_check["result"] == "not exist":
-            self.data_access.create_new_lead_score(lead_id=lead_id)
+                return lead_info_exist_check
             
-            lead_score_exist_check = self.ensure_lead_score_ready(lead_id=lead_id)
+        if new:
+            lead_info_exist_check = self.data_access.get_lead_base_info(phone_number)
+            if lead_info_exist_check is None:
+                validate_str(lead_name , "lead name")
+                
+                self.data_access.create_new_lead(phone_number=phone_number , name=lead_name)
+                lead_info_exist_check = self.data_access.get_lead_base_info(phone_number)
+            
+            return lead_info_exist_check
         
 
-        
-        lead_fields_data_check = self.ensure_lead_fields_ready(lead_id)
+    
+    def ensure_user_tables_exist(self , lead_id):
+        validate_int(lead_id , "lead id")
 
-        if lead_fields_data_check["result"] == "not exist":
+        lead_score_exist_check = self.data_access.get_lead_score_info(lead_id=lead_id)
+        if lead_score_exist_check is None:
+            self.data_access.create_new_lead_score(lead_id=lead_id)
+            lead_score_exist_check = self.data_access.get_lead_score_info(lead_id=lead_id)
+        
+        
+        lead_fields_data_check = self.data_access.get_all_lead_field_data(lead_id=lead_id)
+        if lead_fields_data_check is None:
             self.data_access.create_new_fields_data(lead_id=lead_id)
-            #print("here")
+            lead_fields_data_check = self.data_access.get_all_lead_field_data(lead_id=lead_id)
 
-            lead_fields_data_check = self.ensure_lead_fields_ready(lead_id=lead_id)
-        
-        #print(lead_info_exist_check)
-        #print(lead_score_exist_check)
         
         return {
-            "lead_id" : lead_id ,
-            "phone_number" : phone_number ,
-            "lead_base_info" : lead_info_exist_check ,
-            "lead_scores_info" : lead_score_exist_check ,
+            "lead_scores_data" : lead_score_exist_check , 
             "lead_fields_data" : lead_fields_data_check
-            }
+        }
         
-        
-        
-        
-    def get_lead_all_information(self , all_lead_info , mode):    
-        validate_str(mode , "mode")
-        
-        if mode == "chat":
-            return {
-                "lead_id" : all_lead_info["lead_id"] ,
-                "name" : all_lead_info["lead_base_info"]["result"]["name"] ,
-                "current_field" : all_lead_info["lead_base_info"]["result"]["current_field"] ,
-                "attempt_number" : all_lead_info["lead_base_info"]["result"]["attempt_number"]
-            }
-        
-        if mode == "analyze":
-            return {
-            "lead_id" : all_lead_info["lead_id"] ,
-            "current_field" : all_lead_info["lead_base_info"]["result"]["current_field"] ,
-            "attempt_number" : all_lead_info["lead_base_info"]["result"]["attempt_number"] ,
-            "total_score" : all_lead_info["lead_scores_info"]["result"]["total_score"] ,
-            "score_count" : all_lead_info["lead_scores_info"]["result"]["score_count"] ,
-            "goal_score" : all_lead_info["lead_scores_info"]["result"]["goal_score"] , 
-            "budget_score" : all_lead_info["lead_scores_info"]["result"]["budget_score"] , 
-            "urgency_score" : all_lead_info["lead_scores_info"]["result"]["urgency_score"]
+
+
+    def process_lead_message(self , phone_number , content , name=None):
+        get_or_create_lead = self.lead_exists_check(phone_number=phone_number)
+        if get_or_create_lead is None:
+            get_or_create_lead = self.lead_exists_check(phone_number=phone_number , name=name , new=True)
+
+        ensure_lead_tables = self.ensure_user_tables_exist(get_or_create_lead["lead_id"])
+
+        lead_all_data = {
+            "lead_base_data" : get_or_create_lead ,
+            "lead_external_data"
         }
 
-        if mode == "summary":
-            return {
-                "lead_id" : all_lead_info["lead_id"] ,
-                "phone_number" : all_lead_info["phone_number"] , 
-                "goal_exchange" : [{"role" : "assistant" , "content" : all_lead_info["result"]["lead_fields_data"]["goal_bot"]} , {"role" : "user" , "content" : all_lead_info["result"]["lead_fields_data"]["goal_user"]}] ,
-                "budget_exchange" : [{"role" : "assistant" , "content" : all_lead_info["result"]["lead_fields_data"]["budget_bot"]} , {"role" : "assistant" , "content" : all_lead_info["result"]["lead_fields_data"]["budget_user"]}] ,
-                "urgency_exchange" : [{"role" : "assistant" , "content" : all_lead_info["result"]["lead_fields_data"]["urgency_bot"]} , {"role" : "assistant" , "content" : all_lead_info["result"]["lead_fields_data"]["urgency_user"]}]
-            }
+        generate_ai_response = self.generate_ai_response(lead_info=get_or_create_lead , content=content)
+        if generate_ai_response is None:
+            return "DONE"
+        
+        apply_ai_result = self.apply_ai_result(ai_response=generate_ai_response , lead_info=)
+
+
+
+
+    def generate_ai_response(self , lead_info , content):
+        validate_str(content , "content")
+
+        if lead_info["status"] != "pending":
+            return
+        
+        ai_response = self.conversation_builder.main_prompt(current_field=lead_info["current_field"] , attempt_number=lead_info["attempt_number"] , name=lead_info["name"] , content=content)
+
+        self.data_access.add_lead_message(lead_id=lead_info["lead_id"] , role="user" , content=content)
+
+        self.data_access.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=ai_response["response"])
+
+        return ai_response
+    
+#
+    
+    def apply_ai_result(self , ai_response , lead_info , content):
+        if "extracted_field" in ai_response:
+            if ai_response["extracted_field"] == "goal":
+                lead_info["current_field"] = "budget"
+                self.data_access.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content)
+
+            elif ai_response["extracted_field"] == "budget":
+                lead_info["current_field"] = "urgency"
+                self.data_access.update_lead_field_data(lead_id=lead_info["lead_id"] , field="budget_user" , value=content)
+
+            elif ai_response["extracted_field"] == "urgency":
+                lead_info["current_field"] = None
+                self.data_access.update_lead_field_data(lead_id=lead_info["lead_id"] , field="urgency_user" , value=content)
+            
+            
+            self.data_access.update_lead_current_field(lead_info["lead_id"] , updated_field=lead_info["current_field"])
+            self.data_access.update_lead_attempt_number(lead_id=lead_info["lead_id"] , number=1)
+
+        
+        if "message" in ai_response:
+            self.data_access.update_lead_attempt_number(lead_id=lead_info["lead_id"] , number=lead_info["attempt_number"] + 1)
+
+
+    
+    
+    
+    def apply_message_score(self , lead_info , ai_analyze_response):
+        lead_message_score = self.message_scorer.score_message(ai_analyze_response)
+        
+        if lead_message_score["field"] is None:
+            return
+
+        lead_score_info = {"total_score" : lead_info["total_score"] , "score_count" : lead_info["score_count"] , "goal_score" : lead_info["goal_score"] , "budget_score" : lead_info["budget_score"] , "urgency_score" : lead_info["urgency_score"]}
+        self.lead_score_manager.update_lead_score_info(lead_score_info=lead_score_info , lead_message_score=lead_message_score["rank_score"] , message_field=f"{lead_message_score["field"]}_score")
+        self.data_access.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_score_info["score_count"] , total_score=lead_score_info["total_score"] , score_field=f"{lead_message_score["field"]}_score" , value=lead_message_score["rank_score"])
+
+
+    
+
+    
+    def finalize_lead_status(self , lead_id):
+        validate_int(lead_id , "lead id")
+
+        lead_score_info = self.data_access.get_lead_score_info(lead_id)
+        if lead_score_info["score_count"] == 3:
+            final_lead_status = self.lead_classifier.classify_lead_score(lead_score_info)
+            
+            if final_lead_status:
+                self.data_access.set_lead_status(lead_id , final_lead_status)
+                return {"status" : "final_status" , "final_status" : final_lead_status}
+            
+        return {"status" : "not enough information"}
+
     
 
 
-
-
+    
+    
+    
     def conversation_chat(self  , lead_info , content , question_type):
         validate_str(content , "content")
 
