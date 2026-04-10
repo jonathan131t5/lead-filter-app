@@ -46,7 +46,7 @@ class DataAccess:
         status TEXT Default pending ,
         summary TEXT ,
         current_field TEXT DEFAULT goal ,
-        attempt_number INTEGER DEFAULT 1 ,
+        attempt_number INTEGER DEFAULT 0 ,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
         updated_at TIMESTAMP,
         last_interaction_at TIMESTAMP                 
@@ -387,17 +387,26 @@ class ConversationBuilder:
 
 
 
-    def analyze_prompt(current_field , content):
+    def analyze_prompt(self, current_field, content):
+        print("chill")
         return [
             {
                 "role": "system",
                 "content": (
-                    "אתה מנתח הודעת משתמש ומחזיר JSON בלבד.\n\n"
+                    "אתה חלק ממערכת סינון לידים של מאמן כושר.\n"
+                    "המערכת שואלת את המשתמש כל פעם שאלה אחת בלבד.\n"
+                    "כל שאלה שייכת לשדה אחד בלבד: goal, budget, urgency.\n\n"
 
-                    "מטרתך:\n"
-                    "לבדוק האם יש מידע רלוונטי לשדה הנוכחי.\n\n"
+                    "התפקיד שלך:\n"
+                    "לנתח רק את תשובת המשתמש האחרונה ולבדוק אם היא עונה על השדה הנוכחי.\n\n"
 
-                    "החזר JSON באחד מהפורמטים בלבד:\n\n"
+                    "חשוב מאוד:\n"
+                    "- אסור לעבור לשדה אחר\n"
+                    "- אסור לשנות נושא\n"
+                    "- אסור להזכיר שדות אחרים\n"
+                    "- אתה מתייחס רק ל: " + current_field + "\n\n"
+
+                    "החזר JSON בלבד באחד מהפורמטים:\n\n"
 
                     "אם יש מידע:\n"
                     "{"
@@ -408,7 +417,7 @@ class ConversationBuilder:
 
                     "אם אין מידע:\n"
                     "{"
-                    "\"status\":\"missing\","
+                    "\"status\":\"missing\""
                     "}\n\n"
 
                     "אם המשתמש מבולבל:\n"
@@ -417,58 +426,77 @@ class ConversationBuilder:
                     "\"clarify\":\"TEXT\""
                     "}\n\n"
 
-                    "חוקים:\n"
-                    "- נתח רק את ההודעה האחרונה\n"
-                    "- התייחס רק לשדה: " + current_field + "\n"
-                    "- אל תשאל שאלות\n"
-                    "- אל תנהל שיחה\n"
-                    "- אל תחזיר הסברים\n"
-                    "- החזר JSON בלבד ללא טקסט נוסף\n\n"
-
                     "====================\n"
 
                     "goal:\n"
-                    "החזר מספר 1-10 לפי כמה המטרה ברורה.\n"
-                    "אם המשתמש נתן מטרה כלשהי → זה מידע.\n"
-                    "רק אם אין בכלל מטרה → missing.\n\n"
+                    "כל מטרה שקשורה לכושר נחשבת מידע.\n"
+                    "דוגמאות:\n"
+                    "'להתחטב', 'לרדת במשקל', 'לעלות מסה', 'לבנות שריר',\n"
+                    "'לחזק את הגוף', 'להיכנס לכושר', 'לשפר סיבולת', 'להיראות טוב'.\n"
+                    "אין צורך בפירוט.\n"
+                    "אם יש מטרה כלשהי -> found.\n"
+                    "רק אם אין בכלל מטרה -> missing.\n"
+                    "value בין 1 ל-10 לפי רמת הבהירות.\n\n"
 
                     "budget:\n"
-                    "החזר סכום מספרי.\n"
-                    "אם יש טווח → קח את הגבוה.\n"
-                    "אם אין סכום ברור → missing.\n\n"
+                    "החזר סכום מספרי בלבד.\n"
+                    "אם המשתמש כתב מילים כמו 'שלוש מאות' -> המר ל-300.\n"
+                    "אם יש טווח -> קח את הגבוה.\n"
+                    "אם אין סכום ברור -> missing.\n\n"
 
                     "urgency:\n"
-                    "החזר מספר 1-10 לפי זמן התחלה.\n"
-                    "10 = מיידי, 1 = רחוק מאוד\n"
-                    "אם אין זמן ברור → missing.\n\n"
+                    "החזר מספר 1-10 לפי כמה מהר המשתמש רוצה להתחיל.\n"
+                    "10 = מיידי, 1 = רחוק.\n"
+                    "דוגמאות:\n"
+                    "'עכשיו', 'מייד' -> 10\n"
+                    "'בשבוע הקרוב' -> 8\n"
+                    "'עוד חודש' -> 5\n"
+                    "'מתישהו' -> missing\n\n"
 
                     "====================\n"
 
                     "missing:\n"
-                    "אם המשתמש ענה משהו כללי כמו:\n"
-                    "'לא יודע', 'לא בטוח', 'אולי'\n"
-                    "→ missing\n\n"
+                    "אם המשתמש כתב משהו לא שימושי כמו:\n"
+                    "'לא יודע', 'אולי', 'נראה', 'אין לי מושג'\n"
+                    "-> missing\n\n"
 
                     "confused:\n"
-                    "אם המשתמש כתב:\n"
-                    "'מה?', 'לא הבנתי', 'אה?'\n"
-                    "או שהתשובה לא קשורה לשאלה\n"
-                    "→ confused\n\n"
-
-                    "ack:\n"
-                    "- 2 עד 4 מילים בלבד\n"
-                    "- תגובה טבעית קצרה\n"
-                    "- לא לשאול שאלה\n"
-                    "- דוגמאות:\n"
-                    "  'סבבה'\n"
-                    "  'מעולה'\n"
-                    "  'הבנתי'\n"
-                    "  'לא ברור עדיין'\n\n"
+                    "החזר confused רק אם ברור שהמשתמש לא הבין את השאלה,\n"
+                    "או מבקש הבהרה על מה צריך לענות עכשיו.\n"
+                    "זה כולל ניסוחים כמו 'מה?', 'אה?', 'לא הבנתי', 'את מה?', 'למה הכוונה?',\n"
+                    "'מה צריך לכתוב?', וגם כל ניסוח אחר עם אותה משמעות.\n"
+                    "אם המשתמש רק לא נתן מידע, או כתב ברכה, או מילה כללית כמו 'היי', 'סבבה', 'כן' -> missing, לא confused.\n\n"
 
                     "clarify:\n"
-                    "- עד 8 מילים בלבד\n"
-                    "- הסבר פשוט למה התכוונת\n"
-                    "- בלי חפירות\n"
+                    "- 4 עד 10 מילים בלבד\n"
+                    "- לא שאלה\n"
+                    "- לא תגובה שיחתית מלאה\n"
+                    "- לא לענות למשתמש\n"
+                    "- לא לנהל שיחה\n"
+                    "- לא לשנות נושא\n"
+                    "- להתייחס רק לשדה הנוכחי (" + current_field + ")\n"
+                    "- להסביר בפשטות מה המשתמש צריך לענות עכשיו\n"
+                    "- אפשר להשתמש בניסוחים שונים וטבעיים\n"
+                    "- רצוי לנסח מחדש לפי ההודעה של המשתמש והבלבול שלה\n"
+                    "- אל תחזיר תמיד את אותו משפט בדיוק\n"
+                    "- אל תעתיק ניסוח קבוע בכל פעם\n"
+                    "- המטרה היא להסביר טוב יותר, לא לחזור כמו רובוט\n"
+                    "- אם המשתמש נשמע מאוד מבולבל, אפשר לנסח בצורה עוד יותר פשוטה וברורה\n\n"
+
+                    "ack:\n"
+                    "- רק אם status הוא found\n"
+                    "- 1 עד 3 מילים בלבד\n"
+                    "- בלי שאלה\n"
+                    "- בלי הסבר\n"
+                    "- בלי לחזור על תשובת המשתמש\n"
+                    "- טבעי וקצר\n"
+                    "- אפשר לגוון בין ניסוחים קצרים שונים\n"
+                    "- דוגמאות: 'מעולה', 'סבבה', 'הבנתי', 'סגור', 'אחלה'\n"
+                    "- אל תחזיר תמיד את אותו ack אם אין צורך\n\n"
+
+                    "חוקים אחרונים:\n"
+                    "- החזר JSON בלבד\n"
+                    "- ללא טקסט נוסף\n"
                 )
             },
             {
@@ -668,6 +696,7 @@ class ServiceLayer:
                 get_or_create_lead = self.lead_exists_check(phone_number=phone_number , lead_name=name , new=True)
         
         if get_or_create_lead is not None and mode == 1:
+            #print("here")
             return {"status" : "exist"}
 
         validate_str(content , "content")
@@ -683,11 +712,8 @@ class ServiceLayer:
         current_field = lead_base_data["current_field"]
         total_score = lead_scores_data["total_score"]
                 
-        generate_ai_question = self.generate_question(lead_info=lead_base_data , content=content)
-        if generate_ai_question is None:
-            return {"status" : "DONE"}
         
-        ai_response = self.generate_analyze(content=content , current_field=current_field)
+        ai_response = self.generate_analyze(lead_id=lead_id , content=content , current_field=current_field)
         
         
         self.apply_ai_result(ai_response=ai_response , lead_info=lead_base_data , content=content)
@@ -702,10 +728,32 @@ class ServiceLayer:
             if final_lead_status == "Hot Lead":
                 summary_data = self.build_summary_data(base_data=lead_base_data , fields_data=lead_fields_data , total_score=total_score)
                 self.process_lead_summary(summary_data)
+        
 
-        answer = self.build_user_response(ai_response=ai_response , question=generate_ai_question)
-        return {"status" : "in process" , "response" : answer}
-    
+
+        generate_ai_question = self.generate_question(lead_info=lead_base_data , ai_response=ai_response)
+        if generate_ai_question is None:
+            return {"status" : "DONE"}
+        
+        elif generate_ai_question["status"] == "invaild answer":
+            get_or_create_lead = self.lead_exists_check(phone_number=phone_number)
+            lead_base_data = self.build_base_lead_data(base_data=get_or_create_lead)
+            print(lead_base_data["attempt_number"])
+            print("good")
+            question = self.build_next_response(lead_info=lead_base_data)
+            
+        elif generate_ai_question["status"] == "confused":
+            question = generate_ai_question["question"]
+        
+        elif generate_ai_question["status"] == "valid answer":
+            get_or_create_lead = self.lead_exists_check(phone_number=phone_number)
+            lead_base_data = self.build_base_lead_data(base_data=get_or_create_lead)
+            print(lead_base_data["attempt_number"])
+            print("bad")
+            question = self.build_next_response(lead_info=lead_base_data , ai_response=generate_ai_question["ai_response"] , mode="follow up")
+        
+        return {"status" : "in process" , "question" : question}
+
     
 
     
@@ -803,39 +851,65 @@ class ServiceLayer:
 
 
 
-    def generate_question(self , lead_info , content):
+
+    def generate_analyze(self , lead_id , current_field , content):
+        ai_input = self.conversation_builder.analyze_prompt(current_field=current_field , content=content)
+        ai_response = self.open_ai_client.ai_reply(ai_input)
+        
+        self.data_access.add_lead_message(lead_id=lead_id , role="user" , content=content)
+        
+        print(ai_response)
+        return ai_response
+
+    
+    
+    def generate_question(self , lead_info , ai_response=None):
         validate_str(content , "content")
 
+
         if lead_info["status"] != "pending":
-            return
+            return {"status" : "DONE"}
         
+        #print(lead_info["current_field"])
+        #print(lead_info["attempt_number"])
+
         
-        question = self.questions.process_questions(mode=lead_info["current_field"] , attempt_number=lead_info["attempt_number"])
-
-        self.data_access.add_lead_message(lead_id=lead_info["lead_id"] , role="user" , content=content)
-
-        self.data_access.add_lead_message(lead_id=lead_info["lead_id"] , role="bot" , content=question)
-
-        return question
-    
-
-
-
-    def generate_analyze(self , current_field , content):
-        ai_input = self.conversation_builder.analyze_prompt(current_field=current_field , content=content)
-        return self.open_ai_client.ai_reply(ai_input)
-    
-
-    
-    def build_user_response(self , ai_response , question):
-        if ai_response["status"] == "found":
-            return f"{ai_response['ack']}. {question}"
-
+        if ai_response is None:
+            question = self.questions.process_questions(mode=lead_info["current_field"] , attempt_number=lead_info["attempt_number"])
+        
         elif ai_response["status"] == "missing":
-            return question
+            return {"status" : "invaild answer"}
+        
+        elif ai_response["status"] == "found":
+            return {"status" : "valid answer" , "ai_response" : ai_response}
+    
 
         elif ai_response["status"] == "confused":
-            return ai_response["clarify"]
+            question = ai_response["clarify"]
+            return {"status" : "confused" , "question" : question}
+        
+        self.data_access.add_lead_message(lead_id=lead_info["lead_id"] , role="bot" , content=question)
+
+        
+
+
+
+    def build_next_response(self , lead_info , ai_response=None , mode="regular"):
+        if mode == "regular":
+            return self.questions.process_questions(mode=lead_info["current_field"] , attempt_number=lead_info["attempt_number"])
+        
+        elif mode == "follow up":
+            separators = [
+            ". ",
+            ", ",
+            " - ",
+            " — ",
+            " "
+            ]
+            sep = random.choice(separators)
+
+            build_question = self.questions.process_questions(mode=lead_info["current_field"] , attempt_number=lead_info["attempt_number"])
+            return f"{ai_response['ack']}{sep} {build_question}"
 
 
     
@@ -857,7 +931,7 @@ class ServiceLayer:
             self.data_access.update_lead_current_field(lead_info["lead_id"] , updated_field=lead_info["current_field"])
             self.data_access.update_lead_attempt_number(lead_id=lead_info["lead_id"] , number=1)
 
-        
+    
         if ai_response["status"] == "missing":
             self.data_access.update_lead_attempt_number(lead_id=lead_info["lead_id"] , number=lead_info["attempt_number"] + 1)
 
@@ -865,6 +939,7 @@ class ServiceLayer:
     
     
     def apply_message_score(self , lead_info , current_field , ai_analyze_response):
+        #print("here")
         lead_message_score = self.message_scorer.score_message(message_to_rank=ai_analyze_response , field=current_field)
         
         if lead_message_score["status"] == "missing":
@@ -876,6 +951,7 @@ class ServiceLayer:
 
     
     def finalize_lead_status(self , lead_info):
+        #print("here")
         if lead_info["score_count"] == 3:
             final_lead_status = self.lead_classifier.classify_lead_score(lead_info)
             
@@ -976,6 +1052,7 @@ while True:
 
 
     message_process = service_layer.process_lead_message(phone_number=phone_number)
+    print("did")
     if message_process["status"] == "new":
         lead_name = input("Please enter your name: ")
         validate_str(lead_name , "name")
@@ -985,8 +1062,9 @@ while True:
         
         message_process = service_layer.process_lead_message(phone_number=phone_number , content=content , name=lead_name , mode=2)
         
-    
-    
+
+    #print(message_process)
+    #print("here")
     if message_process["status"] == "exist":
         content = input("Please enter your message: ")
         validate_str(content , "content")
@@ -998,7 +1076,7 @@ while True:
         break
 
     if message_process["status"] == "in process":
-        raw_message = message_process["response"]
+        raw_message = message_process["question"]
         print(get_display(raw_message))
         
 
