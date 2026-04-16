@@ -12,7 +12,6 @@ class LeadsStatesRepository:
         confuse_attempt_number INTGER DEFAULT 1 ,
         question_state TEXT DEFAULT base,
         question_reason TEXT DEFAULT base ,
-        final_status TEXT DEFAULT pending ,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
         updated_at TIMESTAMP,
         last_interaction_at TIMESTAMP                 
@@ -29,7 +28,7 @@ class LeadsStatesRepository:
     
     def get_lead_conversation_states(self , lead_id):
         self.cursor.execute(
-        "SELECT current_field , regular_attempt_number , confuse_attempt_number , question_state , question_reason , final_status FROM lead_conversation_states WHERE lead_id = ?" ,
+        "SELECT current_field , regular_attempt_number , confuse_attempt_number , question_state , question_reason FROM lead_conversation_states WHERE lead_id = ?" ,
         (lead_id , )
         )
         result = self.cursor.fetchone()
@@ -42,8 +41,7 @@ class LeadsStatesRepository:
             "regular_attempt_number" : result[1] , 
             "confuse_attempt_number" : result[2] , 
             "question_state" : result[3] , 
-            "question_reason" : result[4] , 
-            "final_status" : result[5]
+            "question_reason" : result[4] 
         }
 
 

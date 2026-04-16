@@ -15,7 +15,8 @@ class OpenAIClient:
             model="gpt-4o-mini",
             messages=messages,
             temperature=0,
-            max_completion_tokens=80,
+            top_p=1,
+            max_completion_tokens=40,
             response_format={"type": "json_object"}
         )
 
@@ -26,9 +27,9 @@ class OpenAIClient:
 
         # validation קצר
         if "status" not in data:
-            raise ValueError("AI returned invaild JSON structure")
+            raise ValueError("AI returned invalid JSON structure")
 
-        if not ("ack" in data or "clarify" or "value"):
-            raise ValueError("AI returned invaild JSON structure")
+        if not any(key in data for key in ["ack", "clarify", "value", "reason"]):
+            raise ValueError("AI returned invalid JSON structure")
 
         return data

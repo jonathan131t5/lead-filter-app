@@ -1,4 +1,17 @@
+# system
 venv/
-.env
 __pycache__/
-.DS_Store
+*.pyc
+.env
+
+# junk files שאתה לא רוצה
+test*.py
+backup*.py
+app3.py
+main_app_test.py
+mvp_main.py
+mvp.py
+output_questions.py
+
+# אם לא צריך DB מוכן
+# *.db
