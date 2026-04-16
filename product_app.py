@@ -633,19 +633,6 @@ if st.session_state.page == "customer":
  
     st.markdown('<div id="chat-bottom"></div></div>', unsafe_allow_html=True)
 
-    components.html(
-    """
-    <script>
-        const scroll = () => {
-            window.parent.scrollTo(0, document.body.scrollHeight);
-        };
-        setTimeout(scroll, 100);
-        setTimeout(scroll, 300);
-        setTimeout(scroll, 600);
-    </script>
-    """,
-    height=0,
-)
  
     if not st.session_state.chat_done:
         if svc and st.session_state.lead_context and not st.session_state.waiting_for_user:
