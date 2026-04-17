@@ -356,7 +356,9 @@ class ServiceLayer:
 
         if not any(symbol in budget_text for symbol in currency_symbols):
             budget_text = budget_text.strip() + " ₪"
-
+        if "חודש" not in budget_text:
+            budget_text = budget_text.strip() + " לחודש"
+        
         return budget_text
 
 
@@ -380,6 +382,9 @@ class ServiceLayer:
         elif summary_info["final_status"] == "Cold Lead":
             final_status_context = "ליד קר חדש 🧊"
 
+        elif summary_info["final_status"] == "pending":
+            final_status_context = "ליד בתהליך ⏳"
+        
         return final_status_context
     
     def generate_lead_summary(self , summary_info , final_status_context):
@@ -387,7 +392,7 @@ class ServiceLayer:
             f"{final_status_context}\n\n"
             f"{summary_info['name']} פנה לגבי אימונים.\n\n"
             f"מטרה: {summary_info['goal_user']}\n"
-            f"תקציב: {summary_info['budget_user']} לחודש\n"
+            f"תקציב: {summary_info['budget_user']}\n"
             f"זמן התחלה: {summary_info['urgency_user']}\n\n"
             f"ציון התאמה: {summary_info['total_score']}\n"
             f"טלפון: {summary_info['phone_number']}"
