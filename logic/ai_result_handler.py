@@ -17,14 +17,14 @@ class OpenAIClient:
             temperature=0,
             top_p=1,
             max_completion_tokens=40,
-            response_format={"type": "json_object"}
+            response_format={"type" : "json_object"}
         )
 
         text = res.choices[0].message.content
         #print("RAW:", text)
 
         data = json.loads(text)
-
+        print(data)
         # validation קצר
         if "status" not in data:
             raise ValueError("AI returned invalid JSON structure")
