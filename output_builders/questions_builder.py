@@ -435,12 +435,11 @@ class FallBackQuestions:
 
     def goal_fallback_questions(self):
         return [
-            "למה בכלל החלטת להתחיל עכשיו?",
-            "מה גרם לך לרצות להיכנס לזה?",
-            "מה הסיבה שאתה רוצה להתחיל?",
-            "מה דוחף אותך להתחיל דווקא עכשיו?"
-        ]
-    
+            "זה יותר לכיוון ירידה במשקל, חיטוב או משהו אחר?",
+            "אתה יותר בקטע של לרדת במשקל או להתחזק?",
+            "מה הכי קרוב למה שאתה מחפש: חיטוב, מסה או פשוט להרגיש טוב יותר?"
+            ]
+                
 
     def budget_fallback_questions(self , fallback_type):
         if fallback_type == "after_fallback":
@@ -529,5 +528,5 @@ class ProcessQuestion:
 
         elif question_state == "fallback":
             question = self.fallback_questions.process_fallback_question(field=field , reason=reason)
-
+        
         return question
