@@ -46,16 +46,41 @@ class ServiceLayer:
         self.process_question = ProcessQuestion(base_questions=BaseQuestions() , missing_questions=MissingQuestions() , confuse_questions=ConfuseQuestions() , fallback_questions=FallBackQuestions())
 
 
+
+
+    def run_lead_flow(self , phone_number , name=None , content=None , ack_mode=None , create_if_missing=False):
+        prepare_lead_context = self.prepare_lead_context(phone_number=phone_number)
+        if prepare_lead_context is None:
+            if not create_if_missing:
+                return {"status" : "new"}
+            else:
+                prepare_lead_context = self.prepare_lead_context(phone_number=phone_number , name=name , create_if_missing=True)
+
+        if content is None:
+            return self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=ack_mode)
+
+        generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
+
+        self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"])
+
+        self.update_flow_state(lead_all_data=prepare_lead_context , ai_response=generate_ai_analysis , content=content)
+
+        determine_final_status = self.determine_final_status(lead_all_data=prepare_lead_context)
+        
+        if determine_final_status == True:
+            self.build_lead_summary(lead_all_data=prepare_lead_context)
+        
+        self.db.commit()
         
 
-    
-    def prepare_lead_context(self , phone_number , name=None , mode=1):
+
+    def prepare_lead_context(self , phone_number , name=None , create_if_missing=False):
         validate_phone_number(phone_number , "phone_number")        
         
         get_or_create_lead = self.lead_exists_check(phone_number=phone_number)
         if get_or_create_lead is None:
-            if mode == 1:
-                return {"status" : "new"}
+            if not create_if_missing:
+                return
             else:
                 validate_str(name , "name")
                 get_or_create_lead = self.lead_exists_check(phone_number=phone_number , lead_name=name , new=True)
@@ -73,46 +98,38 @@ class ServiceLayer:
         }
     
     
-    def process_lead_message(self , lead_all_data , content=None , mode="output" , ack_mode=0):        
-        lead_id = lead_all_data["lead_base_data"]["lead_id"]
-        current_field = lead_all_data["lead_conversation_states_data"]["current_field"]
-        question_reason = lead_all_data["lead_conversation_states_data"]["question_reason"]
-        final_status = lead_all_data["lead_base_data"]["final_status"]
-        urgency_status = lead_all_data["lead_scores_data"]["urgency_status"]
-        name = lead_all_data["lead_base_data"]["name"]
 
-
-        if mode == "output":
-            question = self.generate_question(lead_info=lead_all_data["lead_conversation_states_data"] , ack_mode=ack_mode , final_status=final_status)
-            if question is None:
-                closing_message = self.closing_message(final_status=final_status , urgency_status=urgency_status , name=name)
-                return {"status" : "DONE" , "closing_message" : closing_message}
+    def generate_lead_question(self , lead_all_data , ack_mode=0):
+        question = self.generate_question(lead_info=lead_all_data["lead_conversation_states_data"] , ack_mode=ack_mode , final_status=lead_all_data["lead_base_data"]["final_status"])
+        if question is None:
+            closing_message = self.closing_message(final_status=lead_all_data["lead_base_data"]["final_status"] , urgency_status=lead_all_data["lead_scores_data"]["urgency_status"] , name=lead_all_data["lead_base_data"]["name"])
+            return {"status" : "DONE" , "closing_message" : closing_message}
             
-            return {"status" : "output" , "question" : question}
-        
+        return {"status" : "output" , "question" : question}
 
-        ai_response = self.generate_analyze(lead_id=lead_id , content=content , current_field=current_field)
-        
-        
+
+    def update_flow_state(self , lead_all_data , ai_response , content):
         flow_status = self.advance_on_found(ai_response=ai_response , lead_info=lead_all_data["lead_conversation_states_data"] , content=content)
         if flow_status == False:
-            unresolved_status = self.handle_unresolved_flow(lead_info=lead_all_data["lead_conversation_states_data"] ,  ai_response=ai_response)
+            unresolved_status = self.handle_unresolved_flow(lead_info=lead_all_data["lead_conversation_states_data"] , ai_response=ai_response)
             if unresolved_status == False:
                 self.handle_unresolved_fallbacks(lead_info=lead_all_data["lead_conversation_states_data"] , ai_response=ai_response)
 
-        score_process_status = self.apply_message_score(current_field=current_field , lead_info=lead_all_data["lead_scores_data"] , ai_analyze_response=ai_response , reason=question_reason)
-        if score_process_status is None:
-            self.db.commit()
-            return 
-        
+
+    def determine_final_status(self , lead_all_data):
         finalize_lead_status = self.finalize_lead_status(lead_info=lead_all_data["lead_scores_data"])
         if finalize_lead_status is not None:
             lead_all_data["lead_base_data"]["final_status"] = finalize_lead_status["final_status"]
-            summary_context = self.summary_context.prepare_lead_summary_context(lead_id=lead_id)
-            self.process_lead_summary(summary_info=summary_context)
+            return True
+        
+        return False
 
-        self.db.commit()
-        return {"status" : "in process"}
+
+    def build_lead_summary(self , lead_all_data):
+        summary_context = self.summary_context.prepare_lead_summary_context(lead_id=lead_all_data["lead_base_data"]["lead_id"])
+        self.process_lead_summary(summary_info=summary_context)
+  
+
 
 
     
@@ -146,7 +163,7 @@ class ServiceLayer:
         if lead_score_exist_check is None:
             self.leads_scores.create_new_lead_score(lead_id=lead_id)
             lead_score_exist_check = self.leads_scores.get_lead_score_data(lead_id=lead_id)
-        
+
         
         lead_fields_data_check = self.leads_fields.get_all_lead_field_data(lead_id=lead_id)
         if lead_fields_data_check is None:
@@ -159,6 +176,7 @@ class ServiceLayer:
             self.leads_states.create_new_lead_conversation_states_data(lead_id=lead_id)
             lead_conversation_states_check = self.leads_states.get_lead_conversation_states(lead_id=lead_id)
         
+        self.db.commit()
         return {
             "lead_scores_data" : lead_score_exist_check , 
             "lead_fields_data" : lead_fields_data_check ,
@@ -339,7 +357,8 @@ class ServiceLayer:
 
     
     def process_lead_summary(self , summary_info):
-        summary_info["budget_user"] = self.format_currency(budget_text=summary_info["budget_user"])
+        if summary_info["budget_user"] is not None:
+            summary_info["budget_user"] = self.format_currency(budget_text=summary_info["budget_user"])
         
         summary_info = self.field_unknown_check(summary_info=summary_info)
 
@@ -387,6 +406,7 @@ class ServiceLayer:
         
         return final_status_context
     
+
     def generate_lead_summary(self , summary_info , final_status_context):
         text = (
             f"{final_status_context}\n\n"
@@ -407,59 +427,64 @@ class ServiceLayer:
 
 
 
-if __name__ == "__main__":
-    service_layer = ServiceLayer()
+#if __name__ == "__main__":
+service_layer = ServiceLayer()
 
-    phone_number = None
-    ack_mode = 0
+phone_number = None
+ack_mode = 0
 
-    service_layer.leads_data.create_leads_data_table()
-    service_layer.leads_states.create_lead_conversation_states()
-    service_layer.leads_scores.create_leads_scores_table()
-    service_layer.leads_fields.create_leads_fields_data()
-    service_layer.messages.create_leads_messages_table()
+service_layer.leads_data.create_leads_data_table()
+service_layer.leads_states.create_lead_conversation_states()
+service_layer.leads_scores.create_leads_scores_table()
+service_layer.leads_fields.create_leads_fields_data()
+service_layer.messages.create_leads_messages_table()
 
-    while True:
-        try:
-            print("""
-                =================================
-                        LEAD FILTER ENGINE
-                =================================
+while True:
 
-                    Analyze • Score • Classify
-                """)
+    print("""
+        =================================
+                LEAD FILTER ENGINE
+        =================================
 
-            if phone_number is None:
-                phone_number = input("שנייה לפני שמתחילים, כדי לשמור לך את ההתקדמות ולהמשיך איתך — מה המספר שלך?: ")
-                validate_phone_number(phone_number=phone_number)
+            Analyze • Score • Classify
+        """)
 
-            prepare_lead_context = service_layer.prepare_lead_context(phone_number=phone_number)
-            if "status" in prepare_lead_context:
-                if prepare_lead_context["status"] == "new":
-                    name = input("מעולה, איך קוראים לך?: ")
-                    validate_str(name, "name")
-                    prepare_lead_context = service_layer.prepare_lead_context(phone_number=phone_number, name=name, mode=2)
+    
+    
+    if phone_number is None:
+        phone_number = input("Just before we start, to save your progress and continue with you — what's your phone number? ")
+        validate_phone_number(phone_number=phone_number)
+    
 
-            message_process = service_layer.process_lead_message(lead_all_data=prepare_lead_context)
+    run_lead_flow = service_layer.run_lead_flow(phone_number=phone_number)
 
-            ack_mode = 1
+    if run_lead_flow is not None and "status" in run_lead_flow:
+        if run_lead_flow["status"] == "DONE":
+            closing_message = run_lead_flow["closing_message"]
+            fixed = get_display(closing_message)
+            print(fixed)
+            break
 
-            if message_process["status"] == "DONE":
-                closing_message = message_process["closing_message"]
-                fixed = get_display(closing_message)
-                print(fixed)
-                break
+        elif run_lead_flow["status"] == "output":
+            question = run_lead_flow["question"]
+            fixed = get_display(question)
+            print(fixed)
+    
+        elif "status" in run_lead_flow:
+            if run_lead_flow["status"] == "new":
+                name = input("Great, what's your name? ")
+                validate_str(name, "name")
+                run_lead_flow = service_layer.run_lead_flow(phone_number=phone_number, name=name, create_if_missing=True)
+    
 
-            elif message_process["status"] == "output":
-                question = message_process["question"]
-                fixed = get_display(question)
-                print(fixed)
-                content = input("Please enter your message: ")
-                message_process = service_layer.process_lead_message(
-                    lead_all_data=prepare_lead_context,
-                    content=content,
-                    mode="input"
-                )
+    content = input("Please enter a message: ")
+    validate_str(content , "content")
 
-        except Exception as e:
-            print(f"Error: {e}")
+    service_layer.run_lead_flow(phone_number=phone_number , ack_mode=ack_mode , content=content)
+    
+    ack_mode = 1
+
+
+    
+        
+        
