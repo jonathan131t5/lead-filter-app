@@ -465,16 +465,20 @@ while True:
             print(fixed)
             break
 
-        elif run_lead_flow["status"] == "output":
-            question = run_lead_flow["question"]
-            fixed = get_display(question)
-            print(fixed)
-    
+        
         elif "status" in run_lead_flow:
             if run_lead_flow["status"] == "new":
                 name = input("Great, what's your name? ")
                 validate_str(name, "name")
                 run_lead_flow = service_layer.run_lead_flow(phone_number=phone_number, name=name, create_if_missing=True)
+        
+        
+        if run_lead_flow["status"] == "output":
+            question = run_lead_flow["question"]
+            fixed = get_display(question)
+            print(fixed)
+    
+
     
 
     content = input("Please enter a message: ")
