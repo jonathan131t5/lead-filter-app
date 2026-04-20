@@ -10,8 +10,9 @@ class LeadsStatesRepository:
         current_field TEXT DEFAULT goal ,
         regular_attempt_number INTEGER DEFAULT 1 ,
         confuse_attempt_number INTGER DEFAULT 1 ,
-        question_state TEXT DEFAULT base,
+        question_state TEXT DEFAULT base ,
         question_reason TEXT DEFAULT base ,
+        is_first_message_in_session INTEGER DEFAULT 0 ,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
         updated_at TIMESTAMP,
         last_interaction_at TIMESTAMP                 
@@ -76,5 +77,12 @@ class LeadsStatesRepository:
     def update_lead_question_reason(self , lead_id , value):
         self.cursor.execute(
         "UPDATE lead_conversation_states SET question_reason = ? WHERE lead_id = ?" , 
+        (value , lead_id)
+        )
+
+    
+    def update_lead_is_first_message_in_session(self , lead_id , value):
+        self.cursor.execute(
+        "UPDATE lead_conversation_states SET is_first_message_in_session = ? WHERE lead_id = ?" ,
         (value , lead_id)
         )

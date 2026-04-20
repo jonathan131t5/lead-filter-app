@@ -21,8 +21,9 @@ class MessagesRepository:
         "INSERT INTO leads_messages (lead_id , role , content) VALUES (? , ? , ?)" ,
         (lead_id , role , content)
         )
- 
     
+
+
     
 
 
