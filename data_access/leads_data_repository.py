@@ -72,7 +72,21 @@ class LeadsDataRepository:
         )
 
 
+    def update_lead_last_interaction(self , last_interaction , lead_id):
+        self.cursor.execute(
+        "UPDATE leads_data SET last_interaction_at = ? WHERE lead_id = ?" ,
+        (last_interaction , lead_id)
+        )
 
 
-
-
+    def get_lead_last_interaction(self , lead_id):
+        self.cursor.execute(
+        "SELECT last_interaction_at FROM leads_data WHERE lead_id = ?" ,
+        (lead_id , )
+        )
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        
+        return result[0]
+    
