@@ -1,16 +1,32 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from service.service_layer import ServiceLayer
+from service.service_upgrade import ServiceLayer
+
+from fastapi.middleware.cors import CORSMiddleware
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 service_layer = ServiceLayer()
 
 app = FastAPI()
 
-class MessageRequirements(BaseModel):
-    phone_number : str
-    name: str | None = None
-    content: str | None = None
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+@app.get("/")
+def serve_chat():
+    return FileResponse("chat2.html")
+
+
+class MessageRequirements(BaseModel):
+    name: str
+    content: str | None = None
 
 
 @app.post("/message")
@@ -21,10 +37,14 @@ def run_message_flow(data : MessageRequirements):
             name=data.name , 
             content=data.content
         )
-        return result
+        return {
+            "content": result["message"]
+            }
     
     except Exception as e:
         return {
-            "status" : "error" , 
-            "message" : str(e)
+            "content": str(e),
+            "status": "error"
         }
+    
+
