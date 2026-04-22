@@ -8,8 +8,8 @@ class LeadsDataRepository:
         CREATE TABLE IF NOT EXISTS leads_data(
         lead_id INTEGER PRIMARY KEY AUTOINCREMENT , 
         name TEXT ,
-        phone_number TEXT UNIQUE NOT NULL ,
-        final_status TEXT DEFAULT pending ,
+        phone_number TEXT UNIQUE,
+        final_status TEXT DEFAULT 'pending' ,
         summary TEXT ,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
         updated_at TIMESTAMP,
@@ -18,17 +18,19 @@ class LeadsDataRepository:
         """)
 
     
-    def create_new_lead(self , name , phone_number):
-        self.cursor.execute(
-        "INSERT INTO leads_data (name , phone_number) VALUES(? , ?)" , 
-        (name , phone_number)
-        )
+    def create_new_lead(self, name):
+        self.cursor.execute("INSERT INTO leads_data (name) VALUES (?)", 
+        (name , ))
+        
+        lead_id = self.cursor.lastrowid
+        return lead_id
+        
 
 
-    def get_lead_base_data(self , phone_number):
+    def get_lead_base_data(self , lead_id):
         self.cursor.execute(
-        "SELECT lead_id , name , final_status , summary FROM leads_data WHERE phone_number = ?" , 
-        (phone_number , )
+        "SELECT name , final_status , summary FROM leads_data WHERE lead_id = ?" , 
+        (lead_id , )
         )
         
         result = self.cursor.fetchone()
@@ -36,11 +38,10 @@ class LeadsDataRepository:
             return None
     
         return {
-            "phone_number" : phone_number , 
-            "lead_id" : result[0] ,
-            "name" : result[1] ,
-            "final_status" : result[2] ,
-            "summary" : result[3]
+            "lead_id" : lead_id ,
+            "name" : result[0] ,
+            "final_status" : result[1] ,
+            "summary" : result[2]
         }
 
     
@@ -90,3 +91,9 @@ class LeadsDataRepository:
         
         return result[0]
     
+
+    def update_lead_phone(self , phone , lead_id):
+        self.cursor.execute(
+        "UPDATE leads_data SET phone_number = ? WHERE lead_id = ?" , 
+        (phone , lead_id)
+        )
