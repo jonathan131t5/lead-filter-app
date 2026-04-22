@@ -1,3 +1,6 @@
+import sqlite3
+
+
 class LeadsFieldsRepository:
     def __init__(self , cursor):
         self.cursor = cursor
@@ -12,6 +15,7 @@ class LeadsFieldsRepository:
         goal_user TEXT ,
         budget_bot TEXT ,
         budget_user TEXT ,
+        phone_user TEXT ,
         urgency_bot TEXT ,
         urgency_user TEXT ,
         updated_at TIMESTAMP
@@ -20,10 +24,15 @@ class LeadsFieldsRepository:
 
 
     def create_new_lead_fields_data(self , lead_id):
-        self.cursor.execute(
-        "INSERT INTO leads_fields_data (lead_id) VALUES (?)" ,
-        (lead_id , )
-        )
+        try:
+            self.cursor.execute(
+            "INSERT INTO leads_fields_data (lead_id) VALUES (?)" ,
+            (lead_id , )
+            )
+
+        except sqlite3.Error:
+            self.conn.rollback()
+            raise
 
 
     def get_all_lead_field_data(self , lead_id):
