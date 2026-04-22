@@ -9,9 +9,12 @@ class MessageScorer:
 
         if message_to_rank["status"] == "missing" or message_to_rank["status"] == "confused":
             if reason == "regular_fallback":
+                if field == "phone":
+                    return {"status" : "invaild" , "rank_score" : rank_score}
+                
                 return {"status" : "unknown"}
         
-        
+
         elif message_to_rank["status"] == "found":
             if field == "budget":
                 if float(message_to_rank["value"]) >= 400:
