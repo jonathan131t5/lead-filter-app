@@ -16,9 +16,12 @@ class OpenAIClient:
             messages=messages,
             temperature=0,
             top_p=1,
-            max_completion_tokens=40,
-            response_format={"type" : "json_object"}
+            max_completion_tokens=15,
+            presence_penalty=0,
+            frequency_penalty=0,
+            response_format={"type": "json_object"}
         )
+
 
         text = res.choices[0].message.content
         #print("RAW:", text)
