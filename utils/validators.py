@@ -36,3 +36,6 @@ def validate_phone_number(phone_number, allow_empty=False):
 
     if len(phone_number) != 10:
         raise ValueError("מספר טלפון לא תקין")
+    
+
+
