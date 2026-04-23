@@ -50,58 +50,52 @@ class ServiceLayer:
 
 
     def run_lead_flow(self , phone_number , name=None , content=None):
-        validate_str(value=phone_number , name= "phone number")
+        try:
+            validate_str(value=phone_number , name= "phone number")
 
-        prepare_lead_context = self.prepare_lead_context(phone_number=phone_number)
-        print("fresh data")
-        if prepare_lead_context is None:
-            if name is None:
-                return {"status" : "new"}
-            else:
-                validate_str(value=name , name="name")
-                prepare_lead_context = self.prepare_lead_context(phone_number=phone_number , name=name)
+            prepare_lead_context = self.prepare_lead_context(phone_number=phone_number)
+            if prepare_lead_context is None:
+                if name is None:
+                    return {"status" : "new" , "message" : "מעולה מה השם שלך"}
+                else:
+                    validate_str(value=name , name="name")
+                    prepare_lead_context = self.prepare_lead_context(phone_number=phone_number , name=name)
 
+
+            if content is None:
+                return self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
+
+            validate_str(value=content , name="content")
+
+            generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
+            self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
+
+            self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"])
+
+            self.update_flow_state(lead_all_data=prepare_lead_context , ai_response=generate_ai_analysis , content=content)
+
+            determine_final_status = self.determine_final_status(lead_all_data=prepare_lead_context)
+            
+            if determine_final_status == True:
+                self.build_lead_summary(lead_all_data=prepare_lead_context)
+            self.db.commit()
+            
+            ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
+            return self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode)
         
-        ack_mode = self.process_lead_session_check(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
-        print(f"ack mode is: {ack_mode}")
-        if content is None:
-            return self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=ack_mode)
-
-        validate_str(value=content , name="content")
-
-        generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
-        self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
-
-        self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"])
-
-        self.update_flow_state(lead_all_data=prepare_lead_context , ai_response=generate_ai_analysis , content=content)
-
-        determine_final_status = self.determine_final_status(lead_all_data=prepare_lead_context)
-        
-        if determine_final_status == True:
-            self.build_lead_summary(lead_all_data=prepare_lead_context)
-        
-        self.db.commit()
-        
-        return {"status" : "in process"}
+        except Exception as e:
+            print(f"Error {e}")
 
 
    
-   
-    def process_lead_session_check(self , lead_id):
-        session_status = self.is_new_session(lead_id=lead_id)
-
-        self.update_the_session(lead_id=lead_id , result=session_status)
-
-        return session_status["status"]
-    
 
     def is_new_session(self , lead_id):
         last_interaction = self.leads_data.get_lead_last_interaction(lead_id=lead_id)
-        print(f"last_interaction: {last_interaction}")
+        #print(f"last_interaction: {last_interaction}")
         
         if last_interaction is None:
-            return {"status" : 0}
+            print("no interaction")
+            return 0
         
         if isinstance(last_interaction, str):
             last_interaction = datetime.fromisoformat(last_interaction)
@@ -113,18 +107,13 @@ class ServiceLayer:
         diff = now - last_interaction
 
         minutes = diff.total_seconds() / 60
-        print(minutes)
+        #print(minutes)
         if minutes >= 15:
-            return {"status" : 0}
+            return 0
         
-        return {"status" : 1}
+        return 1
     
 
-    def update_the_session(self , lead_id , result):
-        self.leads_states.update_lead_is_first_message_in_session(value=result["status"], lead_id=lead_id)
-   
-   
-   
    
    
    
@@ -157,12 +146,14 @@ class ServiceLayer:
     
 
     def generate_lead_question(self , lead_all_data , ack_mode=0):
+        print(f"question_state: {lead_all_data['lead_conversation_states_data']['question_state']} | reason: {lead_all_data['lead_conversation_states_data']['question_reason']}")
+        print(f"current field: {lead_all_data['lead_conversation_states_data']['current_field']}")
         question = self.generate_question(lead_info=lead_all_data["lead_conversation_states_data"] , ack_mode=ack_mode , final_status=lead_all_data["lead_base_data"]["final_status"])
         if question is None:
             closing_message = self.closing_message(final_status=lead_all_data["lead_base_data"]["final_status"] , urgency_status=lead_all_data["lead_scores_data"]["urgency_status"] , name=lead_all_data["lead_base_data"]["name"])
-            return {"status" : "DONE" , "closing_message" : closing_message}
+            return {"status" : "DONE" , "message" : closing_message}
             
-        return {"status" : "output" , "question" : question}
+        return {"status" : "output" , "message" : question}
 
 
 
@@ -306,6 +297,9 @@ class ServiceLayer:
             else:
                 self.leads_states.update_lead_question_state(lead_id=lead_info["lead_id"] , value=None)
                 self.leads_states.update_lead_question_reason(lead_id=lead_info["lead_id"] , value=None)
+            
+            lead_info["question_state"] = "base"
+            lead_info["question_reason"] = "base"
 
             return True
 
@@ -334,14 +328,17 @@ class ServiceLayer:
                 elif ai_response["status"] == "missing":
                     self.leads_states.update_lead_regular_attempt_number(lead_id=lead_info["lead_id"] , number=lead_info["regular_attempt_number"] + 1)
                     lead_info["regular_attempt_number"] = lead_info["regular_attempt_number"] + 1
-                
+
                 elif ai_response["status"] == "confused":
                     self.leads_states.update_lead_confuse_attempt_number(lead_id=lead_info["lead_id"] , number=lead_info["confuse_attempt_number"] + 1)
                     lead_info["confuse_attempt_number"] = lead_info["confuse_attempt_number"] + 1
 
                 self.leads_states.update_lead_question_state(lead_id=lead_info["lead_id"] , value=ai_response["status"])
                 self.leads_states.update_lead_question_reason(lead_info["lead_id"] , ai_response["reason"])
-  
+
+                lead_info["question_state"] = ai_response["status"]
+                lead_info["question_reason"] = ai_response["reason"]
+
             return True
         
     
@@ -503,64 +500,63 @@ service_layer.messages.create_leads_messages_table()
 
 
 
-#if __name__ == "__main__":
-service_layer = ServiceLayer()
+if __name__ == "__main__":
+    service_layer = ServiceLayer()
 
-phone_number = None
+    phone_number = None
 
 
-service_layer.leads_data.create_leads_data_table()
-service_layer.leads_states.create_lead_conversation_states()
-service_layer.leads_scores.create_leads_scores_table()
-service_layer.leads_fields.create_leads_fields_data()
-service_layer.messages.create_leads_messages_table()
+    service_layer.leads_data.create_leads_data_table()
+    service_layer.leads_states.create_lead_conversation_states()
+    service_layer.leads_scores.create_leads_scores_table()
+    service_layer.leads_fields.create_leads_fields_data()
+    service_layer.messages.create_leads_messages_table()
 
-while True:
+    while True:
+        print("""
+            =================================
+                    LEAD FILTER ENGINE
+            =================================
 
-    print("""
-        =================================
-                LEAD FILTER ENGINE
-        =================================
+                Analyze • Score • Classify
+            """)
 
-            Analyze • Score • Classify
-        """)
 
-    
-    
-    if phone_number is None:
-        phone_number = input("Just before we start, to save your progress and continue with you — what's your phone number? ")
-        validate_phone_number(phone_number=phone_number)
-    
 
-    run_lead_flow = service_layer.run_lead_flow(phone_number=phone_number)
+        if phone_number is None:
+            phone_number = input("Just before we start, to save your progress and continue with you — what's your phone number? ")
+            validate_phone_number(phone_number=phone_number)
 
-    if run_lead_flow is not None and "status" in run_lead_flow:
-        if run_lead_flow["status"] == "DONE":
-            closing_message = run_lead_flow["closing_message"]
-            fixed = get_display(closing_message)
-            print(fixed)
-            break
 
-        
-        elif "status" in run_lead_flow:
-            if run_lead_flow["status"] == "new":
-                name = input("Great, what's your name? ")
-                validate_str(name, "name")
-                run_lead_flow = service_layer.run_lead_flow(phone_number=phone_number, name=name)
-        
-        
-        if run_lead_flow["status"] == "output":
-            question = run_lead_flow["question"]
-            fixed = get_display(question)
-            print(fixed)
-    
+        run_lead_flow = service_layer.run_lead_flow(phone_number=phone_number)
 
-    
+        if run_lead_flow is not None and "status" in run_lead_flow:
+            if run_lead_flow["status"] == "DONE":
+                closing_message = run_lead_flow["message"]
+                fixed = get_display(closing_message)
+                print(fixed)
+                break
 
-    content = input("Please enter a message: ")
-    validate_str(content , "content")
+            
+            elif "status" in run_lead_flow:
+                if run_lead_flow["status"] == "new":
+                    name = input("Great, what's your name? ")
+                    validate_str(name, "name")
+                    run_lead_flow = service_layer.run_lead_flow(phone_number=phone_number, name=name)
+            
+            
+            if run_lead_flow["status"] == "output":
+                question = run_lead_flow["message"]
+                fixed = get_display(question)
+                print(fixed)
 
-    service_layer.run_lead_flow(phone_number=phone_number , content=content)
+
+
+
+        content = input("Please enter a message: ")
+        validate_str(content , "content")
+
+        service_layer.run_lead_flow(phone_number=phone_number , content=content)
 
 
 
