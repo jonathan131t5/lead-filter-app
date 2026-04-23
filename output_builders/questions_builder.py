@@ -32,6 +32,14 @@ class BaseQuestions:
             ]
     
 
+    def phone_Base_question(self):
+        return [
+            "בכדי לחזור אלייך תשאיר מספר טלפון" , 
+            "כדי לשמור על קשר מה הטלפון שלך?" , 
+            "תוכל להשאיר מספר טלפון להמשך ההתאמה "
+        ]
+    
+
     def process_base_question(self , field , ack_mode):
         if field == "goal":
             questions = self.goal_Base_questions()
@@ -101,12 +109,6 @@ class MissingQuestions:
                     "לאן אתה רוצה להגיע בתהליך הזה?"
                 ]
 
-            elif attempt_number == 3:
-                return [
-                    "איזה תוצאה היית רוצה לראות?",
-                    "מה המטרה המרכזית שלך?",
-                    "מה הדבר העיקרי שאתה רוצה להשיג?"
-                ]
 
 
         elif question_type == "vague":
@@ -125,12 +127,6 @@ class MissingQuestions:
                     "איזה שינוי אתה מחפש?"
                 ]
 
-            elif attempt_number == 3:
-                return [
-                    "מה התוצאה שאתה מכוון אליה?",
-                    "תן לי דוגמה למה שאתה רוצה להשיג",
-                    "איך זה ייראה כשזה יצליח?"
-                ]
 
 
         elif question_type == "avoid":
@@ -149,18 +145,10 @@ class MissingQuestions:
                     "בלי מטרה קשה להתקדם, תן כיוון"
                 ]
 
-            elif attempt_number == 3:
-                return [
-                    "מה הדבר העיקרי שאתה רוצה להשיג?",
-                    "תן יעד כללי כדי שנוכל לזוז",
-                    "אפילו כיוון קטן יעזור להתקדם"
-                ]
+
             
 
-    
-
     def budget_missing_questions(self, question_type, attempt_number):
-
         if question_type == "no_info":
 
             if attempt_number == 1:
@@ -177,12 +165,6 @@ class MissingQuestions:
                     "על איזה סדר גודל מדובר?"
                 ]
 
-            elif attempt_number == 3:
-                return [
-                    "תן לי טווח בערך כדי להתקדם",
-                    "גם הערכה גסה תעזור לי להבין אותך",
-                    "מה האזור מחיר שאתה מכוון אליו בערך?"
-                ]
 
 
         elif question_type == "vague":
@@ -201,12 +183,7 @@ class MissingQuestions:
                     "תן לי סדר גודל יותר ברור"
                 ]
 
-            elif attempt_number == 3:
-                return [
-                    "אפשר לצמצם את זה לטווח יותר ספציפי?",
-                    "כמה זה בערך יותר מדויק?",
-                    "מה הסכום שאתה רואה לנכון בערך?"
-                ]
+
 
 
         elif question_type == "avoid":
@@ -225,17 +202,29 @@ class MissingQuestions:
                     "תן לי טווח בערך כדי שאוכל לכוון אותך"
                 ]
 
-            elif attempt_number == 3:
+
+    def phone_missing_questions(self , attempt_number , question_type):
+        if question_type == "no info":
+            
+            if attempt_number == 1:
                 return [
-                    "בוא ניקח טווח כללי רק כדי להתקדם",
-                    "אפילו הערכה גסה תספיק כדי שנמשיך",
-                    "מה האזור מחיר שאתה רואה לנכון?"
+                    "בלי טלפון לא נוכל להמשיך" , 
+                    "בכדי להמשיך בתהליך תוכל להשאיר מספר טלפון" , 
+                    "חסר מספר טלפון להתאמה" ,
+                    "חסר מספר טלפון להמשך ההתאמה"
                 ]
-
-
-
+            
+            elif attempt_number == 2:
+                return [
+                    "כדי להתקדם חייבים מספר טלפון" , 
+                    "לא ניתן לחזור אליך בלי מספר" ,
+                    "כדי שנחזור אליך נדרש מספר טלפון" , 
+                    "מספר טלפון נדרש כדי להמשיך"
+                    ]
+            
+    
+    
     def urgency_missing_questions(self, question_type, attempt_number):
-
         if question_type == "no_info":
 
             if attempt_number == 1:
@@ -250,13 +239,6 @@ class MissingQuestions:
                     "אני צריך להבין בערך מתי זה מתאים לך",
                     "מתי חשבת להתחיל?",
                     "על איזה טווח זמן מדובר?"
-                ]
-
-            elif attempt_number == 3:
-                return [
-                    "תן לי זמן כללי כדי להתקדם",
-                    "אפילו הערכה גסה תעזור",
-                    "מתי בערך זה רלוונטי לך?"
                 ]
 
 
@@ -276,12 +258,6 @@ class MissingQuestions:
                     "תחדד לי קצת את הזמנים"
                 ]
 
-            elif attempt_number == 3:
-                return [
-                    "מתי בערך זה קורה בפועל?",
-                    "תן לי טווח זמן ברור יותר",
-                    "כמה זמן לוקח עד שאתה מתחיל?"
-                ]
 
 
         elif question_type == "avoid":
@@ -300,12 +276,6 @@ class MissingQuestions:
                     "תן לי כיוון של מתי זה קורה"
                 ]
 
-            elif attempt_number == 3:
-                return [
-                    "אפילו זמן כללי יעזור להתקדם",
-                    "תן הערכה מתי זה קורה",
-                    "מתי בערך אתה מתכנן להתחיל?"
-                ]
     
 
 
@@ -316,6 +286,9 @@ class MissingQuestions:
 
         elif field == "budget":
             questions = self.budget_missing_questions(question_type=reason , attempt_number=attempt_number)
+
+        elif field == "phone":
+            questions = self.phone_missing_questions(question_type=reason , attempt_number=attempt_number)
 
         elif field == "urgency":
             questions = self.urgency_missing_questions(question_type=reason , attempt_number=attempt_number)
@@ -460,7 +433,28 @@ class FallBackQuestions:
         
         else:
             raise TypeError("Invaild fallback type")
+
+
+    def phone_fallback_question(self , fallback_type):
+        if fallback_type == "after_fallback":
+            return [
+                "אוקי, נמשיך  כדי שנחזור אליך תשאיר בבקשה מספר טלפון" , 
+               "אוקי נמשיך, כדי להמשיך את ההתאמה ולחזור אליך תשאיר מספר טלפון" , 
+                "אוקי נעבור הלאה, בכדי להמשיך את ההתאמה ויצירת קשר בהמשך תשאיר מספר טלפון" , 
+                "אוקי נתקדם, כדי להמשיך את התהליך ולחזור אליך תשאיר טלפון"
+
+
+            ]
         
+        elif fallback_type == "regular_fallback":
+            return [
+                "בלי מספר טלפון אי אפשר להמשיך להתאמה 🙏 אם מתאים לך, שלח מספר ונמשיך" , 
+                "לא ניתן להמשיך בלי מספר טלפון אם תרצה להמשיך, שלח מספר" , 
+                "בלי טלפון התהליך עוצר כאן. כשמוכן, שלח מספר ונמשיך" , 
+                "בלי מספר לא ניתן להמשיך את ההתאמה. שלח מספר כשתהיה מוכן"
+            ]
+
+
     
     def urgency_fallback_questions(self , fallback_type):
         if fallback_type == "after_fallback":
@@ -492,6 +486,9 @@ class FallBackQuestions:
         elif field == "budget":
             questions = self.budget_fallback_questions(fallback_type=reason)
 
+        elif field == "phone":
+            questions = self.phone_fallback_question(fallback_type=reason)
+
         elif field == "urgency":
             questions = self.urgency_fallback_questions(fallback_type=reason)
 
@@ -516,7 +513,7 @@ class ProcessQuestion:
     
     
     
-    def get_question(self , field , question_state , reason , attempt_number , ack_mode=1):
+    def get_question(self , field , question_state , reason , attempt_number , ack_mode):
         if question_state == "base":
             question = self.base_questions.process_base_question(field , ack_mode)
 
