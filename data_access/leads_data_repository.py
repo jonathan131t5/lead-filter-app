@@ -7,6 +7,7 @@ class LeadsDataRepository:
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS leads_data(
         lead_id INTEGER PRIMARY KEY AUTOINCREMENT , 
+        session_id INTEGER , 
         name TEXT ,
         phone_number TEXT UNIQUE,
         final_status TEXT DEFAULT 'pending' ,
@@ -18,19 +19,18 @@ class LeadsDataRepository:
         """)
 
     
-    def create_new_lead(self, name):
-        self.cursor.execute("INSERT INTO leads_data (name) VALUES (?)", 
-        (name , ))
-        
-        lead_id = self.cursor.lastrowid
-        return lead_id
-        
+    def create_new_lead(self, name , session_id):
+        self.cursor.execute("INSERT INTO leads_data (name , session_id) VALUES (?)", 
+        (name , session_id))
+
+        return self.cursor.lastrowid
+         
 
 
-    def get_lead_base_data(self , lead_id):
+    def get_lead_base_data(self , session_id):
         self.cursor.execute(
-        "SELECT name , final_status , summary FROM leads_data WHERE lead_id = ?" , 
-        (lead_id , )
+        "SELECT lead_id , name , final_status , summary FROM leads_data WHERE session_id = ?" , 
+        (session_id , )
         )
         
         result = self.cursor.fetchone()
@@ -38,10 +38,10 @@ class LeadsDataRepository:
             return None
     
         return {
-            "lead_id" : lead_id ,
-            "name" : result[0] ,
-            "final_status" : result[1] ,
-            "summary" : result[2]
+            "lead_id" : result[0] ,
+            "name" : result[1] ,
+            "final_status" : result[2] ,
+            "summary" : result[3]
         }
 
     
