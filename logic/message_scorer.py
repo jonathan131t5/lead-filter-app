@@ -7,12 +7,12 @@ class MessageScorer:
         rank_score = 0
 
 
+        if field == "phone":
+            return {"status" : "phone"}
+        
         if message_to_rank["status"] == "missing" or message_to_rank["status"] == "confused":
             if reason == "regular_fallback":
-                if field == "phone":
-                    return {"status" : "invaild" , "rank_score" : rank_score}
-                
-                return {"status" : "unknown"}
+                return {"status" : "unknown" , "rank_score" : rank_score}
         
 
         elif message_to_rank["status"] == "found":
