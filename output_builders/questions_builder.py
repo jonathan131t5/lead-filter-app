@@ -41,11 +41,16 @@ class BaseQuestions:
     
 
     def process_base_question(self , field , ack_mode):
+        #print(f"field : {field}")
         if field == "goal":
             questions = self.goal_Base_questions()
 
         elif field == "budget":
             questions = self.budget_Base_questions()
+
+        elif field == "phone":
+            #print("yes")
+            questions = self.phone_Base_question()
 
         elif field == "urgency":
             questions = self.urgency_Base_questions()
@@ -53,6 +58,7 @@ class BaseQuestions:
         else:
             raise TypeError("Invaild field choice")
 
+        #print(f"question: {questions}")
         question = random.choice(questions)
         if ack_mode == 1:
             prefix = self.build_ack_prefix()
