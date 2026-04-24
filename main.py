@@ -56,7 +56,10 @@ def run_message_flow(
             content=data.content
         )
 
-        return {"content": result["message"]}
+        return {
+            "content": result["message"],
+            "status": result.get("status")
+        }
 
     except Exception as e:
         return {
