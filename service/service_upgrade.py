@@ -64,8 +64,11 @@ class ServiceLayer:
             return self.run_lead_flow(prepare_lead_context=init_result, content=content)
         
         except Exception as e:
-            traceback.print_exc()  # 👈 מדפיס שגיאה מלאה בטרמינל
-            return {"content": str(e), "status": "error"}
+            import traceback
+            return {
+                "content": traceback.format_exc(),
+                "status": "error"
+            }
 
     
     
