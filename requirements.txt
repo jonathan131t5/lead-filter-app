@@ -1,6 +1,5 @@
 requests
 openai
 python-dotenv
-python-bidi
 fastapi
 uvicorn
