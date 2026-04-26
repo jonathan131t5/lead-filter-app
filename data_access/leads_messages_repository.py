@@ -21,7 +21,25 @@ class MessagesRepository:
         "INSERT INTO leads_messages (lead_id , role , content) VALUES (? , ? , ?)" ,
         (lead_id , role , content)
         )
-    
+
+
+    def get_lead_messages(self , lead_id):
+        self.cursor.execute(
+        "SELECT role , content , created_at FROM leads_messages WHERE lead_id = ? ORDER BY created_at ASC" , 
+        (lead_id , )
+        )
+        rows = self.cursor.fetchall()
+
+        messages = []
+        for row in rows:
+            messages.append({
+                "role": row[0],
+                "content": row[1],
+                "created_at": row[2]
+            })
+
+        return messages
+        
 
 
     

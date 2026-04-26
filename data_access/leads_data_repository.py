@@ -97,3 +97,33 @@ class LeadsDataRepository:
         "UPDATE leads_data SET phone_number = ? WHERE lead_id = ?" , 
         (phone , lead_id)
         )
+
+
+
+    def get_all_leads_data(self):
+        self.cursor.execute("""
+            SELECT lead_id, name, phone_number, final_status, summary , last_interaction_at
+            FROM leads_data
+            ORDER BY 
+                CASE 
+                    WHEN final_status = 'Hot Lead' THEN 1
+                    WHEN final_status = 'pending' THEN 2
+                    WHEN final_status = 'Cold Lead' THEN 3
+                END,
+                last_interaction_at DESC
+        """)
+
+        rows = self.cursor.fetchall()
+
+        leads = []
+        for row in rows:
+            leads.append({
+                "lead_id" : row[0],
+                "name" : row[1],
+                "phone" : row[2],
+                "final_status" : row[3],
+                "summary" : row[4],
+                "last_interaction_at" : row[5]
+            })
+
+        return leads
