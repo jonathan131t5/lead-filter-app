@@ -1,5 +1,4 @@
-import random
-from bidi.algorithm import get_display
+
 from datetime import datetime, timezone
 import sqlite3
 import traceback
