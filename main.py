@@ -16,7 +16,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:8000"],
+    allow_origins=["http://127.0.0.1:8000", "http://192.168.1.36:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -24,8 +24,12 @@ app.add_middleware(
 
 @app.get("/")
 def serve_chat():
-    return FileResponse("chat2.html")
+    return FileResponse("chat.html")
 
+
+@app.get("/dashboard")
+def serve_dashboard():
+    return FileResponse("dashboard.html")
 
 class MessageRequirements(BaseModel):
     name: str | None = None
@@ -66,4 +70,14 @@ def run_message_flow(
             "content": str(e),
             "status": "error"
         }
+    
 
+
+@app.get("/api/dashboard/leads")
+def get_dashboard_leads():
+    return service_layer.leads_data.get_all_leads_data()
+
+
+@app.get("/api/dashboard/leads/{lead_id}/messages")
+def get_dasboard_messages(lead_id: int):
+    return service_layer.messages.get_lead_messages(lead_id=lead_id)
