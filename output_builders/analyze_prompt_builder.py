@@ -8,209 +8,34 @@ class ConversationBuilder:
     def __init__(self):
         pass
 
- # ─────────────────────────────────────────
-    # SHARED HEADER  (נשלח פעם אחת בכל קריאה)
-    # ─────────────────────────────────────────
-    _BASE = (
-        "אתה מנוע חילוץ מידע.\n"
-        "החזר JSON בלבד — בלי טקסט נוסף, בלי markdown.\n"
-        "אל תשאל שאלות ואל תסביר.\n"
-    )
- 
-    # ─────────────────────────────────────────
-    # פורמטים אפשריים  (תזכורת קצרה למודל)
-    # ─────────────────────────────────────────
-    _FORMATS = (
-        "\n"
-        "פורמטי תשובה אפשריים:\n"
-        '{"status":"found","value":<number|string>}\n'
-        '{"status":"missing","reason":"no_info"}     ← אין מידע כלל\n'
-        '{"status":"missing","reason":"vague"}       ← כיוון חלקי, לא מספיק\n'
-        '{"status":"missing","reason":"avoid"}       ← מתחמק מלענות\n'
-        '{"status":"confused","reason":"meaning"}    ← לא הבין את השאלה\n'
-        '{"status":"confused","reason":"answer_type"}← לא יודע איך לענות\n'
-        '{"status":"confused","reason":"focus"}      ← ענה על שדה אחר\n'
-    )
- 
-    # ─────────────────────────────────────────
-    # סדר הכרעה מחייב  (זהה לכולם)
-    # ─────────────────────────────────────────
-    _DECISION = (
-        "\n"
-        "סדר הכרעה (בדוק מלמעלה למטה, עצור בהתאמה הראשונה):\n"
-        "1. לא הבין את השאלה         → confused:meaning\n"
-        "2. לא יודע איך לענות        → confused:answer_type\n"
-        "3. ענה בבירור על שדה אחר   → confused:focus\n"
-        "4. יש ערך תקין לשדה הנוכחי → found\n"
-        "5. אין מידע כלל             → missing:no_info\n"
-        "6. מתחמק                   → missing:avoid\n"
-        "7. כיוון חלקי/לא ברור      → missing:vague\n"
-        "\n"
-        "כלל ברזל: confused:focus רק כאשר ההתאמה לשדה אחר *חזקה יותר* מההתאמה לשדה הנוכחי.\n"
-        "אל תחזיר confused:focus רק כי התשובה קצרה.\n"
-    )
- 
-    # ─────────────────────────────────────────
-    # הגדרות כל שדה
-    # ─────────────────────────────────────────
-    _FIELD_PROMPTS = {
- 
-        # ── GOAL ──────────────────────────────
-        "goal": (
-            "\n"
-            "━━━ שדה: goal (מטרה אימונית) ━━━\n"
-            "GOAL הוא מטרה אימונית בלבד.\n"
-            "GOAL אינו: סכום כסף, זמן התחלה, מספר טלפון.\n"
-            "\n"
-            "ערכים תקינים (דוגמאות, לא רשימה סגורה):\n"
-            "  ירידה במשקל, חיטוב, עלייה במסה, בניית שריר,\n"
-            "  התחזקות, שיפור כושר, כושר כללי, סיבולת,\n"
-            "  להרגיש טוב יותר, להתחטב, לבנות שריר.\n"
-            "\n"
-            "value = ציון 1-10 לפי בהירות המטרה:\n"
-            "  1-2  כמעט אין מטרה\n"
-            "  3-4  מעורפל מאוד\n"
-            "  5-6  כללי אך מובן  (למשל 'כושר', 'להרגיש טוב')\n"
-            "  7-8  מטרה ברורה\n"
-            "  9-10 מטרה ספציפית מאוד\n"
-            "\n"
-            "דוגמאות:\n"
-            "  'להתחטב'      → found, 8\n"
-            "  'כושר'         → found, 5\n"
-            "  '450'          → confused:focus  (זה מספר כסף)\n"
-            "  'להתחיל מהר'  → confused:focus  (זה זמן)\n"
-            "  'לא יודע'      → missing:vague\n"
-            "  ''             → missing:no_info\n"
-        ),
- 
-        # ── BUDGET ────────────────────────────
-        "budget": (
-            "\n"
-            "━━━ שדה: budget (תקציב בשקלים) ━━━\n"
-            "BUDGET הוא סכום כסף בלבד — מספר שלם.\n"
-            "BUDGET אינו: מטרה אימונית, זמן התחלה, מספר טלפון.\n"
-            "\n"
-            "חוקי חילוץ:\n"
-            "  • מספר בודד ('450')                → value=450\n"
-            "  • עם מילות עיגון ('בערך 450', 'כן 300', 'סביבות 400') → found, קח את המספר\n"
-            "  • תקרה ('עד 300', 'לכל היותר 500')  → found, קח את הגבול העליון\n"
-            "  • טווח ('300-500')                  → found, קח את הגבוה (500)\n"
-            "  • כיוון ללא מספר ('לא יקר', 'סביר') → missing:vague\n"
-            "  • אין מספר כלל                     → missing:no_info\n"
-            "\n"
-            "⚠️  מספר בודד בשדה budget לעולם לא יהיה confused:focus.\n"
-            "\n"
-            "דוגמאות:\n"
-            "  '450'        → found, 450\n"
-            "  'בערך 400'   → found, 400\n"
-            "  'עד 300'     → found, 300\n"
-            "  '300-500'    → found, 500\n"
-            "  'לא יקר'    → missing:vague\n"
-            "  'להתחטב'    → confused:focus\n"
-            "  'מחר'       → confused:focus\n"
-            "  ''          → missing:no_info\n"
-        ),
- 
-        # ── URGENCY ───────────────────────────
-        "urgency": (
-            "\n"
-            "━━━ שדה: urgency (דחיפות התחלה) ━━━\n"
-            "URGENCY הוא מתי המשתמש רוצה להתחיל — ציון 1-10.\n"
-            "URGENCY אינו: מטרה אימונית, סכום כסף, מספר טלפון.\n"
-            "\n"
-            "מיפוי ציונים:\n"
-            "  מיד / עכשיו / כמה שיותר מהר  → 10\n"
-            "  היום / מחר / השבוע            → 9\n"
-            "  בימים הקרובים                 → 8\n"
-            "  בקרוב                         → 7\n"
-            "  בחודש הקרוב                   → 6\n"
-            "  עוד כמה שבועות                → 5\n"
-            "  בהמשך / לא לחוץ              → 3\n"
-            "  מתישהו                        → 2\n"
-            "\n"
-            "דוגמאות:\n"
-            "  'כמה שיותר מהר' → found, 10\n"
-            "  'מחר'           → found, 9\n"
-            "  'עוד שבועיים'   → found, 5\n"
-            "  'בהמשך'         → found, 3\n"
-            "  'לא יודע'       → missing:vague\n"
-            "  'להתחטב'        → confused:focus\n"
-            "  '450'           → confused:focus\n"
-            "  ''              → missing:no_info\n"
-        ),
- 
-        # ── PHONE ─────────────────────────────
-        "phone": (
-            "\n"
-            "━━━ שדה: phone (מספר טלפון ישראלי) ━━━\n"
-            "PHONE הוא מספר טלפון נייד ישראלי בלבד — 10 ספרות, מתחיל ב-05.\n"
-            "PHONE אינו: מטרה אימונית, סכום כסף, זמן התחלה.\n"
-            "\n"
-            "חוקי חילוץ:\n"
-            "  • הסר רווחים, מקפים ותווים מיוחדים (החזר ספרות בלבד).\n"
-            "  • דרוש בדיוק 10 ספרות שמתחילות ב-05.\n"
-            "  • אל תשלים ספרות חסרות — אין ניחושים.\n"
-            "  • כל ערך שלא עומד בתנאים → missing:no_info.\n"
-            "\n"
-            "value = מחרוזת הספרות בלבד (ללא מקפים/רווחים).\n"
-            "\n"
-            "דוגמאות:\n"
-            "  '050-123-4567'  → found, '0501234567'\n"
-            "  '054 987 6543'  → found, '0549876543'\n"
-            "  '0541234567'    → found, '0541234567'\n"
-            "  '03-1234567'    → missing:no_info\n"
-            "  '054123456'     → missing:no_info\n"
-            "  'להתחטב'       → missing:no_info\n"
-            "  '450'          → missing:no_info\n"
-            "  ''             → missing:no_info\n"
-            )
-    }
-    # ─────────────────────────────────────────
-    # API  –  build_prompt
-    # ─────────────────────────────────────────
-    def build_prompt(self, field: str, content: str) -> list[dict]:
-        if field not in self._FIELD_PROMPTS:
-            raise ValueError(f"Unknown field: {field}")
- 
-        system_content = (
-            self._BASE
-            + self._FORMATS
-            + self._DECISION
-            + self._FIELD_PROMPTS[field]
-        )
- 
-        return [
-            {"role": "system", "content": system_content},
-            {"role": "user",   "content": content},
-        ]
-    
-    def main_analyze_prompt(self , current_field, content):
+
+    def build_prompt(self , current_field , content): 
+        if current_field == "goal":
+            prompt = self.goal_analyze_prompt(content=content)
+
+        elif current_field == "budget":
+            prompt = self.budget_analyze_prompt(content=content)
+
+        elif current_field == "urgency":
+            prompt = self.urgency_analyze_prompt(content=content)
+
+        return prompt
+
+
+
+
+    def main_analyze_prompt(self, current_field, content):
         return [
             {
                 "role": "system",
                 "content": (
                     "אתה מנוע חילוץ מידע.\n"
-                    "החזר JSON בלבד, בלי שום טקסט נוסף.\n"
-                    "אל תשאל שאלות.\n"
-                    "אל תסביר.\n"
-                    "אל תחזיר markdown.\n"
+                    "החזר JSON בלבד. בלי טקסט נוסף, בלי שאלות, בלי הסברים, בלי markdown.\n"
 
-                    "\n"
-                    "חוק עליון ומחייב:\n"
-                    "- בדוק את תשובת המשתמש רק לפי השדה הנוכחי current_field.\n"
-                    "- התעלם מכל ערך שנראה מתאים לשדה אחר.\n"
-                    "- גם אם ההודעה מכילה מידע ברור מאוד, אסור להשתמש בו אם הוא לא שייך ל-current_field.\n"
-                    "- קודם כל שאל: האם התשובה עונה על current_field?\n"
-                    "- אם לא, החזר status='confused', reason='focus'.\n"
-                    "- אל תנתח את ההודעה באופן כללי. נתח אותה רק ביחס ל-current_field.\n"
-                    "\n"
-
-                    "\n"
-                    f"השדה הנוכחי: {current_field}\n"
+                    f"\nהשדה הנוכחי: {current_field}\n"
                     "השדות האפשריים: goal, budget, urgency\n"
 
-                    "\n"
-                    "פורמט תשובה בלבד:\n"
+                    "\nפורמט תשובה בלבד:\n"
                     '{"status":"found","value":<number>}\n'
                     '{"status":"missing","reason":"no_info"}\n'
                     '{"status":"missing","reason":"vague"}\n'
@@ -219,81 +44,69 @@ class ConversationBuilder:
                     '{"status":"confused","reason":"answer_type"}\n'
                     '{"status":"confused","reason":"focus"}\n'
 
-                    "\n"
-                    "סדר הכרעה מחייב:\n"
-                    "1. אם המשתמש לא הבין את השאלה -> status='confused', reason='meaning'\n"
-                    "2. אם המשתמש לא מבין איך לענות -> status='confused', reason='answer_type'\n"
-                    "3. אם ברור שהתשובה שייכת לשדה אחר -> status='confused', reason='focus'\n"
-                    "4. אם יש מידע מספיק לשדה הנוכחי -> status='found'\n"
-                    "5. אם אין מידע בכלל -> status='missing', reason='no_info'\n"
-                    "6. אם יש התחמקות -> status='missing', reason='avoid'\n"
-                    "7. אם יש כיוון חלקי או תשובה לא מספיק ברורה -> status='missing', reason='vague'\n"
+                    "\nחוק עליון:\n"
+                    "- נתח רק לפי current_field.\n"
+                    "- אם יש התאמה לשדה הנוכחי → המשך רגיל.\n"
+                    "- אם התשובה מתאימה בבירור לשדה אחר → confused:focus.\n"
+                    "- אחרת → missing.\n"
 
-                    "\n"
-                    "חוקים כלליים:\n"
-                    "- זהה לפי משמעות, לא לפי מילים מדויקות בלבד.\n"
-                    "- יש להתחשב גם בשגיאות כתיב, סלנג, ניסוחים שבורים ותשובות קצרות.\n"
-                    "- כל הדוגמאות הן דוגמאות בלבד, לא רשימה סגורה.\n"
-                    "- אם יש התאמה סבירה לשדה הנוכחי, העדף found על פני confused:focus.\n"
-                    "- confused:focus יוחזר רק כשיש התאמה ברורה יותר לשדה אחר מאשר לשדה הנוכחי.\n"
-                    "- אל תחזיר confused:focus רק כי התשובה קצרה.\n"
-                    "- אל תחזיר missing אם יש מידע ברור ומספיק לשדה הנוכחי.\n"
+                    "\nסדר הכרעה:\n"
+                    "1. לא הבין את השאלה עצמה → confused:meaning\n"
+                    "2. לא יודע איך לענות → confused:answer_type\n"
+                    "3. יש מידע מספיק לשדה הנוכחי → found\n"
+                    "4. מסרב / מתחמק בכוונה → missing:avoid\n"
+                    "5. אין שום מידע שימושי → missing:no_info\n"
+                    "6. יש כיוון חלקי / כללי מדי → missing:vague\n"
+                    "7. תשובה ברורה לשדה אחר → confused:focus\n"
 
-                    "\n"
-                    "goal:\n"
+                    "\nחוקים כלליים:\n"
+                    "- זהה לפי משמעות, לא רק לפי מילים.\n"
+                    "- התחשב בשגיאות כתיב, סלנג ותשובות קצרות.\n"
+                    "- אל תחזיר focus בגלל תשובה קצרה או חלשה.\n"
+                    "- focus רק כשהתשובה בבירור שייכת לשדה אחר.\n"
+
+                    "\ngoal:\n"
                     "- goal הוא מטרה אימונית בלבד.\n"
-                    "- דוגמאות: ירידה במשקל, חיטוב, עלייה במסה, בניית שריר, התחזקות, שיפור כושר, כושר כללי, סיבולת, להרגיש טוב יותר.\n"
-                    "- תשובה כמו 'להתחטב', 'לבנות שריר', 'לרדת במשקל' נחשבת found.\n"
-                    "- אם התשובה עוסקת בבירור בכסף או בזמן התחלה, החזר status='confused', reason='focus'.\n"
-                    "- אם התשובה כללית מדי כמו 'כושר' או 'להרגיש טוב' עדיין אפשר להחזיר found.\n"
-                    "- החזר ציון 1-10:\n"
-                    "  1-2 = כמעט אין מטרה\n"
-                    "  3-4 = מאוד מעורפל\n"
-                    "  5-6 = כללי אך מובן\n"
-                    "  7-8 = מטרה ברורה\n"
-                    "  9-10 = מטרה מאוד ברורה או ספציפית\n"
+                    "- דוגמאות: ירידה במשקל, חיטוב, עלייה במסה, בניית שריר, התחזקות, כושר כללי.\n"
+                    "- תשובות כלליות כמו 'כושר' או 'להרגיש טוב' → found.\n"
+                    "- אם התשובה עוסקת בכסף או בזמן התחלה → confused:focus.\n"
+                    "- החזר ציון 1-10 לפי בהירות המטרה:\n"
+                    "  1-2 כמעט אין מטרה, 3-4 מעורפל, 5-6 כללי, 7-8 ברור, 9-10 ספציפי.\n"
 
-                    "\n"
-                    "budget:\n"
+                    "\nbudget:\n"
                     "- budget הוא סכום כסף בלבד.\n"
-                    "- אם יש מספר אחד ברור, החזר אותו כ-found.\n"
-                    "- אם התשובה היא מספר בלבד, למשל '450', יש להחזיר status='found', value=450.\n"
-                    "- אם יש טווח, קח את הגבוה יותר.\n"
-                    "- אם יש תקרה, למשל 'עד 300' -> החזר 300.\n"
-                    "- אם המספר כתוב יחד עם מילים כמו 'בערך 450', 'סביבות 400', 'כן 300' -> עדיין found.\n"
-                    "- אם אין מספר ברור אבל יש כיוון כמו 'לא יקר', 'סביר', 'אין לי הרבה' -> status='missing', reason='vague'.\n"
-                    "- אם התשובה עוסקת בבירור במטרה או בזמן התחלה -> status='confused', reason='focus'.\n"
-                    "- אל תחזיר confused:focus על מספר בודד בשדה budget.\n"
+                    "- מספר ברור → found.\n"
+                    "- מספר בלבד כמו '450' → found, value=450.\n"
+                    "- טווח → קח את הגבוה.\n"
+                    "- תקרה כמו 'עד 300' → value=300.\n"
+                    "- 'בערך 400', 'סביבות 450' → found.\n"
+                    "- אם אין מספר ברור אבל יש כיוון כללי כמו 'לא יקר', 'סביר', 'אין לי הרבה', 'תלוי', 'כמה שצריך' → missing:vague.\n"
+                    "- אם התשובה היא מטרה או זמן התחלה → confused:focus.\n"
+                    "- אל תחזיר focus על תשובת budget חלשה.\n"
 
-                    "\n"
-                    "urgency:\n"
+                    "\nurgency:\n"
                     "- urgency הוא כמה מהר המשתמש רוצה להתחיל.\n"
-                    "- החזר מספר 1-10 לפי מידת הדחיפות.\n"
-                    "- דוגמאות:\n"
-                    "  מיד / עכשיו / כמה שיותר מהר -> 10\n"
-                    "  היום / מחר / השבוע -> 9-10\n"
-                    "  בימים הקרובים -> 8-9\n"
-                    "  בקרוב -> 7\n"
-                    "  בחודש הקרוב -> 6-7\n"
-                    "  עוד כמה שבועות -> 6\n"
-                    "  בהמשך / לא לחוץ -> 3-4\n"
-                    "  מתישהו -> 2\n"
-                    "- אם יש כוונה ברורה לגבי מתי להתחיל, החזר found.\n"
-                    "- אם התשובה עוסקת בבירור במטרה או בכסף -> status='confused', reason='focus'.\n"
-                    "- אם התשובה כללית מדי לגבי זמן, החזר status='missing', reason='vague'.\n"
+                    "- החזר מספר 1-10 לפי דחיפות:\n"
+                    "  עכשיו / מיד → 10\n"
+                    "  היום / מחר / השבוע → 9-10\n"
+                    "  בימים הקרובים → 8-9\n"
+                    "  בקרוב → 7\n"
+                    "  חודש הקרוב → 6-7\n"
+                    "  לא לחוץ → 3-4\n"
+                    "  מתישהו → 2\n"
+                    "- אם יש כוונה ברורה לגבי זמן → found.\n"
+                    "- אם כללי מדי → missing:vague.\n"
+                    "- אם התשובה היא כסף או מטרה → confused:focus.\n"
 
-                    "\n"
-                    "דוגמאות:\n"
-                    "- נשאל goal והמשתמש עונה '450' -> status='confused', reason='focus'\n"
-                    "- נשאל goal והמשתמש עונה 'להתחיל מהר' -> status='confused', reason='focus'\n"
-                    "- נשאל budget והמשתמש עונה '450' -> status='found', value=450\n"
-                    "- נשאל budget והמשתמש עונה 'בערך 450' -> status='found', value=450\n"
-                    "- נשאל budget והמשתמש עונה 'להתחטב' -> status='confused', reason='focus'\n"
-                    "- נשאל urgency והמשתמש עונה 'לבנות שריר' -> status='confused', reason='focus'\n"
-                    "- נשאל urgency והמשתמש עונה 'כמה שיותר מהר' -> status='found', value=10\n"
-                    "- 'לא יודע' -> status='missing', reason='vague'\n"
-                    "- הודעה ריקה -> status='missing', reason='no_info'\n"
-                    "- 'לא רוצה לענות' -> status='missing', reason='avoid'\n"
+                    "\nדוגמאות:\n"
+                    "- current_field=budget, content='450' → found, value=450\n"
+                    "- current_field=budget, content='לא יקר' → missing:vague\n"
+                    "- current_field=budget, content='להתחטב' → confused:focus\n"
+                    "- current_field=goal, content='450' → confused:focus\n"
+                    "- current_field=urgency, content='כמה שיותר מהר' → found, value=10\n"
+                    "- content='לא יודע' → missing:vague\n"
+                    "- content='' → missing:no_info\n"
+                    "- content='לא רוצה לענות' → missing:avoid\n"
                 )
             },
             {
@@ -301,6 +114,8 @@ class ConversationBuilder:
                 "content": content
             }
         ]
+
+
 
 
 
@@ -310,41 +125,62 @@ class ConversationBuilder:
             {
                 "role": "system",
                 "content": (
-                    "החזר JSON בלבד.\n"
+                    "אתה מנוע חילוץ מידע לשדה goal בלבד.\n"
+                    "החזר JSON בלבד. בלי טקסט נוסף, בלי שאלות, בלי הסברים.\n"
 
-                    "\n"
-                    "פורמט:\n"
+                    "\nכללי עדיפות עליונים:\n"
+                    "- אם ההודעה היא רק סימנים או בלי מילים, למשל '???', '...', '-' -> missing:no_info.\n"
+                    "- אם המשתמש אומר במפורש שלא הבין, למשל 'לא הבנתי', 'מה הכוונה' -> confused:meaning.\n"
+                    "- אם המשתמש שואל איך לענות, למשל 'מה לרשום', 'איך לענות' -> confused:answer_type.\n"
+                    "- אם התשובה היא זמן התחלה, למשל 'היום', 'מחר', 'השבוע', 'בקרוב', 'עוד חודש', 'כמה שיותר מהר' -> confused:focus.\n"
+                    "- אם התשובה היא כסף, למשל '450', '300 שקל', 'עד 400' -> confused:focus.\n"
+                    "- אם התשובה היא התחמקות/אי ודאות, למשל 'נראה כבר', 'לא יודע', 'לא בטוח', 'תלוי' -> missing:vague.\n"
+                    "- אם המשתמש מסרב לענות, למשל 'לא רוצה לענות', 'מעדיף לא להגיד' -> missing:avoid.\n"
+
+                    "\nפורמט תשובה:\n"
                     '{"status":"found","value":<number>}\n'
-                    '{"status":"missing","reason":"no_info|vague|avoid"}\n'
-                    '{"status":"confused","reason":"meaning|answer_type|focus"}\n'
+                    '{"status":"missing","reason":"no_info"}\n'
+                    '{"status":"missing","reason":"vague"}\n'
+                    '{"status":"missing","reason":"avoid"}\n'
+                    '{"status":"confused","reason":"meaning"}\n'
+                    '{"status":"confused","reason":"answer_type"}\n'
+                    '{"status":"confused","reason":"focus"}\n'
 
-                    "\n"
-                    "goal = מטרה אימונית בלבד (חיטוב, ירידה במשקל, מסה, שריר, כושר וכו').\n"
+                    "\nהגדרת goal:\n"
+                    "- goal הוא מטרה אימונית בלבד.\n"
+                    "- דוגמאות: ירידה במשקל, חיטוב, עלייה במסה, בניית שריר, התחזקות, כושר כללי, סיבולת, להרגיש טוב יותר.\n"
 
-                    "\n"
-                    "סדר:\n"
-                    "1. לא הבין -> confused:meaning\n"
-                    "2. לא יודע איך לענות -> confused:answer_type\n"
-                    "3. ענה על כסף/זמן -> confused:focus\n"
-                    "4. יש מטרה -> found\n"
-                    "5. ריק -> missing:no_info\n"
-                    "6. התחמקות -> missing:avoid\n"
-                    "7. כללי מדי -> missing:vague\n"
+                    "\nסדר הכרעה רגיל:\n"
+                    "1. אם יש מטרה אימונית מספיק ברורה -> found\n"
+                    "2. אם אין מידע בכלל -> missing:no_info\n"
+                    "3. אם יש כיוון חלש מדי או כללי מדי -> missing:vague\n"
+                    "4. אם התשובה היא בבירור לא goal אלא כסף או זמן -> confused:focus\n"
 
-                    "\n"
-                    "דירוג:\n"
-                    "1-2 אין מטרה\n"
-                    "3-4 מעורפל\n"
-                    "5-6 כללי\n"
-                    "7-8 ברור\n"
-                    "9-10 ספציפי\n"
+                    "\nחוקי דירוג value:\n"
+                    "- החזר מספר 1-10 לפי בהירות המטרה.\n"
+                    "- 1-2 = כמעט אין מטרה.\n"
+                    "- 3-4 = מטרה מאוד מעורפלת.\n"
+                    "- 5-6 = מטרה כללית אך מובנת.\n"
+                    "- 7-8 = מטרה ברורה.\n"
+                    "- 9-10 = מטרה מאוד ברורה או ספציפית.\n"
 
-                    "\n"
-                    "חוקים:\n"
-                    "- אם יש מילה כמו חיטוב/שריר/מסה -> found\n"
-                    "- '450' או זמן -> confused:focus\n"
-                    "- 'לא רוצה' -> missing:avoid\n"
-                    "- 'לא יודע' -> missing:vague\n"
+                    "\nחוקים חשובים:\n"
+                    "- זהה לפי משמעות, לא רק לפי מילים מדויקות.\n"
+                    "- התחשב בשגיאות כתיב, סלנג ותשובות קצרות.\n"
+                    "- תשובות כמו 'להתחטב', 'לרדת במשקל', 'לבנות שריר' -> found.\n"
+                    "- תשובות כלליות כמו 'כושר' או 'להרגיש טוב' עדיין יכולות להיות found.\n"
+                    "- אל תחזיר confused:meaning אלא אם המשתמש אומר במפורש שלא הבין.\n"
+                    "- אל תחזיר focus בגלל תשובה קצרה או חלשה.\n"
+
+                    "\nדוגמאות:\n"
+                    "- 'להתחטב' -> found, value=7\n"
+                    "- 'לרדת במשקל 10 קילו' -> found, value=9\n"
+                    "- 'כושר' -> found, value=5\n"
+                    "- 'נראה כבר' -> missing:vague\n"
+                    "- '???' -> missing:no_info\n"
+                    "- 'השבוע' -> confused:focus\n"
+                    "- '450' -> confused:focus\n"
+                    "- 'לא הבנתי מה הכוונה' -> confused:meaning\n"
                 )
             },
             {
@@ -354,18 +190,24 @@ class ConversationBuilder:
         ]
     
 
+
     def budget_analyze_prompt(self, content):
         return [
             {
                 "role": "system",
                 "content": (
-                    "אתה מנוע חילוץ מידע.\n"
-                    "החזר JSON בלבד, בלי שום טקסט נוסף.\n"
-                    "אל תשאל שאלות.\n"
-                    "אל תסביר.\n"
+                    "אתה מנוע חילוץ מידע לשדה budget בלבד.\n"
+                    "החזר JSON בלבד. בלי טקסט נוסף, בלי שאלות, בלי הסברים.\n"
 
-                    "\n"
-                    "פורמט תשובה בלבד:\n"
+                    "\nכללי עדיפות עליונים:\n"
+                    "- אם ההודעה היא רק סימנים או בלי מילים, למשל '???', '...', '-' -> missing:no_info.\n"
+                    "- אם המשתמש אומר במפורש שלא הבין, למשל 'לא הבנתי', 'מה הכוונה' -> confused:meaning.\n"
+                    "- אם המשתמש שואל איך לענות, למשל 'מה לרשום', 'איך לענות' -> confused:answer_type.\n"
+                    "- אם התשובה היא מטרה אימונית, למשל 'להתחטב', 'לרדת במשקל', 'לבנות שריר', 'כושר' -> confused:focus.\n"
+                    "- אם התשובה היא זמן התחלה, למשל 'היום', 'מחר', 'השבוע', 'בקרוב', 'כמה שיותר מהר' -> confused:focus.\n"
+                    "- אם המשתמש מסרב לענות, למשל 'לא רוצה לענות', 'מעדיף לא להגיד' -> missing:avoid.\n"
+
+                    "\nפורמט תשובה:\n"
                     '{"status":"found","value":<number>}\n'
                     '{"status":"missing","reason":"no_info"}\n'
                     '{"status":"missing","reason":"vague"}\n'
@@ -374,38 +216,44 @@ class ConversationBuilder:
                     '{"status":"confused","reason":"answer_type"}\n'
                     '{"status":"confused","reason":"focus"}\n'
 
-                    "\n"
-                    "סדר הכרעה מחייב:\n"
-                    "1. אם המשתמש לא הבין את השאלה -> status='confused', reason='meaning'\n"
-                    "2. אם המשתמש לא מבין איך לענות -> status='confused', reason='answer_type'\n"
-                    "3. אם ברור שהתשובה שייכת לשדה אחר (מטרה/זמן) -> status='confused', reason='focus'\n"
-                    "4. אם יש סכום כסף ברור -> status='found'\n"
-                    "5. אם אין מידע בכלל -> status='missing', reason='no_info'\n"
-                    "6. אם יש התחמקות -> status='missing', reason='avoid'\n"
-                    "7. אם יש כיוון אבל לא מספר -> status='missing', reason='vague'\n"
-
-                    "\n"
-                    "budget:\n"
+                    "\nהגדרת budget:\n"
                     "- budget הוא סכום כסף בלבד.\n"
-                    "- אם יש מספר אחד ברור, החזר אותו כ-found.\n"
-                    "- אם התשובה היא מספר בלבד, למשל '450', החזר value=450.\n"
-                    "- אם יש טווח, קח את הגבוה יותר.\n"
-                    "- אם יש תקרה, למשל 'עד 300' -> החזר 300.\n"
-                    "- אם המספר כתוב עם מילים כמו 'בערך 450', 'סביבות 400', 'כן 300' -> עדיין found.\n"
-                    "- אם אין מספר ברור אבל יש כיוון כמו 'לא יקר', 'סביר', 'אין לי הרבה' -> missing:vague.\n"
-                    "- אם התשובה עוסקת במטרה או בזמן התחלה -> confused:focus.\n"
-                    "- אל תחזיר confused:focus על מספר בודד.\n"
+                    "- המטרה היא לחלץ מספר שמייצג תקציב בשקלים.\n"
 
-                    "\n"
-                    "דוגמאות:\n"
-                    "- '450' -> found, 450\n"
-                    "- 'בערך 400' -> found, 400\n"
-                    "- 'עד 300' -> found, 300\n"
-                    "- 'להתחטב' -> confused, focus\n"
-                    "- 'מחר' -> confused, focus\n"
-                    "- 'לא יודע' -> missing, vague\n"
-                    "- '' -> missing, no_info\n"
-                    "- 'לא רוצה לענות' -> missing, avoid\n"
+                    "\nסדר הכרעה רגיל:\n"
+                    "1. אם יש מספר תקציב ברור -> found\n"
+                    "2. אם אין מידע בכלל -> missing:no_info\n"
+                    "3. אם יש כיוון כללי בלי מספר ברור -> missing:vague\n"
+                    "4. אם התשובה היא בבירור לא budget אלא מטרה או זמן -> confused:focus\n"
+
+                    "\nחוקי חילוץ value:\n"
+                    "- מספר ברור -> found, value=המספר.\n"
+                    "- מספר בלבד כמו '450' -> found, value=450.\n"
+                    "- סכום עם מילים כמו 'בערך 400', 'סביבות 450', 'כן 300' -> found.\n"
+                    "- טווח כמו '300-500' -> קח את הגבוה, value=500.\n"
+                    "- תקרה כמו 'עד 300' -> value=300.\n"
+                    "- אם יש כמה מספרים והם נראים כמו טווח תקציב -> קח את הגבוה.\n"
+                    "- אל תנחש מספר אם אין מספר ברור.\n"
+
+                    "\nחוקים חשובים:\n"
+                    "- זהה לפי משמעות, לא רק לפי מילים מדויקות.\n"
+                    "- התחשב בשגיאות כתיב, סלנג ותשובות קצרות.\n"
+                    "- אם אין מספר ברור אבל יש כיוון כללי כמו 'לא יקר', 'סביר', 'אין לי הרבה', 'תלוי', 'כמה שצריך' -> missing:vague.\n"
+                    "- אל תחזיר confused:focus על תשובת budget חלשה.\n"
+                    "- focus רק אם זו בבירור תשובה לשדה אחר.\n"
+
+                    "\nדוגמאות:\n"
+                    "- '450' -> found, value=450\n"
+                    "- '300 שקל' -> found, value=300\n"
+                    "- 'בערך 400' -> found, value=400\n"
+                    "- '300-500' -> found, value=500\n"
+                    "- 'עד 300' -> found, value=300\n"
+                    "- 'לא יקר' -> missing:vague\n"
+                    "- 'תלוי' -> missing:vague\n"
+                    "- '???' -> missing:no_info\n"
+                    "- 'להתחטב' -> confused:focus\n"
+                    "- 'השבוע' -> confused:focus\n"
+                    "- 'לא הבנתי מה הכוונה' -> confused:meaning\n"
                 )
             },
             {
@@ -413,36 +261,6 @@ class ConversationBuilder:
                 "content": content
             }
         ]
-
-
-    def phone_analyze(self, content):
-            return [
-                {
-                    "role": "system",
-                    "content": (
-                        f"המטרה שלך היא לחלץ מספר טלפון מהודעת המשתמש.\n"
-                        f"זו הודעת המשתמש:\n"
-                        f"{content}\n\n"
-                        "חוקים:\n"
-                        "- אם יש מספר טלפון ישראלי מלא → החזר status: found\n"
-                        "- מספר תקין: מתחיל ב-05 ומכיל 10 ספרות\n"
-                        "- הסר רווחים, מקפים או תווים מיוחדים (החזר רק ספרות בלבד)\n"
-                        "- אל תנחש ואל תשלים מספרים\n"
-                        "- אם אין מספר מלא וברור → החזר status: missing ו-reason: no_info\n\n"
-                        "פורמט תשובה:\n\n"
-                        "אם נמצא:\n"
-                        "{\n"
-                        '  "status": "found",\n'
-                        '  "value": "PHONE_NUMBER"\n'
-                        "}\n\n"
-                        "אם לא נמצא:\n"
-                        "{\n"
-                        '  "status": "missing",\n'
-                        '  "reason": "no_info"\n'
-                        "}"
-                    )
-                }
-            ]
     
 
 
@@ -451,13 +269,18 @@ class ConversationBuilder:
             {
                 "role": "system",
                 "content": (
-                    "אתה מנוע חילוץ מידע.\n"
-                    "החזר JSON בלבד, בלי שום טקסט נוסף.\n"
-                    "אל תשאל שאלות.\n"
-                    "אל תסביר.\n"
+                    "אתה מנוע חילוץ מידע לשדה urgency בלבד.\n"
+                    "החזר JSON בלבד. בלי טקסט נוסף, בלי שאלות, בלי הסברים.\n"
 
-                    "\n"
-                    "פורמט תשובה בלבד:\n"
+                    "\nכללי עדיפות עליונים:\n"
+                    "- אם ההודעה היא רק סימנים או בלי מילים, למשל '???', '...', '-' -> missing:no_info.\n"
+                    "- אם המשתמש אומר במפורש שלא הבין, למשל 'לא הבנתי', 'מה הכוונה' -> confused:meaning.\n"
+                    "- אם המשתמש שואל איך לענות, למשל 'מה לרשום', 'איך לענות' -> confused:answer_type.\n"
+                    "- אם התשובה היא מטרה אימונית, למשל 'להתחטב', 'לבנות שריר', 'כושר' -> confused:focus.\n"
+                    "- אם התשובה היא כסף, למשל '450', '300 שקל', 'עד 400' -> confused:focus.\n"
+                    "- אם המשתמש מסרב לענות, למשל 'לא רוצה לענות', 'מעדיף לא להגיד' -> missing:avoid.\n"
+
+                    "\nפורמט תשובה:\n"
                     '{"status":"found","value":<number>}\n'
                     '{"status":"missing","reason":"no_info"}\n'
                     '{"status":"missing","reason":"vague"}\n'
@@ -466,48 +289,46 @@ class ConversationBuilder:
                     '{"status":"confused","reason":"answer_type"}\n'
                     '{"status":"confused","reason":"focus"}\n'
 
-                    "\n"
-                    "סדר הכרעה מחייב:\n"
-                    "1. אם המשתמש לא הבין את השאלה -> status='confused', reason='meaning'\n"
-                    "2. אם המשתמש לא מבין איך לענות -> status='confused', reason='answer_type'\n"
-                    "3. אם ברור שהתשובה שייכת לשדה אחר (מטרה/כסף) -> status='confused', reason='focus'\n"
-                    "4. אם יש כוונה ברורה לגבי זמן התחלה -> status='found'\n"
-                    "5. אם אין מידע בכלל -> status='missing', reason='no_info'\n"
-                    "6. אם יש התחמקות -> status='missing', reason='avoid'\n"
-                    "7. אם התשובה כללית מדי לגבי זמן -> status='missing', reason='vague'\n"
-
-                    "\n"
-                    "urgency:\n"
+                    "\nהגדרת urgency:\n"
                     "- urgency הוא כמה מהר המשתמש רוצה להתחיל.\n"
-                    "- החזר מספר 1-10 לפי מידת הדחיפות.\n"
+                    "- יש להמיר את התשובה לציון 1-10 לפי מידת הדחיפות.\n"
 
-                    "\n"
-                    "מיפוי:\n"
-                    "מיד / עכשיו / כמה שיותר מהר -> 10\n"
-                    "היום / מחר / השבוע -> 9-10\n"
-                    "בימים הקרובים -> 8-9\n"
-                    "בקרוב -> 7\n"
-                    "בחודש הקרוב -> 6-7\n"
-                    "עוד כמה שבועות -> 6\n"
-                    "בהמשך / לא לחוץ -> 3-4\n"
-                    "מתישהו -> 2\n"
+                    "\nסדר הכרעה רגיל:\n"
+                    "1. אם יש כוונה ברורה לגבי זמן התחלה -> found\n"
+                    "2. אם אין מידע בכלל -> missing:no_info\n"
+                    "3. אם התשובה כללית מדי -> missing:vague\n"
+                    "4. אם התשובה היא בבירור לא זמן אלא מטרה או כסף -> confused:focus\n"
 
-                    "\n"
-                    "חוקים:\n"
-                    "- אם יש זמן התחלה ברור -> status='found'\n"
-                    "- אם התשובה עוסקת במטרה או כסף -> status='confused', reason='focus'\n"
-                    "- אם אין זמן ברור -> status='missing', reason='vague'\n"
+                    "\nחוקי דירוג value:\n"
+                    "- עכשיו / מיד / כמה שיותר מהר -> 10\n"
+                    "- היום / מחר / השבוע -> 9-10\n"
+                    "- בימים הקרובים -> 8-9\n"
+                    "- בקרוב -> 7\n"
+                    "- חודש הקרוב -> 6-7\n"
+                    "- עוד כמה שבועות -> 5-6\n"
+                    "- לא לחוץ / בהמשך -> 3-4\n"
+                    "- מתישהו -> 2\n"
 
-                    "\n"
-                    "דוגמאות:\n"
-                    "- 'כמה שיותר מהר' -> found, 10\n"
-                    "- 'מחר' -> found, 9\n"
-                    "- 'עוד שבועיים' -> found, 6\n"
-                    "- 'להתחטב' -> confused, focus\n"
-                    "- '450' -> confused, focus\n"
-                    "- 'לא יודע' -> missing, vague\n"
-                    "- '' -> missing, no_info\n"
-                    "- 'לא רוצה לענות' -> missing, avoid\n"
+                    "\nחוקים חשובים:\n"
+                    "- זהה לפי משמעות, לא רק לפי מילים מדויקות.\n"
+                    "- התחשב בשגיאות כתיב, סלנג ותשובות קצרות.\n"
+                    "- אם התשובה כללית מדי כמו 'נראה כבר', 'לא יודע', 'תלוי' -> missing:vague.\n"
+                    "- אל תחזיר focus בגלל תשובה חלשה.\n"
+                    "- focus רק אם זו בבירור תשובה לשדה אחר.\n"
+
+                    "\nדוגמאות:\n"
+                    "- 'עכשיו' -> found, value=10\n"
+                    "- 'מחר' -> found, value=9\n"
+                    "- 'השבוע' -> found, value=9\n"
+                    "- 'בקרוב' -> found, value=7\n"
+                    "- 'עוד חודש' -> found, value=6\n"
+                    "- 'לא לחוץ' -> found, value=3\n"
+                    "- 'מתישהו' -> found, value=2\n"
+                    "- 'נראה כבר' -> missing:vague\n"
+                    "- '???' -> missing:no_info\n"
+                    "- '450' -> confused:focus\n"
+                    "- 'להתחטב' -> confused:focus\n"
+                    "- 'לא הבנתי מה הכוונה' -> confused:meaning\n"
                 )
             },
             {
@@ -515,19 +336,3 @@ class ConversationBuilder:
                 "content": content
             }
         ]
-
-
-    def build_prompt_second(self , field , content):
-        if field == "goal":
-            prompt = self.goal_analyze_prompt(content=content)
-
-        elif field == "budget":
-            prompt = self.budget_analyze_prompt(content=content)
-
-        elif field == "phone":
-            prompt = self.phone_analyze(content=content)
-
-        elif field == "urgency":
-            prompt = self.urgency_analyze_prompt(content=content)
-
-        return prompt

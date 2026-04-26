@@ -101,118 +101,73 @@ class MissingQuestions:
     def goal_missing_questions(self, question_type, attempt_number):
         if question_type == "no_info":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "כדי להתקדם אני צריך להבין מה המטרה שלך",
                     "מה היעד שאתה מכוון אליו?",
                     "על מה אתה רוצה לעבוד בעיקר?"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "חסר לי להבין מה אתה רוצה להשיג",
-                    "מה חשוב לך להגיע אליו?",
-                    "לאן אתה רוצה להגיע בתהליך הזה?"
-                ]
-
-
 
         elif question_type == "vague":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "תן לי קצת יותר פירוט על המטרה שלך",
                     "תחדד לי מה אתה רוצה להשיג",
                     "תסביר לי יותר לאן אתה מכוון"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "אני צריך קצת יותר כיוון כדי להבין אותך",
-                    "מה בדיוק אתה רוצה לשפר?",
-                    "איזה שינוי אתה מחפש?"
-                ]
-
-
 
         elif question_type == "avoid":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "בלי להבין מטרה יהיה קשה לדייק לך",
                     "אני צריך כיוון ממך כדי להמשיך",
                     "תן לי להבין מה אתה רוצה להשיג"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "מה חשוב לך להגיע אליו?",
-                    "אני חייב כיוון בסיסי כדי להמשיך",
-                    "בלי מטרה קשה להתקדם, תן כיוון"
-                ]
 
-
-            
 
     def budget_missing_questions(self, question_type, attempt_number):
         if question_type == "no_info":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "יש לך טווח מסוים בראש?",
                     "כמה בערך חשבת להשקיע על זה?",
                     "על איזה אזור מחיר אתה חושב?"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "אפילו טווח כללי יעזור לי להבין",
-                    "מה בערך הסכום שאתה חושב עליו?",
-                    "על איזה סדר גודל מדובר?"
-                ]
-
 
 
         elif question_type == "vague":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "תחדד לי קצת את הסכום",
                     "אפשר טווח קצת יותר ברור?",
                     "כמה זה יוצא בערך במספרים?"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "אני צריך טווח יותר ממוקד כדי להבין אותך",
-                    "על איזה אזור מחיר זה יושב אצלך?",
-                    "תן לי סדר גודל יותר ברור"
-                ]
-
-
-
 
         elif question_type == "avoid":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "רק כדי לכוון אותך נכון — יש טווח שמתאים לך?",
                     "זה יעזור לי לדייק — על איזה אזור מחיר חשבת?",
                     "יש כיוון כללי של סכום שאתה מרגיש איתו נוח?"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "בלי טווח יהיה קשה להתאים לך משהו מדויק",
-                    "גם סדר גודל כללי יספיק כדי להתקדם",
-                    "תן לי טווח בערך כדי שאוכל לכוון אותך"
-                ]
+
 
 
     def phone_missing_questions(self , attempt_number , question_type):
-        if question_type == "no info":
+        if question_type == "no_info":
             
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "בלי טלפון לא נוכל להמשיך" , 
                     "בכדי להמשיך בתהליך תוכל להשאיר מספר טלפון" , 
@@ -220,69 +175,49 @@ class MissingQuestions:
                     "חסר מספר טלפון להמשך ההתאמה"
                 ]
             
-            elif attempt_number == 2:
+
+        
+        elif question_type == "invalid_format":
+            if attempt_number == 2:
                 return [
-                    "כדי להתקדם חייבים מספר טלפון" , 
-                    "לא ניתן לחזור אליך בלי מספר" ,
-                    "כדי שנחזור אליך נדרש מספר טלפון" , 
-                    "מספר טלפון נדרש כדי להמשיך"
-                    ]
+                    "נראה שהמספר לא מלא, תוכל לשלוח שוב?",
+                    "המספר ששלחת לא תקין, תשלח בבקשה מספר מלא",
+                    "כנראה חסרות ספרות במספר, תוכל לרשום שוב?",
+                    "לא הצלחתי לזהות מספר תקין, תשלח בבקשה שוב"
+                ] 
             
     
     
     def urgency_missing_questions(self, question_type, attempt_number):
         if question_type == "no_info":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "צריך להבין זמנים כדי להמשיך",
                     "מתי זה אמור לקרות מבחינתך?",
                     "מתי אתה רוצה להיכנס לזה?"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "אני צריך להבין בערך מתי זה מתאים לך",
-                    "מתי חשבת להתחיל?",
-                    "על איזה טווח זמן מדובר?"
-                ]
-
 
         elif question_type == "vague":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "תן זמן בערך",
                     "מתי אתה רואה את עצמך מתחיל עם זה?",
                     "מתי זה מתאים לך להתחיל?"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "תן לי בבקשה זמן יותר מדויק",
-                    "תוך כמה זמן אתה רואה את עצמך מתחיל?" 
-                    "תחדד לי קצת את הזמנים"
-                ]
-
-
 
         elif question_type == "avoid":
 
-            if attempt_number == 1:
+            if attempt_number == 2:
                 return [
                     "כדי להתקדם אני צריך זמן ממך",
                     "בלי לדעת מתי זה קורה קשה להמשיך",
                     "תן לי להבין מתי זה מתאים לך"
                 ]
 
-            elif attempt_number == 2:
-                return [
-                    "מתי כן רלוונטי לך להתחיל?",
-                    "בלי זמן קשה להתקדם",
-                    "תן לי כיוון של מתי זה קורה"
-                ]
-
-    
 
 
     def process_missing_question(self , field , reason , attempt_number):
@@ -302,6 +237,9 @@ class MissingQuestions:
         else:
             raise TypeError("Invaild field choice")
 
+        print(f"reason: {reason}")
+        print(f"field: {field}")
+        print(f"questions: {questions}")
         return random.choice(questions)
     
     
@@ -455,9 +393,9 @@ class FallBackQuestions:
         elif fallback_type == "regular_fallback":
             return [
                 "בלי מספר טלפון אי אפשר להמשיך להתאמה 🙏 אם מתאים לך, שלח מספר ונמשיך" , 
-                "לא ניתן להמשיך בלי מספר טלפון אם תרצה להמשיך, שלח מספר" , 
-                "בלי טלפון התהליך עוצר כאן. כשמוכן, שלח מספר ונמשיך" , 
-                "בלי מספר לא ניתן להמשיך את ההתאמה. שלח מספר כשתהיה מוכן"
+                "לא ניתן להמשיך בלי מספר טלפון אם תרצה להמשיך, תזין את מספר הטלפון שלך" , 
+                "בלי טלפון התהליך עוצר כאן. כשמוכן, תזין את מספרף ונמשיך" , 
+                "בלי מספר לא ניתן להמשיך את ההתאמה. תשתף את מספר הטלפון שלך כשתהיה מוכן"
             ]
 
 

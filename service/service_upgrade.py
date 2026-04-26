@@ -27,7 +27,7 @@ from output_builders.questions_builder import (
     FallBackQuestions
 )
 
-from utils.validators import validate_int, validate_str , validate_phone_number
+from utils.validators import validate_int, validate_str , validate_phone_number , extract_phone
 
 
 
@@ -51,7 +51,12 @@ class ServiceLayer:
 
     def process_lead_message(self , session_id , name=None , content=None):
         try:
-            #print(f"My name is: {name}")
+            if content is not None:
+                content = content.strip()[:100]
+
+            if name is not None:
+                name = name.strip()[:100]
+            
             init_result = self.initialize_lead_context(session_id=session_id , name=name)
             
             if init_result.get("status") == "new":
@@ -84,22 +89,20 @@ class ServiceLayer:
         if content is None:
             return self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
 
-        try:
-            if prepare_lead_context["lead_conversation_states_data"]["current_field"] == "phone":
-                validate_phone_number(phone_number=content)
-                generate_ai_analysis = {"status": "found", "value": content}
-
-            else:
-                validate_str(value=content , name="content")
-                #print("here before")
-                generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
-                #print("here after")
-        except Exception as e:
-            #print(f"Error: {e}")
-            generate_ai_analysis = {"status" : "missing" , "reason" : "no info"}
-            #print("here after2")
-            content = None
         
+        if prepare_lead_context["lead_conversation_states_data"]["current_field"] == "phone":
+            generate_ai_analysis = extract_phone(content=content)
+            print(f"analysis: {generate_ai_analysis}")
+        
+        else:
+            try:
+                validate_str(value=content , name="content")
+                generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
+
+            except Exception:
+                generate_ai_analysis = {"status" : "missing" , "reason" : "no info"}
+        
+
         self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
         #print(generate_ai_analysis)
         self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"])
@@ -217,13 +220,11 @@ class ServiceLayer:
 
 
     def update_flow_state(self , lead_all_data , ai_response , content=None):
-        #print(f"content: {content}")
-        if content is not None:
-            flow_status = self.advance_on_found(ai_response=ai_response , lead_info=lead_all_data["lead_conversation_states_data"] , content=content)
-            if flow_status == False:
-                unresolved_status = self.handle_unresolved_flow(lead_info=lead_all_data["lead_conversation_states_data"] , ai_response=ai_response)
-                if unresolved_status == False:
-                    self.handle_unresolved_fallbacks(lead_info=lead_all_data["lead_conversation_states_data"] , ai_response=ai_response)
+        flow_status = self.advance_on_found(ai_response=ai_response , lead_info=lead_all_data["lead_conversation_states_data"] , content=content)
+        if flow_status == False:
+            unresolved_status = self.handle_unresolved_flow(lead_info=lead_all_data["lead_conversation_states_data"] , ai_response=ai_response)
+            if unresolved_status == False:
+                self.handle_unresolved_fallbacks(lead_info=lead_all_data["lead_conversation_states_data"] , ai_response=ai_response)
 
 
     def determine_final_status(self , lead_all_data):
@@ -242,7 +243,7 @@ class ServiceLayer:
 
     
     def generate_analyze(self , lead_id , current_field , content):
-        ai_input = self.conversation_builder.main_analyze_prompt(current_field=current_field , content=content)
+        ai_input = self.conversation_builder.build_prompt(current_field=current_field , content=content)
         ai_response = self.openai_client.ai_reply(ai_input)
         
         self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content)
@@ -391,6 +392,7 @@ class ServiceLayer:
             self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field=f"{current_field}_status" , value=lead_message_score["status"])
         
         if lead_message_score["status"] == "phone":
+            print("alr bet")
             return True
         
         else:
