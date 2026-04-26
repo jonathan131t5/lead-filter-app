@@ -1,3 +1,6 @@
+import re
+
+
 def validate_int(value, name):  
     if value is None:
         raise ValueError(f"לא הוזן {name}")
@@ -39,3 +42,23 @@ def validate_phone_number(phone_number, allow_empty=False):
     
 
 
+def extract_phone(content: str):
+    match = re.search(r"(?<!\d)05(?:[\s-]?\d){8}(?!\d)", content)
+
+    if match:
+        digits = re.sub(r"\D", "", match.group())
+        return {
+            "status": "found",
+            "value": digits
+        }
+
+    if re.search(r"\d", content):
+        return {
+            "status": "missing",
+            "reason": "invalid_format"
+        }
+
+    return {
+        "status": "missing",
+        "reason": "no_info"
+    }
