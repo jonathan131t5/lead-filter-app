@@ -236,7 +236,7 @@ class MissingQuestions:
 
         else:
             raise TypeError("Invaild field choice")
-
+        print(f"attempt number: {attempt_number}")
         print(f"reason: {reason}")
         print(f"field: {field}")
         print(f"questions: {questions}")
