@@ -42,34 +42,30 @@ def run_message_flow(
     request: Request,
     response: Response
 ):
-    try:
-        session_id = request.cookies.get("session_id")
 
-        if session_id is None:
-            session_id = str(uuid.uuid4())
-            response.set_cookie(
-                key="session_id",
-                value=session_id,
-                httponly=True,
-                samesite="lax"
-            )
+    session_id = request.cookies.get("session_id")
 
-        result = service_layer.process_lead_message(
-            session_id=session_id,
-            name=data.name,
-            content=data.content
+    if session_id is None:
+        session_id = str(uuid.uuid4())
+        response.set_cookie(
+            key="session_id",
+            value=session_id,
+            httponly=True,
+            samesite="lax"
         )
 
-        return {
-            "content": result.get("message") or result.get("content") or "יש בעיה זמנית, נסה שוב.",
-            "status": result.get("status", "error")
-        }
+    result = service_layer.process_lead_message(
+        session_id=session_id,
+        name=data.name,
+        content=data.content
+    )
 
-    except Exception as e:
-        return {
-            "content": str(e),
-            "status": "error"
-        }
+    return {
+        "content": result.get("message") or result.get("content") , 
+        "status": result.get("status", "error")
+    }
+
+
     
 
 

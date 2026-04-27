@@ -2,6 +2,8 @@
 from datetime import datetime, timezone
 import sqlite3
 import traceback
+import logging
+
 
 from data_access.leads_data_repository import LeadsDataRepository
 from data_access.leads_states_repository import LeadsStatesRepository
@@ -26,7 +28,14 @@ from output_builders.questions_builder import (
     FallBackQuestions
 )
 
-from utils.validators import validate_int, validate_str , validate_phone_number , extract_phone
+from utils.validators import validate_int, validate_str, extract_phone
+from utils.validators import UserError
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - [APP] %(message)s"
+)
 
 
 
@@ -50,6 +59,12 @@ class ServiceLayer:
 
     def process_lead_message(self , session_id , name=None , content=None):
         try:
+            logging.info(
+            f"[NEW MESSAGE] session_id={session_id} | "
+            f"name_provided={name is not None} | "
+            f"content_len={len(content) if content else 0}"
+        )
+            
             if content is not None:
                 content = content.strip()[:100]
 
@@ -59,19 +74,25 @@ class ServiceLayer:
             init_result = self.initialize_lead_context(session_id=session_id , name=name)
             
             if init_result.get("status") == "new":
+                logging.info(f"New user detected session_id={session_id}")
                 return init_result
             
             
             result = self.run_lead_flow(prepare_lead_context=init_result, content=content)
-            print("RESULT FROM SERVICE:", result)
+            logging.info(f"Response sent session_id={session_id} | status={result.get('status')}")
             return result
         
-        except Exception as e:
-            import traceback
-            print("SERVICE ERROR:", traceback.format_exc())
-
+        except UserError as e:
+            logging.warning(f"UserError session_id={session_id} | status=error | error={str(e)}")
             return {
-                "content": traceback.format_exc(),
+                "content": str(e),
+                "status": "error"
+            }
+        
+        except Exception as e:
+            logging.exception("SYSTEM ERROR")
+            return {
+                "content" : "יש תקלה זמנית, נסה שוב עוד רגע." ,
                 "status": "error"
             }
 
@@ -85,41 +106,53 @@ class ServiceLayer:
             return {"status" : "new" , "message" : "היי, לפני שנתחיל איך קוראים לך?"}
         
         if check["status"] == "exists" or check["status"] == "created":
+            logging.info(f"User logged in / created. session_id={session_id} | lead_id={check["lead_id"]}")
             return self.prepare_lead_context(lead_id=check["lead_id"] , session_id=check["session_id"])
 
 
 
 
     def run_lead_flow(self , prepare_lead_context , content=None):
-        #validate_str(name , "name")
-        #print(f"content: {content}")
+        logging.info(
+            f"lead context ready lead_id={prepare_lead_context['lead_base_data']['lead_id']}"
+            f"field={prepare_lead_context['lead_conversation_states_data']['current_field']}"
+        )
+        
         if content is None:
             return self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
 
         
         if prepare_lead_context["lead_conversation_states_data"]["current_field"] == "phone":
             generate_ai_analysis = extract_phone(content=content)
-            print(f"analysis: {generate_ai_analysis}")
+            logging.info(f"Phone analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
+            
         
         else:
             try:
                 validate_str(value=content , name="content")
                 generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
-
-            except Exception as e:
-                import traceback
-                print("ANALYZE ERROR:", traceback.format_exc())
+                logging.info(f"Regular analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
+            
+            except UserError:
                 generate_ai_analysis = {"status": "missing", "reason": "no_info"}
+                logging.info(f"UserError analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
         
 
         self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
         #print(generate_ai_analysis)
         self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"])
+        logging.info(f"Lead scores updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
+        logging.debug(prepare_lead_context['lead_scores_data'])
+
 
         self.update_flow_state(lead_all_data=prepare_lead_context , ai_response=generate_ai_analysis , content=content)
-
-        determine_final_status = self.determine_final_status(lead_all_data=prepare_lead_context)
         
+        logging.info(f"Flow updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']}")
+        logging.debug(prepare_lead_context['lead_conversation_states_data'])
+        
+        determine_final_status = self.determine_final_status(lead_all_data=prepare_lead_context)
+        logging.info(f"Lead finalize try, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | final_status={prepare_lead_context["lead_base_data"]["final_status"]} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
+        logging.debug(prepare_lead_context)
         if determine_final_status == True:
             self.build_lead_summary(lead_all_data=prepare_lead_context)
         
