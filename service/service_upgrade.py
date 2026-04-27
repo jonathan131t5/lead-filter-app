@@ -106,8 +106,10 @@ class ServiceLayer:
                 validate_str(value=content , name="content")
                 generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
 
-            except Exception:
-                generate_ai_analysis = {"status" : "missing" , "reason" : "no info"}
+            except Exception as e:
+                import traceback
+                print("ANALYZE ERROR:", traceback.format_exc())
+                generate_ai_analysis = {"status": "missing", "reason": "no_info"}
         
 
         self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
