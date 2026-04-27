@@ -68,7 +68,8 @@ class ServiceLayer:
         
         except Exception as e:
             import traceback
-            print("RESULT FROM SERVICE:", result)
+            print("SERVICE ERROR:", traceback.format_exc())
+
             return {
                 "content": traceback.format_exc(),
                 "status": "error"
