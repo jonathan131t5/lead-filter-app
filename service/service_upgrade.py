@@ -60,8 +60,11 @@ class ServiceLayer:
             
             if init_result.get("status") == "new":
                 return init_result
-
-            return self.run_lead_flow(prepare_lead_context=init_result, content=content)
+            
+            
+            result = self.run_lead_flow(prepare_lead_context=init_result, content=content)
+            print("RESULT FROM SERVICE:", result)
+            return result
         
         except Exception as e:
             import traceback
@@ -520,69 +523,5 @@ service_layer.messages.create_leads_messages_table()
 #lead_id = None
 #name = None
 
-if __name__ == "__main__":
-    service_layer = ServiceLayer()
-
-    service_layer.leads_data.create_leads_data_table()
-    service_layer.leads_states.create_lead_conversation_states()
-    service_layer.leads_scores.create_leads_scores_table()
-    service_layer.leads_fields.create_leads_fields_data()
-    service_layer.messages.create_leads_messages_table()
-
-    while True:
-        print("""
-            =================================
-                    LEAD FILTER ENGINE
-            =================================
-
-                Analyze • Score • Classify
-            """)
-
-        if name is None:
-            name = input("Great, what's your name? ")
-            #validate_str(name, "name")
-
-        run_lead_flow = service_layer.run_lead_flow(name=name)
-
-        if run_lead_flow is not None and "status" in run_lead_flow:
-            if run_lead_flow["status"] == "new":
-                lead_id = run_lead_flow["lead_id"]
-
-            
-            run_lead_flow = service_layer.run_lead_flow(name=name , lead_id=lead_id)
-
-
-
-            if run_lead_flow["status"] == "DONE":
-                closing_message = run_lead_flow["message"]
-                fixed = get_display(closing_message)
-                print(fixed)
-                break
-            
-            elif run_lead_flow["status"] == "output":
-                question = run_lead_flow["message"]
-                fixed = get_display(question)
-                print(fixed)
-
-
-            content = input("Please enter a message: ")
-            validate_str(content , "content")
-            
-            service_layer.run_lead_flow(name=name , lead_id=lead_id , content=content)
-
-
-            if run_lead_flow["status"] == "DONE":
-                closing_message = run_lead_flow["message"]
-                fixed = get_display(closing_message)
-                print(fixed)
-                break
-            
-            elif run_lead_flow["status"] == "output":
-                question = run_lead_flow["message"]
-                fixed = get_display(question)
-                print(fixed)
-        
-            
-            print(f"hello my ID is: {lead_id}")
 
 

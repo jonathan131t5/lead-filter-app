@@ -61,8 +61,8 @@ def run_message_flow(
         )
 
         return {
-            "content": result["message"],
-            "status": result.get("status")
+            "content": result.get("message") or result.get("content") or "יש בעיה זמנית, נסה שוב.",
+            "status": result.get("status", "error")
         }
 
     except Exception as e:
