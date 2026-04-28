@@ -107,7 +107,7 @@ class MissingQuestions:
                     "מה היעד שאתה מכוון אליו?",
                     "על מה אתה רוצה לעבוד בעיקר?"
                 ]
-
+#
 
         elif question_type == "vague":
 
