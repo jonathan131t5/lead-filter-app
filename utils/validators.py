@@ -24,7 +24,7 @@ def validate_str(value, name, allow_empty=False):
         raise UserError(f"{name} לא יכול להיות ריק")
 
 
-
+#
     
 
 
