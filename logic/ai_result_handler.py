@@ -27,7 +27,7 @@ class OpenAIClient:
         #print("RAW:", text)
 
         data = json.loads(text)
-        print(data)
+        print(data, flush=True)
         # validation קצר
         if "status" not in data:
             raise ValueError("AI returned invalid JSON structure")
