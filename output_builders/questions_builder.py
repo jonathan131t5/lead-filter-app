@@ -284,6 +284,7 @@ class ConfuseQuestions:
         
 
     def process_confuse_question(self , field , reason):
+        print(f"FIELD: {field} | REASON: {reason}", flush=True)
         questions = []
         if field == "goal":
             questions = self.goal_confuse_questions(question_type=reason)
