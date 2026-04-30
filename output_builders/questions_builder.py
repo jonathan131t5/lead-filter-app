@@ -14,13 +14,8 @@ class BaseQuestions:
             ]
 
 
-    def budget_Base_questions(self):
-        return [
-            "כמה אתה מוכן להשקיע בתהליך?",
-            "יש לך תקציב מסוים בראש?",
-            "על איזה טווח מחיר אתה חושב?",
-            "כמה אתה מתכנן לשים על זה?"
-            ]
+    def preferences_base_questions(self):
+        return ["מה הכי חשוב לך בתהליך?"]
 
 
     def urgency_Base_questions(self):
@@ -45,8 +40,8 @@ class BaseQuestions:
         if field == "goal":
             questions = self.goal_Base_questions()
 
-        elif field == "budget":
-            questions = self.budget_Base_questions()
+        elif field == "preferences":
+            questions = self.preferences_base_questions()
 
         elif field == "phone":
             #print("yes")
@@ -130,39 +125,18 @@ class MissingQuestions:
 
 
 
-    def budget_missing_questions(self, question_type, attempt_number):
+
+    def preferences_missing_questions(self , question_type , attempt_number):
         if question_type == "no_info":
 
             if attempt_number == 2:
                 return [
-                    "יש לך טווח מסוים בראש?",
-                    "כמה בערך חשבת להשקיע על זה?",
-                    "על איזה אזור מחיר אתה חושב?"
+                    "לא כל כך הצלחנו להבין מה חשוב לך בתהליך" , 
+                    "נשמח שתשתף מה הכי חשוב לך בתהליך" ,
+                    "נשמח להבין קצת יותר מה חשוב לך בתהליך"
                 ]
-
-
-
-        elif question_type == "vague":
-
-            if attempt_number == 2:
-                return [
-                    "תחדד לי קצת את הסכום",
-                    "אפשר טווח קצת יותר ברור?",
-                    "כמה זה יוצא בערך במספרים?"
-                ]
-
-
-        elif question_type == "avoid":
-
-            if attempt_number == 2:
-                return [
-                    "רק כדי לכוון אותך נכון — יש טווח שמתאים לך?",
-                    "זה יעזור לי לדייק — על איזה אזור מחיר חשבת?",
-                    "יש כיוון כללי של סכום שאתה מרגיש איתו נוח?"
-                ]
-
-
-
+            
+       
 
     def phone_missing_questions(self , attempt_number , question_type):
         if question_type == "no_info":
@@ -225,8 +199,8 @@ class MissingQuestions:
         if field == "goal":
             questions = self.goal_missing_questions(question_type=reason , attempt_number=attempt_number)
 
-        elif field == "budget":
-            questions = self.budget_missing_questions(question_type=reason , attempt_number=attempt_number)
+        elif field == "preferences":
+            questions = self.preferences_missing_questions(question_type=reason , attempt_number=attempt_number)
 
         elif field == "phone":
             questions = self.phone_missing_questions(question_type=reason , attempt_number=attempt_number)
@@ -274,30 +248,12 @@ class ConfuseQuestions:
             ]
         
 
-    def budget_confuse_questions(self, question_type):
+    def preferences_confuse_questions(self , question_type):
         if question_type == "meaning":
             return [
-               "בערך כמה מתאים לך להשקיע",
-                "הכוונה לכיוון כללי של סכום שמתאים לך",
-                "אני שואל על סדר גודל של מה שמתאים לך לשים",
-                "פשוט להבין בערך איזה תקציב מתאים לך"
-            ]
-            
-        elif question_type == "answer_type":
-            return [
-                "תן לי בערך סכום או טווח",
-                "אפילו כיוון כללי של סכום זה מספיק",
-                "מה בערך הסכום שאתה חושב עליו?",
-                "תן לי סדר גודל של תקציב"
-            ]
-
-            
-        elif question_type == "focus":
-            return [
-                "רק מבחינת תקציב, בערך כמה מתאים לך?",
-                "כרגע רק להבין כיוון של סכום",
-                "רק לדעת בערך איזה תקציב מתאים לך",
-                "רק מה הכיוון שלך מבחינת סכום"
+               "הכוונה היא למה חשוב לך מהתהליך עצמו" , 
+                "השאלה היא מה חשוב לך שיהיה בתהליך" , 
+                "מדובר על מה חשוב לך בתהליך"
             ]
         
 
@@ -332,8 +288,8 @@ class ConfuseQuestions:
         if field == "goal":
             questions = self.goal_confuse_questions(question_type=reason)
 
-        elif field == "budget":
-            questions = self.budget_confuse_questions(question_type=reason)
+        elif field == "preferences":
+            questions = self.preferences_confuse_questions(question_type=reason)
 
         elif field == "urgency":
             questions = self.urgency_confuse_questions(question_type=reason)
@@ -358,25 +314,13 @@ class FallBackQuestions:
             ]
                 
 
-    def budget_fallback_questions(self , fallback_type):
-        if fallback_type == "after_fallback":
-            return [
-                "אוקי, נתקדם לתקציב — כמה בערך חשבת להשקיע?",
-                "סבבה, נעבור לתקציב — יש לך טווח מסוים בראש?",
-                "אוקי, נמשיך — על איזה אזור מחיר אתה חושב?",
-                "טוב, נתקדם לתקציב — כמה בערך אתה רואה את עצמך משקיע?"
-            ]
+    def preferences_fallback_questions(self):
+        return [
+            "סבבה נתקדם, מה הכי חשוב לך בתהליך?" ,
+            "אוקי נעבור הלאה, מה הכי חשוב לך בתהליך?" ,
+            "טוב נתקדם, מה הכי חשוב לך בתהליך?"
+        ]
         
-        elif fallback_type == "regular_fallback":
-            return [
-                "מה יותר קרוב למה שחיפשת?\n1. עד 250₪\n2. 250-450₪\n3. 450₪+",
-                "איזה טווח יותר מתאים לך כרגע?\n1. עד 250₪\n2. 250-450₪\n3. 450₪+",
-                "מה נשמע לך יותר באזור שלך?\n1. עד 250₪\n2. 250-450₪\n3. 450₪+",
-                "לאיזה אזור מחיר אתה יותר מתחבר?\n1. עד 250₪\n2. 250-450₪\n3. 450₪+"
-            ]
-        
-        else:
-            raise TypeError("Invaild fallback type")
 
 
     def phone_fallback_question(self , fallback_type):
@@ -427,8 +371,8 @@ class FallBackQuestions:
         if field == "goal":
             questions = self.goal_fallback_questions()
 
-        elif field == "budget":
-            questions = self.budget_fallback_questions(fallback_type=reason)
+        elif field == "preferences":
+            questions = self.preferences_fallback_questions()
 
         elif field == "phone":
             questions = self.phone_fallback_question(fallback_type=reason)

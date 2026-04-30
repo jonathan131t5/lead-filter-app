@@ -13,8 +13,8 @@ class ConversationBuilder:
         if current_field == "goal":
             prompt = self.goal_analyze_prompt(content=content)
 
-        elif current_field == "budget":
-            prompt = self.budget_analyze_prompt(content=content)
+        elif current_field == "preferences":
+            prompt = self.preferences_analyze_prompt(content=content)
 
         elif current_field == "urgency":
             prompt = self.urgency_analyze_prompt(content=content)
@@ -190,70 +190,42 @@ class ConversationBuilder:
         ]
     
 
-
-    def budget_analyze_prompt(self, content):
+    def preferences_analyze_prompt(self, content):
         return [
             {
                 "role": "system",
                 "content": (
-                    "אתה מנוע חילוץ מידע לשדה budget בלבד.\n"
-                    "החזר JSON בלבד. בלי טקסט נוסף, בלי שאלות, בלי הסברים.\n"
+                    "אתה מנוע חילוץ מידע לשדה preferences בלבד.\n"
+                    "החזר JSON בלבד.\n"
 
-                    "\nכללי עדיפות עליונים:\n"
-                    "- אם ההודעה היא רק סימנים או בלי מילים, למשל '???', '...', '-' -> missing:no_info.\n"
-                    "- אם המשתמש אומר במפורש שלא הבין, למשל 'לא הבנתי', 'מה הכוונה' -> confused:meaning.\n"
-                    "- אם המשתמש שואל איך לענות, למשל 'מה לרשום', 'איך לענות' -> confused:answer_type.\n"
-                    "- אם התשובה היא מטרה אימונית, למשל 'להתחטב', 'לרדת במשקל', 'לבנות שריר', 'כושר' -> confused:focus.\n"
-                    "- אם התשובה היא זמן התחלה, למשל 'היום', 'מחר', 'השבוע', 'בקרוב', 'כמה שיותר מהר' -> confused:focus.\n"
-                    "- אם המשתמש מסרב לענות, למשל 'לא רוצה לענות', 'מעדיף לא להגיד' -> missing:avoid.\n"
+                    "\nהמטרה שלך:\n"
+                    "- לזהות האם המשתמש סיפק מידע כלשהו על מה חשוב לו בתהליך.\n"
+                    "- גם מידע קצר, חלקי או כללי נחשב מידע.\n"
 
-                    "\nפורמט תשובה:\n"
-                    '{"status":"found","value":<number>}\n'
+                    "\nפורמטי החזרה:\n"
+                    '{"status":"found"}\n'
                     '{"status":"missing","reason":"no_info"}\n'
-                    '{"status":"missing","reason":"vague"}\n'
-                    '{"status":"missing","reason":"avoid"}\n'
                     '{"status":"confused","reason":"meaning"}\n'
-                    '{"status":"confused","reason":"answer_type"}\n'
-                    '{"status":"confused","reason":"focus"}\n'
 
-                    "\nהגדרת budget:\n"
-                    "- budget הוא סכום כסף בלבד.\n"
-                    "- המטרה היא לחלץ מספר שמייצג תקציב בשקלים.\n"
+                    "\nחוקי הכרעה:\n"
+                    "- אם המשתמש סיפק מידע כלשהו על מה חשוב לו -> found.\n"
+                    "- אם המשתמש לא סיפק מידע בכלל -> missing:no_info.\n"
+                    "- אם המשתמש לא הבין את השאלה -> confused:meaning.\n"
 
-                    "\nסדר הכרעה רגיל:\n"
-                    "1. אם יש מספר תקציב ברור -> found\n"
-                    "2. אם אין מידע בכלל -> missing:no_info\n"
-                    "3. אם יש כיוון כללי בלי מספר ברור -> missing:vague\n"
-                    "4. אם התשובה היא בבירור לא budget אלא מטרה או זמן -> confused:focus\n"
+                    "\nדוגמאות למצבים של confused:meaning:\n"
+                    "- המשתמש אומר שלא הבין.\n"
+                    "- המשתמש שואל מה הכוונה.\n"
+                    "- המשתמש מבולבל לגבי השאלה עצמה.\n"
 
-                    "\nחוקי חילוץ value:\n"
-                    "- מספר ברור -> found, value=המספר.\n"
-                    "- מספר בלבד כמו '450' -> found, value=450.\n"
-                    "- סכום עם מילים כמו 'בערך 400', 'סביבות 450', 'כן 300' -> found.\n"
-                    "- טווח כמו '300-500' -> קח את הגבוה, value=500.\n"
-                    "- תקרה כמו 'עד 300' -> value=300.\n"
-                    "- אם יש כמה מספרים והם נראים כמו טווח תקציב -> קח את הגבוה.\n"
-                    "- אל תנחש מספר אם אין מספר ברור.\n"
+                    "\nדוגמאות למצבים של missing:no_info:\n"
+                    "- תגובה ריקה.\n"
+                    "- רק סימנים.\n"
+                    "- אין שום מידע שימושי בתשובה.\n"
 
                     "\nחוקים חשובים:\n"
-                    "- זהה לפי משמעות, לא רק לפי מילים מדויקות.\n"
-                    "- התחשב בשגיאות כתיב, סלנג ותשובות קצרות.\n"
-                    "- אם אין מספר ברור אבל יש כיוון כללי כמו 'לא יקר', 'סביר', 'אין לי הרבה', 'תלוי', 'כמה שצריך' -> missing:vague.\n"
-                    "- אל תחזיר confused:focus על תשובת budget חלשה.\n"
-                    "- focus רק אם זו בבירור תשובה לשדה אחר.\n"
-
-                    "\nדוגמאות:\n"
-                    "- '450' -> found, value=450\n"
-                    "- '300 שקל' -> found, value=300\n"
-                    "- 'בערך 400' -> found, value=400\n"
-                    "- '300-500' -> found, value=500\n"
-                    "- 'עד 300' -> found, value=300\n"
-                    "- 'לא יקר' -> missing:vague\n"
-                    "- 'תלוי' -> missing:vague\n"
-                    "- '???' -> missing:no_info\n"
-                    "- 'להתחטב' -> confused:focus\n"
-                    "- 'השבוע' -> confused:focus\n"
-                    "- 'לא הבנתי מה הכוונה' -> confused:meaning\n"
+                    "- גם תשובה קצרה מאוד נחשבת מידע.\n"
+                    "- גם תשובה כללית נחשבת מידע.\n"
+                    "- אין צורך בפירוט כדי להחזיר found.\n"
                 )
             },
             {
@@ -261,6 +233,7 @@ class ConversationBuilder:
                 "content": content
             }
         ]
+    
     
 
 

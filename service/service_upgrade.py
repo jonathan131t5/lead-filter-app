@@ -317,13 +317,13 @@ class ServiceLayer:
         #print("found")
         if ai_response["status"] == "found":
             if lead_info["current_field"] == "goal":
-                lead_info["current_field"] = "budget"
+                lead_info["current_field"] = "preferences"
                 self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content)
 
             
-            elif lead_info["current_field"] == "budget":
+            elif lead_info["current_field"] == "preferences":
                 lead_info["current_field"] = "phone"
-                self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="budget_user" , value=content)
+                self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="preferences_user" , value=content)
 
 
             elif lead_info["current_field"] == "phone":
@@ -404,10 +404,10 @@ class ServiceLayer:
                 lead_info["question_reason"] = "after_fallback"
                 
                 if lead_info["current_field"] == "goal":
-                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="budget")
-                    lead_info["current_field"] = "budget"
+                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="preferences")
+                    lead_info["current_field"] = "preferences"
                 
-                elif lead_info["current_field"] == "budget":
+                elif lead_info["current_field"] == "preferences":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="phone")
                     lead_info["current_field"] = "phone"
 
@@ -433,8 +433,7 @@ class ServiceLayer:
             self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score["status"] , message_field=f"{current_field}_status")
             self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field=f"{current_field}_status" , value=lead_message_score["status"])
         
-        if lead_message_score["status"] == "phone":
-            print("alr bet")
+        if lead_message_score["status"] == "preferences":
             return True
         
         else:
@@ -479,9 +478,6 @@ class ServiceLayer:
 
     
     def process_lead_summary(self , summary_info):
-        if summary_info["budget_user"] is not None:
-            summary_info["budget_user"] = self.format_currency(budget_text=summary_info["budget_user"])
-        
         summary_info = self.field_unknown_check(summary_info=summary_info)
 
         final_status_context = self.generate_final_status_context(summary_info=summary_info)
@@ -491,16 +487,7 @@ class ServiceLayer:
         self.upload_lead_summary(summary=final_summary , lead_id=summary_info["lead_id"])
 
     
-    
-    def format_currency(self , budget_text):
-        currency_symbols = ["₪", "שקל", "שח", 'ש"ח' , "שקלים"]
 
-        if not any(symbol in budget_text for symbol in currency_symbols):
-            budget_text = budget_text.strip() + " ₪"
-        if "חודש" not in budget_text:
-            budget_text = budget_text.strip() + " לחודש"
-        
-        return budget_text
 
 
 
@@ -508,8 +495,8 @@ class ServiceLayer:
         if summary_info["goal_status"] == "unknown":
             summary_info["goal_user"] = "לא סופק על ידי הלקוח"
         
-        if summary_info["budget_status"] == "unknown":
-            summary_info["budget_user"] = "לא סופק על ידי הלקוח"
+        if summary_info["preferences_status"] == "unknown":
+            summary_info["preferences_user"] = "לא סופק על ידי הלקוח"
 
         if summary_info["urgency_status"] == "unknown":
             summary_info["urgency_user"] = "לא סופק על ידי הלקוח"
@@ -534,7 +521,7 @@ class ServiceLayer:
             f"{final_status_context}\n\n"
             f"{summary_info['name']} פנה לגבי אימונים.\n\n"
             f"מטרה: {summary_info['goal_user']}\n"
-            f"תקציב: {summary_info['budget_user']}\n"
+            f"מה חשוב לו בתהליך: {summary_info['preferences_user']}\n"
             f"זמן התחלה: {summary_info['urgency_user']}\n\n"
             f"ציון התאמה: {summary_info['total_score']}\n"
             f"טלפון: {summary_info['phone_number']}"
