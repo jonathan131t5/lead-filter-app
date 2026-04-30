@@ -399,6 +399,7 @@ class ServiceLayer:
     
     
     def handle_unresolved_fallbacks(self , ai_response , lead_info):
+        print(lead_info["current_field"], flush=True)
         if ai_response["status"] == "missing" or ai_response["status"] == "confused":
             if lead_info["question_reason"] == "regular_fallback":
                 if lead_info["current_field"] == "phone":
@@ -411,6 +412,8 @@ class ServiceLayer:
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="preferences")
                     lead_info["current_field"] = "preferences"
                 
+                    
+
                 elif lead_info["current_field"] == "preferences":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="phone")
                     lead_info["current_field"] = "phone"
