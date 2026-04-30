@@ -42,10 +42,10 @@ class LeadsScoresRepository:
             "total_score" : result[0] , 
             "score_count" : result[1] ,
             "goal_score" : result[2] , 
-            "urgency_score" : result [4] , 
-            "goal_status" : result[5] , 
-            "preferences_status" : result[6] , 
-            "urgency_status" : result[7]
+            "urgency_score" : result [3] , 
+            "goal_status" : result[4] , 
+            "preferences_status" : result[5] , 
+            "urgency_status" : result[6]
         }
 
 
