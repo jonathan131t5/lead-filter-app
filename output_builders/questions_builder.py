@@ -284,7 +284,7 @@ class ConfuseQuestions:
         
 
     def process_confuse_question(self , field , reason):
-        print(f"FIELD: {field} | REASON: {reason}", flush=True)
+        #print(f"FIELD: {field} | REASON: {reason}", flush=True)
         questions = []
         if field == "goal":
             questions = self.goal_confuse_questions(question_type=reason)
@@ -403,6 +403,8 @@ class ProcessQuestion:
     
     
     def get_question(self , field , question_state , reason , attempt_number , ack_mode):
+        print(f"FIELD: {field} | REASON: {reason}", flush=True)
+
         if question_state == "base":
             question = self.base_questions.process_base_question(field , ack_mode)
 
