@@ -3,12 +3,12 @@ class MessageScorer:
         pass
     
     
-    def score_message(self , message_to_rank , field , reason):
+    def score_message(self , message_to_rank , field , reason , phone_attempt_number):
         rank_score = 0
 
 
-        if field == "phone":
-            return {"status" : "phone"}
+        if field == "preferences":
+            return {"status" : "preferences"}
         
         if message_to_rank["status"] == "missing" or message_to_rank["status"] == "confused":
             if reason == "regular_fallback":
@@ -16,23 +16,25 @@ class MessageScorer:
         
 
         elif message_to_rank["status"] == "found":
-            if field == "budget":
-                if float(message_to_rank["value"]) >= 400:
-                    rank_score += 3
-                elif 250 <= float(message_to_rank["value"]) <= 399:
-                    rank_score += 2
-                else:
-                    rank_score += 1
-
             
-            
-            elif field == "goal":
+            if field == "goal":
                 if 8 <= float(message_to_rank["value"]) <= 10:
                     rank_score += 3
                 elif 5 <= float(message_to_rank["value"]) <= 7:
                     rank_score += 2
                 else:
                     rank_score += 1
+
+            
+            if field == "phone":
+                if phone_attempt_number <= 1:
+                    rank_score += 100
+
+                elif phone_attempt_number >= 2 and reason != "regular_fallback":
+                    rank_score += 40
+                
+                else:
+                    rank_score += 25
             
             
             elif field == "urgency":

@@ -9,10 +9,10 @@ class LeadsScoresRepository:
         CREATE TABLE IF NOT EXISTS leads_scores(
         lead_id INTEGER PRIMARY KEY ,
         goal_score INTEGER DEFAULT 0 ,
-        budget_score INTEGER DEFAULT 0 ,
+        phone_score INTEGER DEFAULT 0,
         urgency_score INTEGER DEFAULT 0,
         goal_status TEXT , 
-        budget_status TEXT ,
+        preferences_status TEXT ,
         urgency_status TEXT , 
         score_count INTEGER DEFAULT 0 ,
         total_score INTEGER DEFAULT 0
@@ -29,7 +29,7 @@ class LeadsScoresRepository:
     
     def get_lead_score_data(self , lead_id):
         self.cursor.execute(
-        "SELECT total_score , score_count , goal_score , budget_score , urgency_score , goal_status , budget_status , urgency_status FROM leads_scores WHERE lead_id = ?" ,
+        "SELECT total_score , score_count , goal_score ,  urgency_score , goal_status , preferences_status , urgency_status FROM leads_scores WHERE lead_id = ?" ,
         (lead_id , )
         )
         
@@ -42,10 +42,9 @@ class LeadsScoresRepository:
             "total_score" : result[0] , 
             "score_count" : result[1] ,
             "goal_score" : result[2] , 
-            "budget_score" : result[3] ,
             "urgency_score" : result [4] , 
             "goal_status" : result[5] , 
-            "budget_status" : result[6] , 
+            "preferences_status" : result[6] , 
             "urgency_status" : result[7]
         }
 
