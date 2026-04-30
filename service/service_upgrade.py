@@ -368,6 +368,9 @@ class ServiceLayer:
                 if lead_info["question_state"] == "fallback" and lead_info["question_reason"] == "regular_fallback":
                     return False    
                 
+                if lead_info["current_field"] == "preferences":
+                    return False
+
                 if lead_info["question_reason"] != "after_fallback":
                     self.leads_states.update_lead_question_state(lead_id=lead_info["lead_id"] , value="fallback")
                     self.leads_states.update_lead_question_reason(lead_id=lead_info["lead_id"] , value="regular_fallback")
@@ -401,23 +404,22 @@ class ServiceLayer:
     def handle_unresolved_fallbacks(self , ai_response , lead_info):
         print(lead_info["current_field"], flush=True)
         if ai_response["status"] == "missing" or ai_response["status"] == "confused":
-            if lead_info["question_reason"] == "regular_fallback":
+            if lead_info["question_reason"] == "regular_fallback" or lead_info["current_field"] == "preferences":
+                
                 if lead_info["current_field"] == "phone":
                     return
                 
                 self.leads_states.update_lead_question_reason(lead_id=lead_info["lead_id"] , value="after_fallback")
                 lead_info["question_reason"] = "after_fallback"
                 
+
                 if lead_info["current_field"] == "goal":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="preferences")
                     lead_info["current_field"] = "preferences"
-                
-                    
 
                 elif lead_info["current_field"] == "preferences":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="phone")
                     lead_info["current_field"] = "phone"
-
 
                 elif lead_info["current_field"] == "urgency":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field=None)
