@@ -10,6 +10,7 @@ class LeadsDataRepository:
         session_id INTEGER , 
         name TEXT ,
         phone_number TEXT UNIQUE,
+        lead_preferences TEXT,
         final_status TEXT DEFAULT 'pending' ,
         summary TEXT ,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,

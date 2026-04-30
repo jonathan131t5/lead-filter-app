@@ -13,8 +13,8 @@ class LeadsFieldsRepository:
         lead_id INTEGER PRIMARY KEY , 
         goal_bot TEXT ,
         goal_user TEXT ,
-        budget_bot TEXT ,
-        budget_user TEXT ,
+        preferences_bot TEXT ,
+        preferences_user TEXT ,
         phone_user TEXT ,
         urgency_bot TEXT ,
         urgency_user TEXT ,
@@ -37,7 +37,7 @@ class LeadsFieldsRepository:
 
     def get_all_lead_field_data(self , lead_id):
         self.cursor.execute(
-        "SELECT goal_user , budget_user , urgency_user FROM leads_fields_data WHERE lead_id = ?" , 
+        "SELECT goal_user , preferences_user , urgency_user FROM leads_fields_data WHERE lead_id = ?" , 
         (lead_id , )
         )
 
@@ -48,7 +48,7 @@ class LeadsFieldsRepository:
         return {
             "lead_id" : lead_id ,
             "goal_user" : result[0] ,
-            "budget_user" : result[1] ,
+            "preferences_user" : result[1] ,
             "urgency_user" : result[2]
         } 
     
