@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import sqlite3
 import traceback
 import logging
-
+import sys
 
 from data_access.leads_data_repository import LeadsDataRepository
 from data_access.leads_states_repository import LeadsStatesRepository
@@ -35,6 +35,9 @@ from utils.validators import UserError
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - [APP] %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ],
     force=True
 )
 
