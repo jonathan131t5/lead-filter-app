@@ -34,7 +34,8 @@ from utils.validators import UserError
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - [APP] %(message)s"
+    format="%(asctime)s - %(levelname)s - [APP] %(message)s",
+    force=True
 )
 
 
