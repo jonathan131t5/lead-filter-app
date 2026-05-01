@@ -3,19 +3,13 @@ class MessageScorer:
         pass
     
     
-    def score_message(self , message_to_rank , field , reason , confuse_attempt_number , regular_attempt_number):
+    def score_message(self , message_to_rank , field , reason , regular_attempt_number):
         rank_score = 0
 
         if message_to_rank["status"] == "missing" or message_to_rank["status"] == "confused":
             if reason == "regular_fallback":      
                 return {"status" : "unknown" , "rank_score" : rank_score}
-        
-        if field == "preferences":
-            if confuse_attempt_number >= 2 or regular_attempt_number >= 2:
-                return {"status" : "unknown" , "rank_score" : rank_score}
-            
-            return {"status" : "preferences"}
-
+    
         elif message_to_rank["status"] == "found":
             
             if field == "goal":

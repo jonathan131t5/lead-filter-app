@@ -12,12 +12,10 @@ class LeadSummaryContextRepository:
             li.final_status,
             
             lfd.goal_user,
-            lfd.preferences_user,
             lfd.urgency_user,
             
             ls.total_score ,
             ls.goal_status , 
-            ls.preferences_status ,
             ls.urgency_status
 
         FROM leads_data li
@@ -42,10 +40,8 @@ class LeadSummaryContextRepository:
             "phone_number" : row[1] , 
             "final_status" : row[2] , 
             "goal_user" : row[3] , 
-            "preferences_user" : row[4] , 
-            "urgency_user" : row[5] , 
-            "total_score" : row[6] , 
-            "goal_status" : row[7] , 
-            "preferences_status" : row[8] ,
-            "urgency_status" : row[9] 
+            "urgency_user" : row[4] , 
+            "total_score" : row[5] , 
+            "goal_status" : row[6] , 
+            "urgency_status" : row[7] 
         }

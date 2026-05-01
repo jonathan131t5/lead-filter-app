@@ -7,10 +7,6 @@ class BaseQuestions:
             "מה היית רוצה להשיג מהתהליך?"
         ]
 
-    def preferences_base_questions(self):
-        return [
-           "יש משהו ספציפי שחשוב לך באיך שהתהליך יתנהל?"
-        ]
 
     def urgency_base_questions(self):
         return [
@@ -25,9 +21,6 @@ class BaseQuestions:
     def process_base_question(self, field, ack_mode):
         if field == "goal":
             questions = self.goal_base_questions()
-
-        elif field == "preferences":
-            questions = self.preferences_base_questions()
 
         elif field == "urgency":
             questions = self.urgency_base_questions()
@@ -68,16 +61,6 @@ class MissingQuestions:
         elif question_type == "avoid":
             return [
                 "כדי להמשיך אני צריך להבין מה המטרה שלך"
-            ]
-
-
-    def preferences_missing_questions(self, question_type, attempt_number):
-        if attempt_number != 2:
-            return
-
-        if question_type == "no_info":
-            return [
-                "תן לי להבין אם יש משהו שחשוב לך באיך שהתהליך יתנהל"
             ]
 
 
@@ -122,9 +105,6 @@ class MissingQuestions:
         if field == "goal":
             questions = self.goal_missing_questions(reason, attempt_number)
 
-        elif field == "preferences":
-            questions = self.preferences_missing_questions(reason, attempt_number)
-
         elif field == "urgency":
             questions = self.urgency_missing_questions(reason, attempt_number)
 
@@ -156,13 +136,6 @@ class ConfuseQuestions:
             ]
 
 
-    def preferences_confuse_questions(self , question_type):
-        if question_type == "meaning":
-            return [
-                "אני מתכוון למה חשוב לך באיך שהתהליך יתנהל"
-            ]
-
-
     def urgency_confuse_questions(self, question_type):
         if question_type == "meaning":
             return [
@@ -183,9 +156,6 @@ class ConfuseQuestions:
     def process_confuse_question(self, field, reason):
         if field == "goal":
             questions = self.goal_confuse_questions(reason)
-
-        elif field == "preferences":
-            questions = self.preferences_confuse_questions(reason)
 
         elif field == "urgency":
             questions = self.urgency_confuse_questions(reason)
@@ -208,13 +178,6 @@ class FallBackQuestions:
             ]
                 
 
-    def preferences_fallback_questions(self):
-        return [
-            "סבבה נתקדם, יש משהו שחשוב לך במיוחד באיך שהתהליך יתנהל?"
-        ]
-        
-
-
     def phone_fallback_question(self , fallback_type):
         if fallback_type == "after_fallback":
             return [
@@ -227,7 +190,6 @@ class FallBackQuestions:
             ]
 
 
-    
     def urgency_fallback_questions(self , fallback_type):
         if fallback_type == "after_fallback":
             return [
@@ -248,9 +210,6 @@ class FallBackQuestions:
         questions = []
         if field == "goal":
             questions = self.goal_fallback_questions()
-
-        elif field == "preferences":
-            questions = self.preferences_fallback_questions()
 
         elif field == "phone":
             questions = self.phone_fallback_question(fallback_type=reason)

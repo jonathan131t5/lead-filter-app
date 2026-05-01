@@ -144,7 +144,7 @@ class ServiceLayer:
 
         self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
         #print(generate_ai_analysis)
-        self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"] , regular_attempt_number=prepare_lead_context["lead_conversation_states_data"]["regular_attempt_number"] , confuse_attempt_number=prepare_lead_context["lead_conversation_states_data"]["confuse_attempt_number"])
+        self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"] , regular_attempt_number=prepare_lead_context["lead_conversation_states_data"]["regular_attempt_number"])
         logging.info(f"Lead scores updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
         logging.debug(prepare_lead_context['lead_scores_data'])
 
@@ -322,13 +322,13 @@ class ServiceLayer:
         #print("found")
         if ai_response["status"] == "found":
             if lead_info["current_field"] == "goal":
-                lead_info["current_field"] = "preferences"
+                lead_info["current_field"] = "urgency"
                 self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content)
 
             
-            elif lead_info["current_field"] == "preferences":
+            elif lead_info["current_field"] == "urgency":
                 lead_info["current_field"] = "phone"
-                self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="preferences_user" , value=content)
+                self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="urgency_user" , value=content)
 
 
             elif lead_info["current_field"] == "phone":
@@ -369,8 +369,7 @@ class ServiceLayer:
                 if lead_info["question_state"] == "fallback" and lead_info["question_reason"] == "regular_fallback":
                     return False    
                 
-                if lead_info["current_field"] == "preferences":
-                    return False
+
 
                 if lead_info["question_reason"] != "after_fallback":
                     self.leads_states.update_lead_question_state(lead_id=lead_info["lead_id"] , value="fallback")
@@ -405,7 +404,7 @@ class ServiceLayer:
     def handle_unresolved_fallbacks(self , ai_response , lead_info):
         print(lead_info["current_field"], flush=True)
         if ai_response["status"] == "missing" or ai_response["status"] == "confused":
-            if lead_info["question_reason"] == "regular_fallback" or lead_info["current_field"] == "preferences":
+            if lead_info["question_reason"] == "regular_fallback":
                 
                 if lead_info["current_field"] == "phone":
                     return
@@ -415,10 +414,10 @@ class ServiceLayer:
                 
 
                 if lead_info["current_field"] == "goal":
-                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="preferences")
-                    lead_info["current_field"] = "preferences"
+                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="urgency")
+                    lead_info["current_field"] = "urgency"
 
-                elif lead_info["current_field"] == "preferences":
+                elif lead_info["current_field"] == "urgency":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="phone")
                     self.leads_states.update_lead_question_state(lead_id=lead_info["lead_id"] , value="fallback")
                     lead_info["current_field"] = "phone"
@@ -435,20 +434,13 @@ class ServiceLayer:
                 lead_info["confuse_attempt_number"] = 1
     
     
-    def apply_message_score(self , lead_info , current_field , ai_analyze_response , reason , regular_attempt_number , confuse_attempt_number):
-        lead_message_score = self.message_scorer.score_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason , regular_attempt_number=regular_attempt_number , confuse_attempt_number=confuse_attempt_number)
+    def apply_message_score(self , lead_info , current_field , ai_analyze_response , reason , regular_attempt_number ):
+        lead_message_score = self.message_scorer.score_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason , regular_attempt_number=regular_attempt_number)
         
         if lead_message_score["status"] == "invaild":
             return
 
-        if lead_message_score["status"] == "preferences":
-            return
-
         if lead_message_score["status"] == "unknown":
-            if current_field == "preferences":
-                self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field=f"{current_field}_status" , value=lead_message_score["status"])
-                return True
-
             self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score["status"] , message_field=f"{current_field}_status")
             self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field=f"{current_field}_status" , value=lead_message_score["status"])
         
@@ -511,9 +503,6 @@ class ServiceLayer:
         if summary_info["goal_status"] == "unknown":
             summary_info["goal_user"] = "לא סופק על ידי הלקוח"
         
-        if summary_info["preferences_status"] == "unknown":
-            summary_info["preferences_user"] = "לא סופק על ידי הלקוח"
-
         if summary_info["urgency_status"] == "unknown":
             summary_info["urgency_user"] = "לא סופק על ידי הלקוח"
 
@@ -537,7 +526,6 @@ class ServiceLayer:
             f"{final_status_context}\n\n"
             f"{summary_info['name']} פנה לגבי אימונים.\n\n"
             f"מטרה: {summary_info['goal_user']}\n"
-            f"מה חשוב לו בתהליך: {summary_info['preferences_user']}\n"
             f"זמן התחלה: {summary_info['urgency_user']}\n\n"
             f"ציון התאמה: {summary_info['total_score']}\n"
             f"טלפון: {summary_info['phone_number']}"
