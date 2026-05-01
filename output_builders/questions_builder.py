@@ -1,31 +1,26 @@
 import random
 
+#אחד או מה?
 class BaseQuestions:
-    def __init__(self):
-        pass
-
-
-    def goal_Base_questions(self):
+    def goal_base_questions(self):
         return [
-            "מה אתה רוצה להשיג מהאימונים?",
-            "מה המטרה שלך כרגע באימונים?",
-            "מה אתה רוצה לשפר אצלך בתקופה הקרובה?",
-            "מה היית רוצה לשפר או לחזק בגוף שלך?"
-            ]
-
+            "מה המטרה המרכזית שאתה רוצה להשיג?",
+            "מה היית רוצה להשיג או לשפר?",
+            "מה היעד העיקרי שלך כרגע?"
+        ]
 
     def preferences_base_questions(self):
-        return ["מה הכי חשוב לך בתהליך?"]
-
-
-    def urgency_Base_questions(self):
         return [
-            "מתי אתה רוצה להתחיל?",
-            "מתי זה רלוונטי לך?",
-            "יש לך זמן התחלה בראש?",
-            "מתי אתה מתכנן להתחיל בפועל?"
-            ]
-    
+            "יש משהו שחשוב לך במיוחד באיך שהתהליך יתנהל?",
+           "יש משהו שחשוב לך באיך שהתהליך יתנהל?",
+            "יש משהו שחשוב לך שנשים לב אליו לאורך התהליך?"
+        ]
+
+    def urgency_base_questions(self):
+        return [
+            "מתי היית רוצה להתחיל?",
+            "מתי היית רוצה להתחיל?",
+        ]
 
     def phone_Base_question(self):
         return [
@@ -33,112 +28,100 @@ class BaseQuestions:
             "כדי לשמור על קשר מה הטלפון שלך?" , 
             "תוכל להשאיר מספר טלפון להמשך ההתאמה "
         ]
-    
 
-    def process_base_question(self , field , ack_mode):
-        print(f"field : {field}" , flush=True)
+    def process_base_question(self, field, ack_mode):
         if field == "goal":
-            questions = self.goal_Base_questions()
+            questions = self.goal_base_questions()
 
         elif field == "preferences":
             questions = self.preferences_base_questions()
 
-        elif field == "phone":
-            #print("yes")
-            questions = self.phone_Base_question()
-
         elif field == "urgency":
-            questions = self.urgency_Base_questions()
+            questions = self.urgency_base_questions()
+
+        elif field == "phone":
+            questions = self.phone_base_questions()
 
         else:
-            raise TypeError("Invaild field choice")
+            raise TypeError("Invalid field")
 
-        #print(f"question: {questions}")
         question = random.choice(questions)
+
         if ack_mode == 1:
-            prefix = self.build_ack_prefix()
-            return f"{prefix} {question}"
-        
+            return f"{self.build_ack_prefix()} {question}"
+
         return question
 
-    
     def build_ack_prefix(self):
-        ack = self.get_ack()
-        punctuation_mark = self.get_punctuation()
-
-        return f"{ack}{punctuation_mark}"
-    
-    
-    def get_ack(self):
-        ack_found = [
-        "מעולה",
-        "הבנתי",
-        "סבבה",
-        "אחלה"
-        ]
-        return random.choice(ack_found)
-    
-    def get_punctuation(self):
-        punctuation = {
-            "comma": "," , 
-            "period": "."
-        }
-        return random.choice(list(punctuation.values()))
+        return f"{random.choice(['מעולה', 'הבנתי', 'סבבה', 'אחלה'])}{random.choice([',', '.'])}"
 
 
 
 class MissingQuestions:
-    def __init__(self):
-        pass
-
-
-
     def goal_missing_questions(self, question_type, attempt_number):
-        if question_type == "no_info":
+        if attempt_number != 2:
+            return
 
-            if attempt_number == 2:
-                return [
-                    "כדי להתקדם אני צריך להבין מה המטרה שלך",
-                    "מה היעד שאתה מכוון אליו?",
-                    "על מה אתה רוצה לעבוד בעיקר?"
-                ]
-#
+        if question_type == "no_info":
+            return [
+                "עוד לא הבנתי מה אתה מחפש",
+                "תן לי להבין מה המטרה שלך",
+                "מה היית רוצה להשיג?"
+            ]
 
         elif question_type == "vague":
-
-            if attempt_number == 2:
-                return [
-                    "תן לי קצת יותר פירוט על המטרה שלך",
-                    "תחדד לי מה אתה רוצה להשיג",
-                    "תסביר לי יותר לאן אתה מכוון"
-                ]
-
+            return [
+                "תוכל לפרט קצת יותר למה הכוונה?",
+                "אשמח אם תוכל לחדד לי מעט את הנקודה הזו.",
+                "אפשר קצת יותר פירוט כדי שאהיה בטוח שהבנתי?"
+            ]
 
         elif question_type == "avoid":
-
-            if attempt_number == 2:
-                return [
-                    "בלי להבין מטרה יהיה קשה לדייק לך",
-                    "אני צריך כיוון ממך כדי להמשיך",
-                    "תן לי להבין מה אתה רוצה להשיג"
-                ]
+            return [
+                "כדי להמשיך אני צריך להבין מה המטרה שלך",
+                "בלי להבין מה אתה מחפש יהיה קשה להתקדם"
+            ]
 
 
+    def preferences_missing_questions(self, question_type, attempt_number):
+        if attempt_number != 2:
+            return
 
-
-    def preferences_missing_questions(self , question_type , attempt_number):
         if question_type == "no_info":
+            return [
+                "לא כל כך הצלחתי להבין למה אתה מצפה מהתהליך עצמו",
+               "לא ממש הבנתי אם יש משהו ספציפי שחשוב לך שיהיה לאורך התהליך",
+                "תן לי להבין אם יש משהו שחשוב לך באיך שהתהליך יתנהל"
+            ]
 
-            if attempt_number == 2:
-                return [
-                    "לא כל כך הצלחנו להבין מה חשוב לך בתהליך" , 
-                    "נשמח שתשתף מה הכי חשוב לך בתהליך" ,
-                    "נשמח להבין קצת יותר מה חשוב לך בתהליך"
-                ]
-            
-       
 
-    def phone_missing_questions(self , attempt_number , question_type):
+    def urgency_missing_questions(self, question_type, attempt_number):
+        if attempt_number != 2:
+            return
+
+        if question_type == "no_info":
+            return [
+                "עוד לא הבנתי מתי אתה רוצה להתחיל",
+                "יש לך זמן התחלה בראש?",
+                "מתי זה רלוונטי לך בערך?"
+            ]
+
+        elif question_type == "vague":
+            return [
+                "תוכל לפרט קצת יותר מתי היית רוצה להתחיל?",
+              "תחדד לי קצת יותר מתי היית רוצה להתחיל",
+                "מתי אתה רואה את עצמך מתחיל בתהליך?"
+            ]
+
+        elif question_type == "avoid":
+            return [
+                "אפילו זמן כללי יעזור לי",
+                "כדי להמשיך אני צריך להבין מתי זה מתאים לך",
+                "תן לי זמן כללי שבו היית רוצה להתחיל"
+            ]
+
+
+    def phone_missing_questions(self, question_type, attempt_number):
         if question_type == "no_info":
             
             if attempt_number == 2:
@@ -159,147 +142,99 @@ class MissingQuestions:
                     "כנראה חסרות ספרות במספר, תוכל לרשום שוב?",
                     "לא הצלחתי לזהות מספר תקין, תשלח בבקשה שוב"
                 ] 
-            
-    
-    
-    def urgency_missing_questions(self, question_type, attempt_number):
-        if question_type == "no_info":
-
-            if attempt_number == 2:
-                return [
-                    "צריך להבין זמנים כדי להמשיך",
-                    "מתי זה אמור לקרות מבחינתך?",
-                    "מתי אתה רוצה להיכנס לזה?"
-                ]
 
 
-        elif question_type == "vague":
-
-            if attempt_number == 2:
-                return [
-                    "תן זמן בערך",
-                    "מתי אתה רואה את עצמך מתחיל עם זה?",
-                    "מתי זה מתאים לך להתחיל?"
-                ]
-
-
-        elif question_type == "avoid":
-
-            if attempt_number == 2:
-                return [
-                    "כדי להתקדם אני צריך זמן ממך",
-                    "בלי לדעת מתי זה קורה קשה להמשיך",
-                    "תן לי להבין מתי זה מתאים לך"
-                ]
-
-
-
-    def process_missing_question(self , field , reason , attempt_number):
-        questions = []
+    def process_missing_question(self, field, reason, attempt_number):
         if field == "goal":
-            questions = self.goal_missing_questions(question_type=reason , attempt_number=attempt_number)
+            questions = self.goal_missing_questions(reason, attempt_number)
 
         elif field == "preferences":
-            questions = self.preferences_missing_questions(question_type=reason , attempt_number=attempt_number)
-
-        elif field == "phone":
-            questions = self.phone_missing_questions(question_type=reason , attempt_number=attempt_number)
+            questions = self.preferences_missing_questions(reason, attempt_number)
 
         elif field == "urgency":
-            questions = self.urgency_missing_questions(question_type=reason , attempt_number=attempt_number)
+            questions = self.urgency_missing_questions(reason, attempt_number)
+
+        elif field == "phone":
+            questions = self.phone_missing_questions(reason, attempt_number)
 
         else:
-            raise TypeError("Invaild field choice")
-        #print(f"attempt number: {attempt_number}")
-        #print(f"reason: {reason}")
-        #print(f"field: {field}")
-        #print(f"questions: {questions}")
+            raise TypeError("Invalid field")
+
         return random.choice(questions)
-    
-    
+
+
+
 class ConfuseQuestions:
-    def __init__(self):
-        pass    
-    
-    
     def goal_confuse_questions(self, question_type):
         if question_type == "meaning":
             return [
-                "אני שואל מה אתה רוצה להשיג",
-                "הכוונה היא למה שאתה רוצה להגיע אליו",
-                "מדובר במה שאתה רוצה לשפר",
-               "לאן אתה רוצה להגיע?"
+                "אני מתכוון למה שאתה רוצה להשיג",
+                "הכוונה היא למה המטרה שלך",
+                "אני מנסה להבין מה אתה רוצה להשיג מהתהליך"
             ]
-        
+
         elif question_type == "answer_type":
             return [
-                "תכתוב מה אתה רוצה להשיג",
-                "תענה עם המטרה שלך",
-                "תרשום מה היעד שלך",
-                "תכתוב מה אתה רוצה לשפר"
+                "פשוט תכתוב מה הכיוון הכללי שלך.",
+                "פשוט תכתוב מה המטרה שלך.",
+                "תרשום פשוט מה היעד שאתה מכוון אליו."
             ]
-            
+
         elif question_type == "focus":
             return [
+                "כרגע אני שואל רק על המטרה שלך",
                 "רק מה אתה רוצה להשיג",
-                "אני שואל רק על המטרה שלך",
-                "כרגע רק מה היעד שלך",
-                "רק על מה שאתה רוצה להגיע אליו"
+                "אני צריך להבין רק מה אתה רוצה להשיג כרגע"
             ]
-        
+
 
     def preferences_confuse_questions(self , question_type):
         if question_type == "meaning":
             return [
-               "הכוונה היא למה חשוב לך מהתהליך עצמו" , 
-                "השאלה היא מה חשוב לך שיהיה בתהליך" , 
-                "מדובר על מה חשוב לך בתהליך"
+                "אני מתכוון למה חשוב לך באיך שהתהליך יתנהל",
+                "כלומר איך היית רוצה שהתהליך ירגיש לך",
+                "אני מתכוון אם יש משהו שחשוב לך שנשים לב אליו לאורך התהליך"
             ]
-        
+
 
     def urgency_confuse_questions(self, question_type):
         if question_type == "meaning":
             return [
-                "אני שואל מתי אתה רוצה להתחיל",
-                "הכוונה למתי זה מתאים לך להתחיל את התהליך",
-                "מדובר במתי אתה חושב להתחיל",
-                "אני מתכוון למתי זה מתאים לך להתחיל"
+                "אני מתכוון למתי אתה רוצה להתחיל",
+               "כלומר מתי מתאים לך להתחיל",
+                "הכוונה היא מתי אתה רואה את עצמך מתחיל בתהליך?"
             ]
-        
+
         elif question_type == "answer_type":
             return [
-                "כתוב מתי בערך זה מתאים לך להתחיל",
-                "תענה עם זמן",
-                "תרשום מתי אתה רוצה להתחיל",
-                "תן לי זמן בערך"
+                "פשוט תכתוב מתי בערך היית רוצה להתחיל",
+                "אפשר גם זמן כללי",
+                "תרשום מתי בערך תרצה להתחיל"
             ]
-            
+
         elif question_type == "focus":
             return [
-                "רק מתי אתה מתחיל",
-                "אני שואל רק על זמן",
-                "כרגע רק מתי",
-                "רק זמן"
+                "כרגע אני שואל רק על הזמן",
+                "רק מתי אתה רוצה להתחיל",
+                "אני צריך להבין רק מתי אתה רוצה להתחיל"
             ]
-        
 
-    def process_confuse_question(self , field , reason):
-        #print(f"FIELD: {field} | REASON: {reason}", flush=True)
-        questions = []
+
+    def process_confuse_question(self, field, reason):
         if field == "goal":
-            questions = self.goal_confuse_questions(question_type=reason)
+            questions = self.goal_confuse_questions(reason)
 
         elif field == "preferences":
-            questions = self.preferences_confuse_questions(question_type=reason)
+            questions = self.preferences_confuse_questions(reason)
 
         elif field == "urgency":
-            questions = self.urgency_confuse_questions(question_type=reason)
+            questions = self.urgency_confuse_questions(reason)
 
         else:
-            raise TypeError("Invaild field choice")
+            raise TypeError("Invalid field")
 
         return random.choice(questions)
-        
+
 
 
 class FallBackQuestions:
@@ -309,17 +244,17 @@ class FallBackQuestions:
 
     def goal_fallback_questions(self):
         return [
-            "זה יותר לכיוון ירידה במשקל, חיטוב או משהו אחר?",
-            "אתה יותר בקטע של לרדת במשקל או להתחזק?",
-            "מה הכי קרוב למה שאתה מחפש: חיטוב, מסה או פשוט להרגיש טוב יותר?"
+            "זה יותר משהו ספציפי או מטרה כללית?",
+            "גם תשובה כללית תעזור לי להבין מה המטרה שלך",
+            "יש לך משהו ספציפי שהיית רוצה להגיע אליו או אפילו משהו כללי?"
             ]
                 
 
     def preferences_fallback_questions(self):
         return [
-            "סבבה נתקדם, מה הכי חשוב לך בתהליך?" ,
-            "אוקי נעבור הלאה, מה הכי חשוב לך בתהליך?" ,
-            "טוב נתקדם, מה הכי חשוב לך בתהליך?"
+            "סבבה נתקדם, יש משהו שחשוב לך במיוחד באיך שהתהליך יתנהל?",
+            "אוקי נעבור הלאה, יש משהו שחשוב לך שנשים לב אליו לאורך התהליך?",
+            "טוב נתקדם, איך היית רוצה שהתהליך ירגיש לך?"
         ]
         
 
@@ -348,10 +283,9 @@ class FallBackQuestions:
     def urgency_fallback_questions(self , fallback_type):
         if fallback_type == "after_fallback":
             return [
-                "אוקי, נתקדם לזמן — מתי היית רוצה להתחיל?",
-                "סבבה, נעבור לזמן — מתי זה מתאים לך להתחיל?",
-                "אוקי, נמשיך — כמה זה דחוף לך להתחיל?",
-                "טוב, נתקדם — מתי אתה רואה את עצמך מתחיל?"
+                "אוקי נמשיך, מתי היית רוצה להתחיל בתהליך?",
+                "סבבה נתקדם, מתי היית רוצה להתחיל בתהליך?",
+                "אוקי, נמשיך, מתי היית רוצה להתחיל בתהליך?"
             ]
         
         elif fallback_type == "regular_fallback":
@@ -388,33 +322,37 @@ class FallBackQuestions:
         
 
 
-
-
 class ProcessQuestion:
-    def __init__(self , base_questions , missing_questions , confuse_questions , fallback_questions):
+    def __init__(self, base_questions, missing_questions, confuse_questions, fallback_questions):
         self.base_questions = base_questions
         self.missing_questions = missing_questions
         self.confuse_questions = confuse_questions
         self.fallback_questions = fallback_questions
 
 
-
-    
-    
-    
-    def get_question(self , field , question_state , reason , attempt_number , ack_mode):
-        #print(f"FIELD: {field} | REASON: {reason} | STATE: {question_state}", flush=True)
+    def get_question(self, field, question_state, reason, attempt_number, ack_mode):
 
         if question_state == "base":
-            question = self.base_questions.process_base_question(field , ack_mode)
+            return self.base_questions.process_base_question(field, ack_mode)
 
         elif question_state == "missing":
-            question = self.missing_questions.process_missing_question(field=field , reason=reason , attempt_number=attempt_number)
+            return self.missing_questions.process_missing_question(
+                field=field,
+                reason=reason,
+                attempt_number=attempt_number
+            )
 
         elif question_state == "confused":
-            question = self.confuse_questions.process_confuse_question(field=field , reason=reason)
+            return self.confuse_questions.process_confuse_question(
+                field=field,
+                reason=reason
+            )
 
         elif question_state == "fallback":
-            question = self.fallback_questions.process_fallback_question(field=field , reason=reason)
-        
-        return question
+            return self.fallback_questions.process_fallback_question(
+                field=field,
+                reason=reason
+            )
+
+        raise TypeError("Invalid question state")
+
