@@ -403,7 +403,7 @@ class ProcessQuestion:
     
     
     def get_question(self , field , question_state , reason , attempt_number , ack_mode):
-        print(f"FIELD: {field} | REASON: {reason}", flush=True)
+        print(f"FIELD: {field} | REASON: {reason} | STATE: {question_state}", flush=True)
 
         if question_state == "base":
             question = self.base_questions.process_base_question(field , ack_mode)
