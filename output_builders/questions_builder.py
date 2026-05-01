@@ -36,7 +36,7 @@ class BaseQuestions:
     
 
     def process_base_question(self , field , ack_mode):
-        #print(f"field : {field}")
+        print(f"field : {field}" , flush=True)
         if field == "goal":
             questions = self.goal_Base_questions()
 
@@ -210,10 +210,10 @@ class MissingQuestions:
 
         else:
             raise TypeError("Invaild field choice")
-        print(f"attempt number: {attempt_number}")
-        print(f"reason: {reason}")
-        print(f"field: {field}")
-        print(f"questions: {questions}")
+        #print(f"attempt number: {attempt_number}")
+        #print(f"reason: {reason}")
+        #print(f"field: {field}")
+        #print(f"questions: {questions}")
         return random.choice(questions)
     
     
@@ -403,7 +403,7 @@ class ProcessQuestion:
     
     
     def get_question(self , field , question_state , reason , attempt_number , ack_mode):
-        print(f"FIELD: {field} | REASON: {reason} | STATE: {question_state}", flush=True)
+        #print(f"FIELD: {field} | REASON: {reason} | STATE: {question_state}", flush=True)
 
         if question_state == "base":
             question = self.base_questions.process_base_question(field , ack_mode)
