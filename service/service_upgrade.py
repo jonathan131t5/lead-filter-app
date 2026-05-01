@@ -322,20 +322,14 @@ class ServiceLayer:
         #print("found")
         if ai_response["status"] == "found":
             if lead_info["current_field"] == "goal":
-                lead_info["current_field"] = "urgency"
+                lead_info["current_field"] = "phone"
                 self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content)
 
             
-            elif lead_info["current_field"] == "urgency":
-                lead_info["current_field"] = "phone"
-                self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="urgency_user" , value=content)
-
-
             elif lead_info["current_field"] == "phone":
                 lead_info["current_field"] = "urgency"
+                self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="urgency_user" , value=content)
                 self.leads_data.update_lead_phone(phone=ai_response["value"] , lead_id=lead_info["lead_id"])
-                self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="phone_user" , value=content)
-
 
             elif lead_info["current_field"] == "urgency":
                 need_to_change = True
@@ -369,7 +363,6 @@ class ServiceLayer:
                 if lead_info["question_state"] == "fallback" and lead_info["question_reason"] == "regular_fallback":
                     return False    
                 
-
 
                 if lead_info["question_reason"] != "after_fallback":
                     self.leads_states.update_lead_question_state(lead_id=lead_info["lead_id"] , value="fallback")
@@ -414,14 +407,9 @@ class ServiceLayer:
                 
 
                 if lead_info["current_field"] == "goal":
-                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="urgency")
-                    lead_info["current_field"] = "urgency"
-
-                elif lead_info["current_field"] == "urgency":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="phone")
-                    self.leads_states.update_lead_question_state(lead_id=lead_info["lead_id"] , value="fallback")
                     lead_info["current_field"] = "phone"
-                    lead_info["question_state"] = "fallback"
+
 
                 elif lead_info["current_field"] == "urgency":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field=None)
