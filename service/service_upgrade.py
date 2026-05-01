@@ -419,7 +419,9 @@ class ServiceLayer:
 
                 elif lead_info["current_field"] == "preferences":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="phone")
+                    self.leads_states.update_lead_question_state(lead_id=lead_info["lead_id"] , value="fallback")
                     lead_info["current_field"] = "phone"
+                    lead_info["question_state"] = "fallback"
 
                 elif lead_info["current_field"] == "urgency":
                     self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field=None)
