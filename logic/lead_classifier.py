@@ -10,12 +10,6 @@ class LeadClassifier:
         
         elif lead_score_info["total_score"] >= 6:
             return "Hot Lead"
-        
-        elif lead_score_info["total_score"] >= 5:
-            if lead_score_info["phone_score"] == 100:
-                return "Hot Lead"
-            else:
-                return "Cold Lead"
-        
+          
         else:
             return "Cold Lead"

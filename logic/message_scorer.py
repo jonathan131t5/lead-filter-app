@@ -29,14 +29,11 @@ class MessageScorer:
             
             if field == "phone":
                 if regular_attempt_number <= 1:
-                    rank_score += 100
-
-                elif regular_attempt_number >= 2 and reason != "regular_fallback":
-                    rank_score += 40
-                
+                    rank_score += 1
                 else:
-                    rank_score += 25
+                    rank_score = 0
             
+                print(f"PHONE SCORE: {rank_score}", flush=True)
             
             elif field == "urgency":
                 if 8 <= float(message_to_rank["value"]) <= 10:
