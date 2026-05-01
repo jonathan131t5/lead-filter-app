@@ -275,6 +275,7 @@ class ServiceLayer:
 
     def determine_final_status(self , lead_all_data):
         finalize_lead_status = self.finalize_lead_status(lead_info=lead_all_data["lead_scores_data"])
+        print(f"Final Status: {finalize_lead_status}" , flush=True)
         if finalize_lead_status is not None:
             lead_all_data["lead_base_data"]["final_status"] = finalize_lead_status["final_status"]
             return True
