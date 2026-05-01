@@ -22,7 +22,7 @@ class BaseQuestions:
             "מתי היית רוצה להתחיל?",
         ]
 
-    def phone_Base_question(self):
+    def phone_base_question(self):
         return [
             "בכדי לחזור אלייך תשאיר מספר טלפון" , 
             "כדי לשמור על קשר מה הטלפון שלך?" , 
@@ -31,16 +31,16 @@ class BaseQuestions:
 
     def process_base_question(self, field, ack_mode):
         if field == "goal":
-            questions = self.goal_Base_questions()
+            questions = self.goal_base_questions()
 
         elif field == "preferences":
-            questions = self.preferences_Base_questions()
+            questions = self.preferences_base_questions()
 
         elif field == "urgency":
-            questions = self.urgency_Base_questions()
+            questions = self.urgency_base_questions()
 
         elif field == "phone":
-            questions = self.phone_Base_questions()
+            questions = self.phone_base_question()
 
         else:
             raise TypeError("Invalid field")
