@@ -44,7 +44,7 @@ class BaseQuestions:
     def build_ack_prefix(self):
         return f"{random.choice(['מעולה', 'הבנתי', 'סבבה', 'אחלה'])}{random.choice([',', '.'])}"
 
-
+#
 
 class MissingQuestions:
     def goal_missing_questions(self, question_type, attempt_number):
