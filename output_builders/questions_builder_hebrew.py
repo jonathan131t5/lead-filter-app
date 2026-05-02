@@ -19,7 +19,7 @@ class BaseQuestions:
         ]
 
     def process_base_question(self, field, ack_mode):
-        print(f"FIELD: {field}", flush=True)
+        print(f"PROCESS BASE QUESTION FIELD={repr(field)} ACK_MODE={repr(ack_mode)}", flush=True)
         if field == "goal":
             questions = self.goal_base_questions()
 
@@ -30,7 +30,7 @@ class BaseQuestions:
             questions = self.phone_base_question()
 
         else:
-            raise TypeError("Invalid field")
+            raise TypeError(f"Invalid field: {repr(field)}")
 
         question = random.choice(questions)
 
@@ -38,6 +38,8 @@ class BaseQuestions:
             return f"{self.build_ack_prefix()} {question}"
 
         return question
+
+
 
     def build_ack_prefix(self):
         return f"{random.choice(['מעולה', 'הבנתי', 'סבבה', 'אחלה'])}{random.choice([',', '.'])}"
