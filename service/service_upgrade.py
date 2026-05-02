@@ -19,8 +19,8 @@ from logic.lead_classifier import LeadClassifier
 from logic.message_scorer import MessageScorer
 from logic.lead_score_manager import LeadScoreManager
 
-from output_builders.analyze_prompt_builder_hebrew import ConversationBuilder
-from output_builders.questions_builder_hebrew import (
+from output_builders.analyze_prompt_builder_english import ConversationBuilder
+from output_builders.questions_builder_english import (
     ProcessQuestion,
     BaseQuestions,
     MissingQuestions,
