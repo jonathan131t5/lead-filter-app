@@ -14,7 +14,7 @@ class BaseQuestions:
 
     def phone_base_question(self):
         return [
-            "What's the best number to reach you on?"
+            "What's the best number to reach you?"
         ]
 
     def process_base_question(self, field, ack_mode):
@@ -49,7 +49,7 @@ class MissingQuestions:
             ]
         elif question_type == "vague":
             return [
-                "Can you give me a bit more detail?"
+                "Can you share a bit more about what you want to achieve?"
             ]
         elif question_type == "avoid":
             return [
@@ -102,7 +102,7 @@ class ConfuseQuestions:
     def goal_confuse_questions(self, question_type):
         if question_type == "meaning":
             return [
-                "I mean what you'd like to achieve"
+                "I mean what you're looking to achieve."
             ]
         elif question_type == "answer_type":
             return [
@@ -110,21 +110,21 @@ class ConfuseQuestions:
             ]
         elif question_type == "focus":
             return [
-                "Right now I'm just asking about your goal"
+                "For now, I just need to understand what you're looking to achieve."
             ]
 
     def urgency_confuse_questions(self, question_type):
         if question_type == "meaning":
             return [
-                "I mean when you'd want to kick things off"
+                "I mean when you'd like to get started."
             ]
         elif question_type == "answer_type":
             return [
-                "Just write roughly when you'd want to start"
+                "Just write roughly when you'd like to get started."
             ]
         elif question_type == "focus":
             return [
-                "Just roughly when you'd like to start"
+                "For now, I just need to know roughly when you'd like to get started."
             ]
 
     def process_confuse_question(self, field, reason):
@@ -150,11 +150,11 @@ class FallBackQuestions:
     def phone_fallback_question(self, fallback_type):
         if fallback_type == "after_fallback":
             return [
-                "Alright, let's keep going — what's the best number to reach you on?"
+                "Alright, let's keep going — what's the best number to reach you?"
             ]
         elif fallback_type == "regular_fallback":
             return [
-                "Without a number we can't continue 🙏 if you'd like to keep going, just send it here"
+                "Without a number, we can't continue 🙏 If you'd like to keep going, just send it here."
             ]
 
     def urgency_fallback_questions(self, fallback_type):
