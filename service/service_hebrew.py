@@ -526,14 +526,13 @@ class ServiceLayer:
 
     def generate_lead_summary(self, summary_info, final_status_context):
         text = (
-            f"{final_status_context}\n\n"
-            f"פנייה חדשה מאת {summary_info['name']}.\n\n"
+            f"{summary_info['name']} — {final_status_context}\n\n"
             f"מטרה: {summary_info['goal_user']}\n"
             f"זמן התחלה: {summary_info['urgency_user']}\n\n"
-            f"ציון התאמה: {summary_info['total_score']}\n"
+            f"ציון: {summary_info['total_score']}\n"
             f"טלפון: {summary_info['phone_number']}"
         )
-        
+
         return text
     
 

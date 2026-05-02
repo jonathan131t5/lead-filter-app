@@ -514,10 +514,10 @@ class ServiceLayer:
 
     def generate_final_status_context(self, summary_info):
         if summary_info["final_status"] == "Hot Lead":
-            final_status_context = "New hot lead 🔥"
+            final_status_context = "Hot lead 🔥"
 
         elif summary_info["final_status"] == "Cold Lead":
-            final_status_context = "New cold lead 🧊"
+            final_status_context = "Cold lead 🧊"
 
         elif summary_info["final_status"] == "pending":
             final_status_context = "Lead in progress ⏳"
