@@ -19,6 +19,7 @@ class BaseQuestions:
         ]
 
     def process_base_question(self, field, ack_mode):
+        print(f"FIELD: {field}", flush=True)
         if field == "goal":
             questions = self.goal_base_questions()
 
