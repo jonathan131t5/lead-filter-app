@@ -96,7 +96,7 @@ class ServiceLayer:
         except Exception as e:
             logging.exception("SYSTEM ERROR")
             return {
-                "content" : "יש תקלה זמנית, נסה שוב עוד רגע." ,
+                "content": "Something went wrong. Please try again in a moment." ,
                 "status": "error"
             }
 
@@ -107,7 +107,7 @@ class ServiceLayer:
         
         #print(check)
         if check["status"] == "new":
-            return {"status" : "new" , "message" : "היי, לפני שנתחיל איך קוראים לך?"}
+            return {"status" : "new" , "message" : "Hey, before we get started, what's your name?"}
         
         if check["status"] == "exists" or check["status"] == "created":
             logging.info(f"User logged in / created. session_id={session_id} | lead_id={check["lead_id"]}")
