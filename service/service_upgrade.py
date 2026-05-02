@@ -440,7 +440,7 @@ class ServiceLayer:
 
         return True
 
-
+#
     
     def finalize_lead_status(self , lead_info):
         if lead_info["score_count"] == 3:
