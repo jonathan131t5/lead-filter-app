@@ -107,7 +107,7 @@ class ServiceLayer:
         
         #print(check)
         if check["status"] == "new":
-            return {"status" : "new" , "message" : "Hey, before we get started, what's your name?"}
+            return {"status" : "new" , "message" : "Hi, before we get started, what's your name?"}
         
         if check["status"] == "exists" or check["status"] == "created":
             logging.info(f"User logged in / created. session_id={session_id} | lead_id={check["lead_id"]}")
@@ -527,16 +527,14 @@ class ServiceLayer:
 
     def generate_lead_summary(self, summary_info, final_status_context):
         text = (
-            f"{final_status_context}\n\n"
-            f"New inquiry from {summary_info['name']}.\n\n"
+            f"{summary_info['name']} — {final_status_context}\n\n"
             f"Goal: {summary_info['goal_user']}\n"
-            f"Preferred timeline: {summary_info['urgency_user']}\n\n"
-            f"Match score: {summary_info['total_score']}\n"
+            f"Timeline: {summary_info['urgency_user']}\n\n"
+            f"Score: {summary_info['total_score']}\n"
             f"Phone: {summary_info['phone_number']}"
         )
-        
+
         return text
-    
 
     
     def upload_lead_summary(self , summary , lead_id):

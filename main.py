@@ -29,7 +29,7 @@ def serve_chat():
 
 @app.get("/dashboard")
 def serve_dashboard():
-    return FileResponse("dashboard.html")
+    return FileResponse("dashboard_english.html")
 
 class MessageRequirements(BaseModel):
     name: str | None = None
