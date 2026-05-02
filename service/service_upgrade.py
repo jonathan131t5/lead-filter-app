@@ -1,4 +1,4 @@
-
+import time
 from datetime import datetime, timezone
 import sqlite3
 import traceback
@@ -117,6 +117,9 @@ class ServiceLayer:
 
 
     def run_lead_flow(self , prepare_lead_context , content=None):
+        start_total = time.time()
+        logging.info("[TIMER] run_lead_flow START")
+        
         logging.info(
             f"lead context ready lead_id={prepare_lead_context['lead_base_data']['lead_id']}"
             f"field={prepare_lead_context['lead_conversation_states_data']['current_field']}"
@@ -291,8 +294,14 @@ class ServiceLayer:
     
     def generate_analyze(self , lead_id , current_field , content):
         ai_input = self.conversation_builder.build_prompt(current_field=current_field , content=content)
+
+        before_ai = time.time()
+        logging.info("[TIMER] BEFORE OPENAI")
+
         ai_response = self.openai_client.ai_reply(ai_input)
         
+        logging.info(f"[TIMER] AFTER OPENAI | took={time.time() - before_ai:.2f}s")
+
         self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content)
         print(ai_response)
         return ai_response
