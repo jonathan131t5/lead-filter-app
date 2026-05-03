@@ -245,72 +245,13 @@
     flex-shrink: 0;
   }
 
-  .phone-gate,
+
   .input-area {
     border-top: 1px solid var(--border);
     background: rgba(22,22,26,0.98);
     flex-shrink: 0;
   }
 
-  .phone-gate {
-    padding: 14px;
-    padding-bottom: max(14px, env(safe-area-inset-bottom));
-  }
-
-  .phone-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-    font-weight: 400;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-  }
-
-  .phone-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .phone-input {
-    flex: 1;
-    min-width: 0;
-    height: 48px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    padding: 0 14px;
-    color: var(--text);
-    font-size: 16px;
-    font-family: 'Heebo', sans-serif;
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-    direction: ltr;
-    -webkit-appearance: none;
-  }
-
-  .phone-input:focus { border-color: rgba(200,255,87,0.55); background: #202028; }
-  .phone-input::placeholder { color: #777785; }
-
-  .phone-btn {
-    height: 48px;
-    padding: 0 18px;
-    background: var(--accent);
-    color: #0d0d0f;
-    border: none;
-    border-radius: 13px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Heebo', sans-serif;
-    transition: opacity 0.2s, transform 0.08s;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .phone-btn:active { opacity: 0.85; transform: scale(0.98); }
-  .phone-btn:disabled { opacity: 0.55; }
 
   .input-area {
     padding: 10px 12px;
@@ -341,7 +282,7 @@
     max-height: 112px;
     line-height: 1.45;
     transition: border-color 0.2s, background 0.2s;
-    overflow-y: auto;
+    overflow-y: hidden;
     -webkit-appearance: none;
   }
 
@@ -377,9 +318,7 @@
     .msg { max-width: 88%; }
     .bubble { font-size: 14px; padding: 10px 13px; }
     .header { padding-right: 12px; padding-left: 12px; }
-    .phone-gate { padding-right: 10px; padding-left: 10px; }
     .input-area { padding-right: 9px; padding-left: 9px; }
-    .phone-btn { padding: 0 14px; }
   }
 </style>
 </head>
@@ -401,13 +340,6 @@
 
   <div class="done-banner" id="doneBanner">✓ תודה! נחזור אליך בקרוב</div>
 
-  <div class="phone-gate" id="phoneGate">
-    <div class="phone-label">מספר טלפון לאימות</div>
-    <div class="phone-row">
-      <input class="phone-input" id="phoneInput" type="tel" placeholder="05X-XXXXXXX" />
-      <button class="phone-btn" id="phoneBtn" onclick="startChat()">התחל</button>
-    </div>
-  </div>
 
   <div class="input-area" id="inputArea">
     <div class="input-row">
@@ -425,14 +357,12 @@
 
 <script>
   const API = window.location.origin;
-  let phone = '';
   let name = null;
   let waitingForName = false;
   let done = false;
 
   const messagesEl = document.getElementById('messages');
   const inputArea = document.getElementById('inputArea');
-  const phoneGate = document.getElementById('phoneGate');
   const msgInput = document.getElementById('msgInput');
   const sendBtn = document.getElementById('sendBtn');
   const doneBanner = document.getElementById('doneBanner');
@@ -485,31 +415,6 @@
     return await res.json();
   }
 
-  async function startChat() {
-    const val = document.getElementById('phoneInput').value.trim();
-    if (!val) return;
-    phone = val;
-    document.getElementById('phoneBtn').disabled = true;
-    showTyping();
-    try {
-      const data = await callAPI(null, null);
-      hideTyping();
-      if (data.status === 'new' || (data.content && data.content.includes('שם'))) {
-        waitingForName = true;
-      }
-      phoneGate.style.display = 'none';
-      inputArea.style.display = 'block';
-      msgInput.disabled = false;
-      sendBtn.disabled = false;
-      addMsg(data.content, 'bot');
-      setTimeout(() => msgInput.focus(), 100);
-    } catch(e) {
-      hideTyping();
-      document.getElementById('phoneBtn').disabled = false;
-      addMsg('לא ניתן להתחבר לשרת. בדוק שה-API פועל.', 'bot', true);
-    }
-  }
-
   async function sendMessage() {
     if (done) return;
     const text = msgInput.value.trim();
@@ -559,10 +464,6 @@
     }
   });
 
-  document.getElementById('phoneInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') startChat();
-  });
-
   msgInput.addEventListener('input', () => {
     if (waitingForName && msgInput.value.length > 20) {
       msgInput.value = msgInput.value.slice(0, 20);
@@ -608,7 +509,6 @@
 
       if (data.status === 'new') waitingForName = true;
 
-      phoneGate.style.display = 'none';
       inputArea.style.display = 'block';
       msgInput.disabled = false;
       sendBtn.disabled = false;
