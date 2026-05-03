@@ -140,7 +140,7 @@
   .messages {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-y: hidden;
+    overflow-y: auto;
     overflow-x: hidden;
     padding: 18px 14px 16px;
     display: flex;
@@ -282,7 +282,7 @@
     max-height: 112px;
     line-height: 1.45;
     transition: border-color 0.2s, background 0.2s;
-    overflow-y: auto;
+    overflow-y: hidden;
     -webkit-appearance: none;
   }
 
@@ -513,6 +513,7 @@
 
       if (data.status === 'new') waitingForName = true;
 
+      
 
       inputArea.style.display = 'block';
       msgInput.disabled = false;
