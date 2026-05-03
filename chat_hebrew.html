@@ -419,7 +419,6 @@
         </svg>
       </button>
     </div>
-    <div class="char-count" id="charCount">20</div>
 
   </div>
 </div>
@@ -576,10 +575,6 @@
     msgInput.style.height = 'auto';
     msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
     sendBtn.disabled = msgInput.value.trim() === '';
-
-    const max = waitingForName ? 20 : 100;
-    const left = max - msgInput.value.length;
-    document.getElementById('charCount').innerText = left;
   });
 
   if (window.visualViewport) {
@@ -612,8 +607,6 @@
       addMsg(data.content, 'bot');
 
       if (data.status === 'new') waitingForName = true;
-
-      document.getElementById('charCount').innerText = waitingForName ? 20 : 100;
 
       phoneGate.style.display = 'none';
       inputArea.style.display = 'block';

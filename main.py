@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from service.service_english import ServiceLayer
+from service.service_hebrew import ServiceLayer
 
 from fastapi import Request, Response
 import uuid
@@ -24,12 +24,12 @@ app.add_middleware(
 
 @app.get("/")
 def serve_chat():
-    return FileResponse("chat_english.html")
+    return FileResponse("chat_hebrew.html")
 
 
 @app.get("/dashboard")
 def serve_dashboard():
-    return FileResponse("dashboard_english.html")
+    return FileResponse("dashboard_hebrew.html")
 
 class MessageRequirements(BaseModel):
     name: str | None = None
