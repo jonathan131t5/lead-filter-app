@@ -16,7 +16,6 @@ from data_base.connection import Connection
 
 from integrations.mail_integration import send_email
 
-
 from logic.ai_result_handler import OpenAIClient
 from logic.lead_classifier import LeadClassifier
 from logic.message_scorer import MessageScorer
