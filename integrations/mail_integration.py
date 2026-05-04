@@ -41,106 +41,129 @@ def send_email(lead_data):
     score_pct      = min(score * 10, 100)
 
     content = f"""
-<div style="margin:0;padding:0;background:#f3f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-  <div style="padding:36px 16px;">
-    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e6eaf0;border-radius:22px;overflow:hidden;box-shadow:0 18px 45px rgba(15,23,42,0.10);">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f3f5f9;margin:0;padding:0;font-family:Arial,'Segoe UI',sans-serif;">
+  <tr>
+    <td align="center" style="padding:36px 14px;">
 
-      <div style="padding:30px 32px 24px;background:#0b1220;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#22c55e;margin-bottom:18px;">
-          Lead Qualification System
-        </div>
-
-        <div style="font-size:26px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:-0.6px;margin-bottom:8px;">
-          New lead received
-        </div>
-
-        <div style="font-size:14px;line-height:1.5;color:#94a3b8;">
-          A new inquiry was submitted through your lead filter.
-        </div>
-      </div>
-
-      <div style="padding:28px 32px 24px;background:#ffffff;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#ffffff;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center;">
-              {initials}
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="width:560px;max-width:560px;background:#ffffff;border:1px solid #e5eaf1;border-radius:18px;overflow:hidden;">
+        
+        <tr>
+          <td style="background:#0b1220;padding:30px 32px 26px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#22c55e;margin-bottom:18px;">
+              Lead Qualification System
             </div>
-
-            <div>
-              <div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.2;">
-                {lead_data["name"]}
-              </div>
-              <div style="font-size:13px;color:#64748b;margin-top:5px;">
-                {phone}
-              </div>
+            <div style="font-size:26px;line-height:32px;font-weight:800;color:#ffffff;margin-bottom:8px;">
+              New lead received
             </div>
-          </div>
-
-          <div style="white-space:nowrap;background:{status_bg};border:1px solid {status_border};color:{status_text};font-size:12px;font-weight:800;padding:8px 13px;border-radius:999px;">
-            ● {status_label}
-          </div>
-        </div>
-      </div>
-
-      <div style="padding:0 32px 28px;background:#ffffff;">
-        <div style="border:1px solid #e8edf4;border-radius:18px;overflow:hidden;background:#fbfcfe;">
-          
-          <div style="display:flex;">
-            <div style="width:42%;padding:22px 22px;border-right:1px solid #e8edf4;">
-              <div style="font-size:11px;font-weight:800;letter-spacing:0.10em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;">
-                Score
-              </div>
-              <div style="font-size:42px;line-height:1;font-weight:900;color:#0f172a;letter-spacing:-1px;">
-                {score}<span style="font-size:17px;color:#94a3b8;font-weight:800;">/10</span>
-              </div>
-              <div style="height:5px;background:#e2e8f0;border-radius:999px;margin-top:16px;overflow:hidden;">
-                <div style="width:{score_pct}%;height:5px;background:#10b981;border-radius:999px;"></div>
-              </div>
+            <div style="font-size:14px;line-height:21px;color:#94a3b8;">
+              A new inquiry was submitted through your lead filter.
             </div>
+          </td>
+        </tr>
 
-            <div style="width:58%;padding:22px 22px;">
-              <div style="font-size:11px;font-weight:800;letter-spacing:0.10em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;">
-                Timeline
-              </div>
-              <div style="font-size:15px;line-height:1.5;font-weight:750;color:#0f172a;">
-                <span style="color:#f59e0b;">●</span>
-                {lead_data["urgency_user"]}
-              </div>
-            </div>
-          </div>
+        <tr>
+          <td style="padding:28px 32px 22px;background:#ffffff;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+              <tr>
+                <td width="58" valign="middle">
+                  <table role="presentation" width="52" height="52" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td align="center" valign="middle" style="width:52px;height:52px;background:#5b5cf6;border-radius:14px;color:#ffffff;font-size:17px;font-weight:800;">
+                        {initials}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
 
-          <div style="border-top:1px solid #e8edf4;padding:22px;">
-            <div style="font-size:11px;font-weight:800;letter-spacing:0.10em;text-transform:uppercase;color:#94a3b8;margin-bottom:10px;">
-              Goal
-            </div>
-            <div style="font-size:16px;line-height:1.55;font-weight:750;color:#0f172a;">
-              {lead_data["goal_user"]}
-            </div>
-          </div>
+                <td valign="middle" style="padding-left:12px;">
+                  <div style="font-size:18px;line-height:22px;font-weight:800;color:#0f172a;">
+                    {lead_data["name"]}
+                  </div>
+                  <div style="font-size:13px;line-height:18px;color:#64748b;margin-top:4px;">
+                    {phone}
+                  </div>
+                </td>
 
-        </div>
-      </div>
+                <td align="right" valign="middle" width="130">
+                  <span style="display:inline-block;background:{status_bg};border:1px solid {status_border};color:{status_text};font-size:12px;font-weight:800;padding:8px 13px;border-radius:999px;white-space:nowrap;">
+                    ● {status_label}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-      <div style="padding:0 32px 32px;background:#ffffff;">
-        <a href="{whatsapp_link}" style="display:block;background:#16a34a;color:#ffffff;text-decoration:none;text-align:center;padding:16px 18px;border-radius:14px;font-size:15px;font-weight:850;margin-bottom:12px;">
-          Message on WhatsApp
-        </a>
+        <tr>
+          <td style="padding:0 32px 26px;background:#ffffff;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #e5eaf1;border-radius:16px;background:#fbfcfe;overflow:hidden;">
+              <tr>
+                <td width="42%" valign="top" style="padding:22px;border-right:1px solid #e5eaf1;">
+                  <div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:10px;">
+                    Score
+                  </div>
+                  <div style="font-size:42px;line-height:44px;font-weight:900;color:#0f172a;">
+                    {score}<span style="font-size:17px;color:#94a3b8;font-weight:800;">/10</span>
+                  </div>
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:14px;">
+                    <tr>
+                      <td style="height:5px;background:#e2e8f0;border-radius:999px;">
+                        <div style="height:5px;width:{score_pct}%;background:#10b981;border-radius:999px;"></div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
 
-        <a href="{dashboard_link}" style="display:block;background:#ffffff;color:#0f172a;text-decoration:none;text-align:center;padding:15px 18px;border-radius:14px;font-size:14px;font-weight:800;border:1px solid #dbe3ee;">
-          View in Dashboard →
-        </a>
-      </div>
+                <td width="58%" valign="top" style="padding:22px;">
+                  <div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:14px;">
+                    Timeline
+                  </div>
+                  <div style="font-size:15px;line-height:22px;font-weight:700;color:#0f172a;">
+                    <span style="color:#f59e0b;">●</span>&nbsp;{lead_data["urgency_user"]}
+                  </div>
+                </td>
+              </tr>
 
-      <div style="padding:18px 32px;background:#f8fafc;border-top:1px solid #e8edf4;text-align:center;">
-        <div style="font-size:12px;color:#94a3b8;">
-          Sent automatically · Lead Qualification System
-        </div>
-      </div>
+              <tr>
+                <td colspan="2" style="border-top:1px solid #e5eaf1;padding:22px;">
+                  <div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:10px;">
+                    Goal
+                  </div>
+                  <div style="font-size:16px;line-height:24px;font-weight:700;color:#0f172a;">
+                    {lead_data["goal_user"]}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-    </div>
-  </div>
-</div>
-    """
+        <tr>
+          <td style="padding:0 32px 32px;background:#ffffff;">
+            <a href="{whatsapp_link}" style="display:block;background:#16a34a;color:#ffffff;text-decoration:none;text-align:center;padding:16px 18px;border-radius:13px;font-size:15px;font-weight:800;">
+              Message on WhatsApp
+            </a>
+
+            <div style="height:12px;line-height:12px;font-size:12px;">&nbsp;</div>
+
+            <a href="{dashboard_link}" style="display:block;background:#ffffff;color:#0f172a;text-decoration:none;text-align:center;padding:15px 18px;border-radius:13px;font-size:14px;font-weight:800;border:1px solid #dbe3ee;">
+              View in Dashboard →
+            </a>
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:18px 32px;background:#f8fafc;border-top:1px solid #e5eaf1;font-size:12px;color:#94a3b8;">
+            Sent automatically · Lead Qualification System
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+"""
 
     message = Mail(
         from_email="jona.wexler@gmail.com",
