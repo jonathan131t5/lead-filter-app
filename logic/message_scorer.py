@@ -23,7 +23,7 @@ class MessageScorer:
             
             if field == "phone":
                 if regular_attempt_number <= 1:
-                    rank_score += 1
+                    rank_score += 2
                 else:
                     rank_score = 0
             

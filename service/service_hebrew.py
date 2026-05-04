@@ -14,6 +14,8 @@ from data_access.lead_summary_context_repository import LeadSummaryContextReposi
 
 from data_base.connection import Connection
 
+from integrations.mail_integration import send_email
+
 from logic.ai_result_handler import OpenAIClient
 from logic.lead_classifier import LeadClassifier
 from logic.message_scorer import MessageScorer
@@ -161,7 +163,10 @@ class ServiceLayer:
         logging.info(f"Lead finalize try, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | final_status={prepare_lead_context["lead_base_data"]["final_status"]} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
         logging.debug(prepare_lead_context)
         if determine_final_status == True:
-            self.build_lead_summary(lead_all_data=prepare_lead_context)
+            raw_summary_context = self.build_lead_summary(lead_all_data=prepare_lead_context)
+            final_summary_context = self.field_unknown_check(raw_summary_context)
+            
+            send_email(final_summary_context)
         
         self.db.commit()
         
