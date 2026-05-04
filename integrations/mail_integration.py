@@ -41,72 +41,104 @@ def send_email(lead_data):
     score_pct      = min(score * 10, 100)
 
     content = f"""
-<div style="font-family:-apple-system,'Segoe UI',Helvetica,sans-serif;background:#e8eaf0;padding:40px 20px;">
-<div style="max-width:480px;margin:0 auto;">
-<div style="background:#0f172a;border-radius:24px;overflow:hidden;">
+<div style="margin:0;padding:0;background:#f3f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+  <div style="padding:36px 16px;">
+    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e6eaf0;border-radius:22px;overflow:hidden;box-shadow:0 18px 45px rgba(15,23,42,0.10);">
 
-  <div style="padding:32px 32px 28px;border-bottom:1px solid rgba(255,255,255,0.07);">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-      <div style="width:6px;height:6px;border-radius:50%;background:#22c55e;"></div>
-      <span style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#475569;">Lead Qualification System</span>
-    </div>
-    <div style="font-size:24px;font-weight:700;color:#f8fafc;letter-spacing:-0.5px;margin-bottom:4px;">New lead received</div>
-    <div style="font-size:13px;color:#475569;">A new inquiry was submitted through your lead filter.</div>
-  </div>
+      <div style="padding:30px 32px 24px;background:#0b1220;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#22c55e;margin-bottom:18px;">
+          Lead Qualification System
+        </div>
 
-  <div style="padding:24px 32px;border-bottom:1px solid rgba(255,255,255,0.06);">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;">{initials}</div>
-        <div>
-          <div style="font-size:16px;font-weight:700;color:#f1f5f9;">{lead_data["name"]}</div>
-          <div style="font-size:12px;color:#64748b;margin-top:2px;font-family:monospace;">{phone}</div>
+        <div style="font-size:26px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:-0.6px;margin-bottom:8px;">
+          New lead received
+        </div>
+
+        <div style="font-size:14px;line-height:1.5;color:#94a3b8;">
+          A new inquiry was submitted through your lead filter.
         </div>
       </div>
-      <div style="background:{status_bg};border:1px solid {status_border};padding:6px 14px;border-radius:999px;display:flex;align-items:center;gap:6px;">
-        <div style="width:6px;height:6px;border-radius:50%;background:{status_dot};"></div>
-        <span style="font-size:12px;font-weight:600;color:{status_text};">{status_label}</span>
+
+      <div style="padding:28px 32px 24px;background:#ffffff;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#ffffff;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center;">
+              {initials}
+            </div>
+
+            <div>
+              <div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.2;">
+                {lead_data["name"]}
+              </div>
+              <div style="font-size:13px;color:#64748b;margin-top:5px;">
+                {phone}
+              </div>
+            </div>
+          </div>
+
+          <div style="white-space:nowrap;background:{status_bg};border:1px solid {status_border};color:{status_text};font-size:12px;font-weight:800;padding:8px 13px;border-radius:999px;">
+            ● {status_label}
+          </div>
+        </div>
       </div>
+
+      <div style="padding:0 32px 28px;background:#ffffff;">
+        <div style="border:1px solid #e8edf4;border-radius:18px;overflow:hidden;background:#fbfcfe;">
+          
+          <div style="display:flex;">
+            <div style="width:42%;padding:22px 22px;border-right:1px solid #e8edf4;">
+              <div style="font-size:11px;font-weight:800;letter-spacing:0.10em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;">
+                Score
+              </div>
+              <div style="font-size:42px;line-height:1;font-weight:900;color:#0f172a;letter-spacing:-1px;">
+                {score}<span style="font-size:17px;color:#94a3b8;font-weight:800;">/10</span>
+              </div>
+              <div style="height:5px;background:#e2e8f0;border-radius:999px;margin-top:16px;overflow:hidden;">
+                <div style="width:{score_pct}%;height:5px;background:#10b981;border-radius:999px;"></div>
+              </div>
+            </div>
+
+            <div style="width:58%;padding:22px 22px;">
+              <div style="font-size:11px;font-weight:800;letter-spacing:0.10em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;">
+                Timeline
+              </div>
+              <div style="font-size:15px;line-height:1.5;font-weight:750;color:#0f172a;">
+                <span style="color:#f59e0b;">●</span>
+                {lead_data["urgency_user"]}
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid #e8edf4;padding:22px;">
+            <div style="font-size:11px;font-weight:800;letter-spacing:0.10em;text-transform:uppercase;color:#94a3b8;margin-bottom:10px;">
+              Goal
+            </div>
+            <div style="font-size:16px;line-height:1.55;font-weight:750;color:#0f172a;">
+              {lead_data["goal_user"]}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div style="padding:0 32px 32px;background:#ffffff;">
+        <a href="{whatsapp_link}" style="display:block;background:#16a34a;color:#ffffff;text-decoration:none;text-align:center;padding:16px 18px;border-radius:14px;font-size:15px;font-weight:850;margin-bottom:12px;">
+          Message on WhatsApp
+        </a>
+
+        <a href="{dashboard_link}" style="display:block;background:#ffffff;color:#0f172a;text-decoration:none;text-align:center;padding:15px 18px;border-radius:14px;font-size:14px;font-weight:800;border:1px solid #dbe3ee;">
+          View in Dashboard →
+        </a>
+      </div>
+
+      <div style="padding:18px 32px;background:#f8fafc;border-top:1px solid #e8edf4;text-align:center;">
+        <div style="font-size:12px;color:#94a3b8;">
+          Sent automatically · Lead Qualification System
+        </div>
+      </div>
+
     </div>
   </div>
-
-  <div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.06);">
-    <div style="flex:1;padding:20px 32px;border-right:1px solid rgba(255,255,255,0.06);">
-      <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#475569;margin-bottom:8px;">Score</div>
-      <div style="font-size:32px;font-weight:800;color:#10b981;line-height:1;">{score}</div>
-      <div style="margin-top:10px;height:3px;background:rgba(255,255,255,0.07);border-radius:999px;overflow:hidden;">
-        <div style="width:{score_pct}%;height:100%;background:#10b981;border-radius:999px;"></div>
-      </div>
-    </div>
-    <div style="flex:1;padding:20px 32px;">
-      <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#475569;margin-bottom:8px;">Timeline</div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <div style="width:6px;height:6px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></div>
-        <span style="font-size:14px;font-weight:600;color:#f1f5f9;">{lead_data["urgency_user"]}</span>
-      </div>
-    </div>
-  </div>
-
-  <div style="padding:20px 32px;border-bottom:1px solid rgba(255,255,255,0.06);">
-    <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#475569;margin-bottom:8px;">Goal</div>
-    <div style="font-size:15px;font-weight:600;color:#f1f5f9;">{lead_data["goal_user"]}</div>
-  </div>
-
-  <div style="padding:24px 32px;display:flex;flex-direction:column;gap:10px;">
-    <a href="{dashboard_link}" style="display:block;text-align:center;background:#f8fafc;color:#0f172a;text-decoration:none;padding:16px;border-radius:14px;font-size:14px;font-weight:700;">
-      View in Dashboard →
-    </a>
-    <a href="{whatsapp_link}" style="display:block;text-align:center;background:#16a34a;color:#fff;text-decoration:none;padding:16px;border-radius:14px;font-size:14px;font-weight:700;">
-      Message on WhatsApp
-    </a>
-  </div>
-
-  <div style="padding:16px 32px;border-top:1px solid rgba(255,255,255,0.05);">
-    <div style="font-size:11px;color:#334155;text-align:center;">Sent automatically · Lead Qualification System</div>
-  </div>
-
-</div>
-</div>
 </div>
     """
 
