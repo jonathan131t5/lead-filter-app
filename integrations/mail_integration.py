@@ -7,110 +7,114 @@ load_dotenv()
 
 api_key = os.getenv("SENDGRID_API_KEY")
 
+DASHBOARD_URL = "https://lead-filter-app.onrender.com/dashboard"
+
 
 def send_email(lead_data):
     status = lead_data["final_status"]
 
     if status.lower() in ["hot lead", "hot"]:
-        status_color_bg = "#dcfce7"
-        status_color_text = "#166534"
-        status_dot = "#16a34a"
-        status_label = "Hot Lead"
+        status_bg     = "#ecfdf5"
+        status_text   = "#065f46"
+        status_dot    = "#10b981"
+        status_label  = "Hot Lead"
     elif status.lower() in ["cold lead", "cold"]:
-        status_color_bg = "#fee2e2"
-        status_color_text = "#991b1b"
-        status_dot = "#dc2626"
-        status_label = "Cold Lead"
+        status_bg     = "#fef2f2"
+        status_text   = "#991b1b"
+        status_dot    = "#ef4444"
+        status_label  = "Cold Lead"
     else:
-        status_color_bg = "#f1f5f9"
-        status_color_text = "#475569"
-        status_dot = "#94a3b8"
-        status_label = "Pending"
+        status_bg     = "#f8fafc"
+        status_text   = "#475569"
+        status_dot    = "#94a3b8"
+        status_label  = "Pending"
 
-    phone = lead_data["phone_number"]
-    whatsapp_link = f"https://wa.me/972{phone[1:]}"
-    initials = "".join([w[0] for w in lead_data["name"].split()][:2]).upper()
-    score_pct = min(int(lead_data["total_score"]) * 10, 100)
+    phone          = lead_data["phone_number"]
+    lead_id        = lead_data["lead_id"]
+    whatsapp_link  = f"https://wa.me/972{phone[1:]}"
+    dashboard_link = f"{DASHBOARD_URL}?lead={lead_id}"
+    initials       = "".join([w[0] for w in lead_data["name"].split()][:2]).upper()
+    score          = int(lead_data["total_score"])
+    score_pct      = min(score * 10, 100)
 
     content = f"""
-    <div style="font-family:-apple-system,'Segoe UI',sans-serif; background:#f8fafc; padding:24px;">
-      <div style="max-width:520px; margin:auto; background:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e2e8f0;">
+<div style="font-family:-apple-system,'Segoe UI',Helvetica,sans-serif;background:#f1f5f9;padding:40px 20px;min-height:100vh;">
+<div style="max-width:500px;margin:0 auto;">
 
-        <div style="background:#0f172a; padding:28px 28px 24px;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-            <div style="width:7px; height:7px; border-radius:50%; background:#22c55e;"></div>
-            <span style="font-size:11px; color:#64748b; letter-spacing:0.08em; text-transform:uppercase;">Lead Qualification System</span>
-          </div>
-          <h2 style="margin:0 0 6px; font-size:22px; font-weight:500; color:#f8fafc;">New lead received</h2>
-          <p style="margin:0; font-size:13px; color:#64748b;">A new inquiry was submitted through your lead filter app.</p>
-        </div>
+  <div style="margin-bottom:6px;">
+    <span style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;">Lead Qualification System</span>
+  </div>
+  <h1 style="margin:0 0 28px;font-size:26px;font-weight:700;color:#0f172a;letter-spacing:-0.5px;">New lead received</h1>
 
-        <div style="padding:20px 28px 0;">
-          <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; background:{status_color_bg}; font-size:12px; font-weight:500; color:{status_color_text};">
-            <span style="width:6px; height:6px; border-radius:50%; background:{status_dot}; display:inline-block;"></span>
-            {status_label}
-          </span>
-        </div>
+  <div style="background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #e2e8f0;">
 
-        <div style="padding:20px 28px;">
+    <div style="padding:14px 24px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:{status_dot};flex-shrink:0;"></div>
+      <span style="font-size:13px;font-weight:600;color:{status_text};">{status_label}</span>
+    </div>
 
-          <div style="display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid #f1f5f9;">
-            <div style="width:36px; height:36px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:500; color:#3730a3; flex-shrink:0;">{initials}</div>
-            <div>
-              <p style="margin:0 0 2px; font-size:11px; color:#94a3b8;">Name</p>
-              <p style="margin:0; font-size:15px; font-weight:500; color:#0f172a;">{lead_data["name"]}</p>
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr;">
-            <div style="padding:14px 16px 14px 0; border-bottom:1px solid #f1f5f9; border-right:1px solid #f1f5f9;">
-              <p style="margin:0 0 2px; font-size:11px; color:#94a3b8;">Phone</p>
-              <p style="margin:0; font-size:14px; font-weight:500; color:#0f172a; font-family:monospace;">{phone}</p>
-            </div>
-            <div style="padding:14px 0 14px 16px; border-bottom:1px solid #f1f5f9;">
-              <p style="margin:0 0 2px; font-size:11px; color:#94a3b8;">Score</p>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:22px; font-weight:500; color:#16a34a;">{lead_data["total_score"]}</span>
-                <div style="flex:1; background:#f1f5f9; border-radius:999px; height:6px; overflow:hidden; max-width:60px;">
-                  <div style="width:{score_pct}%; height:100%; background:#16a34a; border-radius:999px;"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style="padding:14px 0; border-bottom:1px solid #f1f5f9;">
-            <p style="margin:0 0 2px; font-size:11px; color:#94a3b8;">Goal</p>
-            <p style="margin:0; font-size:14px; font-weight:500; color:#0f172a;">{lead_data["goal_user"]}</p>
-          </div>
-
-          <div style="padding:14px 0;">
-            <p style="margin:0 0 2px; font-size:11px; color:#94a3b8;">Timeline</p>
-            <div style="display:flex; align-items:center; gap:6px;">
-              <span style="width:7px; height:7px; border-radius:50%; background:#f59e0b; display:inline-block;"></span>
-              <p style="margin:0; font-size:14px; font-weight:500; color:#0f172a;">{lead_data["urgency_user"]}</p>
-            </div>
-          </div>
-
-        </div>
-
-        <div style="padding:0 28px 28px;">
-          <a href="{whatsapp_link}" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#16a34a; color:white; text-decoration:none; padding:14px; border-radius:10px; font-size:14px; font-weight:500;">
-            Message on WhatsApp
-          </a>
-        </div>
-
-        <div style="padding:14px 28px; border-top:1px solid #f1f5f9; background:#f8fafc;">
-          <p style="margin:0; font-size:11px; color:#94a3b8; text-align:center;">Sent automatically by your lead qualification system</p>
-        </div>
-
+    <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:14px;">
+      <div style="width:42px;height:42px;border-radius:50%;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#5b21b6;flex-shrink:0;">{initials}</div>
+      <div>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:3px;font-weight:500;">Name</div>
+        <div style="font-size:17px;font-weight:700;color:#0f172a;">{lead_data["name"]}</div>
       </div>
     </div>
+
+    <div style="display:flex;border-bottom:1px solid #f1f5f9;">
+      <div style="flex:1;padding:18px 24px;border-right:1px solid #f1f5f9;">
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;font-weight:500;">Phone</div>
+        <div style="font-size:15px;font-weight:600;color:#0f172a;font-family:monospace;">{phone}</div>
+      </div>
+      <div style="flex:1;padding:18px 24px;">
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;font-weight:500;">Score</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;font-weight:800;color:#10b981;">{score}</span>
+          <div style="flex:1;height:5px;background:#f1f5f9;border-radius:999px;overflow:hidden;max-width:56px;">
+            <div style="width:{score_pct}%;height:100%;background:#10b981;border-radius:999px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:18px 24px;border-bottom:1px solid #f1f5f9;">
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;font-weight:500;">Goal</div>
+      <div style="font-size:15px;font-weight:600;color:#0f172a;">{lead_data["goal_user"]}</div>
+    </div>
+
+    <div style="padding:18px 24px;border-bottom:1px solid #f1f5f9;">
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;font-weight:500;">Timeline</div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></div>
+        <div style="font-size:15px;font-weight:600;color:#0f172a;">{lead_data["urgency_user"]}</div>
+      </div>
+    </div>
+
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:10px;">
+      <a href="{dashboard_link}"
+         style="display:block;text-align:center;background:#0f172a;color:#ffffff;text-decoration:none;padding:15px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.01em;">
+        View in Dashboard
+      </a>
+      <a href="{whatsapp_link}"
+         style="display:block;text-align:center;background:#22c55e;color:#ffffff;text-decoration:none;padding:15px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.01em;">
+        Message on WhatsApp
+      </a>
+    </div>
+
+  </div>
+
+  <p style="margin:20px 0 0;font-size:12px;color:#94a3b8;text-align:center;">
+    Sent automatically &middot; Lead Qualification System
+  </p>
+
+</div>
+</div>
     """
 
     message = Mail(
         from_email="jona.wexler@gmail.com",
         to_emails="jona.wexler@gmail.com",
-        subject=f"New Lead - {status_label}",
+        subject=f"New Lead — {status_label} · {lead_data['name']}",
         html_content=content,
     )
 
@@ -118,8 +122,6 @@ def send_email(lead_data):
     response = sg.send(message)
 
     return response.status_code
-
-
 
 
 

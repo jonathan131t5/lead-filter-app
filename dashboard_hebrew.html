@@ -679,7 +679,13 @@
     renderLeads(getFilteredLeads());
   });
 
-  loadLeads();
+  loadLeads().then(() => {
+  const id = new URLSearchParams(window.location.search).get("lead");
+  if (id) {
+    const lead = allLeads.find(l => String(l.lead_id) === String(id));
+    if (lead) openLead(lead);
+  }
+});
 </script>
 </body>
 </html>
