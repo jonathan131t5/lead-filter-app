@@ -14,6 +14,8 @@ from data_access.lead_summary_context_repository import LeadSummaryContextReposi
 
 from data_base.connection import Connection
 
+from integrations.mail_integration import send_email
+
 from logic.ai_result_handler import OpenAIClient
 from logic.lead_classifier import LeadClassifier
 from logic.message_scorer import MessageScorer
@@ -496,7 +498,7 @@ class ServiceLayer:
         final_summary = self.generate_lead_summary(summary_info=summary_info , final_status_context=final_status_context)
 
         self.upload_lead_summary(summary=final_summary , lead_id=summary_info["lead_id"])
-
+        send_email(summary_info)
     
 
 
