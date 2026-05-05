@@ -14,178 +14,249 @@ def send_email(lead_data):
     status = lead_data["final_status"]
 
     if status.lower() in ["hot lead", "hot"]:
-        status_text  = "#10b981"
+        badge_bg     = "#f0fdf4"
+        badge_border = "#86efac"
+        badge_color  = "#15803d"
+        dot_color    = "#16a34a"
         status_label = "Hot Lead"
     elif status.lower() in ["cold lead", "cold"]:
-        status_text  = "#ef4444"
+        badge_bg     = "#eff6ff"
+        badge_border = "#93c5fd"
+        badge_color  = "#1d4ed8"
+        dot_color    = "#3b82f6"
         status_label = "Cold Lead"
     else:
-        status_text  = "#94a3b8"
+        badge_bg     = "#fafafa"
+        badge_border = "#d4d4d8"
+        badge_color  = "#52525b"
+        dot_color    = "#a1a1aa"
         status_label = "Pending"
 
     phone          = lead_data["phone_number"]
     lead_id        = lead_data["lead_id"]
     whatsapp_link  = f"https://wa.me/972{phone[1:]}"
     dashboard_link = f"{DASHBOARD_URL}?lead={lead_id}"
-    score          = int(lead_data["total_score"])
-    
-    content = f"""
-<table width="100%" cellpadding="0" cellspacing="0" style="margin:0;padding:0;background:#f3f6fb;font-family:Arial,Helvetica,sans-serif;">
-<tr>
-<td align="center" style="padding:36px 12px;">
+    name           = lead_data["name"]
 
-<table width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#ffffff;border-radius:22px;overflow:hidden;border:1px solid #dbe3ef;box-shadow:0 14px 40px rgba(15,23,42,0.08);">
+    content = f"""<!DOCTYPE html>
+<html lang="he" dir="rtl" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>ליד חדש</title>
+<style type="text/css">
+  body,table,td,a{{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}}
+  table,td{{mso-table-lspace:0pt;mso-table-rspace:0pt;}}
+  body{{margin:0!important;padding:0!important;background-color:#f4f4f5;}}
 
-<tr>
-<td style="padding:30px 32px;background:#111827;">
-  <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#9ca3af;">
-    New lead
-  </div>
+  @media only screen and (max-width:599px){{
+    .email-card{{width:100%!important;border-radius:0!important;}}
+    .pad{{padding:22px 20px!important;}}
+    .head{{padding:24px 20px 20px!important;}}
+    .cta{{padding:0 20px 28px!important;}}
+    .foot{{padding:14px 20px 20px!important;}}
+    .i1,.i2{{display:block!important;width:100%!important;}}
+    .isp{{display:none!important;}}
+    .headline{{font-size:20px!important;}}
+    .btn{{font-size:15px!important;}}
+  }}
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;">
 
-  <div style="font-size:28px;font-weight:900;color:#ffffff;margin-top:10px;line-height:1.15;">
-    {lead_data["name"]} is ready for follow-up
-  </div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f5;">
+<tr><td align="center" style="padding:40px 16px;">
 
-  <div style="font-size:15px;color:#cbd5e1;margin-top:10px;line-height:1.5;">
-    A new inquiry came in and was summarized for you.
-  </div>
-</td>
-</tr>
+  <table role="presentation" class="email-card" cellpadding="0" cellspacing="0" border="0"
+    style="width:580px;max-width:580px;background:#ffffff;border-radius:16px;
+           border:1px solid #e4e4e7;border-collapse:separate;">
 
-<tr>
-<td style="padding:28px 32px 0 32px;">
+    <!-- top accent -->
+    <tr>
+      <td style="height:3px;background:#16a34a;border-radius:16px 16px 0 0;
+                 font-size:0;line-height:0;">&nbsp;</td>
+    </tr>
 
-<table width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td valign="top">
-  <div style="font-size:13px;color:#64748b;font-weight:700;margin-bottom:6px;">
-    Contact
-  </div>
+    <!-- header -->
+    <tr>
+      <td class="head" style="padding:32px 36px 26px;border-bottom:1px solid #f4f4f5;">
+        <p style="margin:0 0 10px;font-size:11px;font-weight:600;letter-spacing:0.1em;
+                  text-transform:uppercase;color:#a1a1aa;
+                  font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+          ליד חדש
+        </p>
+        <p class="headline" style="margin:0 0 6px;font-size:22px;font-weight:800;color:#09090b;
+                  line-height:1.25;
+                  font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+          {name} השאיר פנייה
+        </p>
+        <p style="margin:0;font-size:14px;color:#71717a;line-height:1.55;
+                  font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+          פנייה חדשה נכנסה ועברה סיכום אוטומטי עבורך.
+        </p>
+      </td>
+    </tr>
 
-  <div style="font-size:22px;font-weight:900;color:#0f172a;line-height:1.2;">
-    {lead_data["name"]}
-  </div>
+    <!-- contact + badge -->
+    <tr>
+      <td class="pad" style="padding:24px 36px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td valign="middle">
+              <p style="margin:0 0 3px;font-size:17px;font-weight:700;color:#09090b;
+                        font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+                {name}
+              </p>
+              <p style="margin:0;font-size:13px;color:#71717a;direction:ltr;text-align:right;
+                        font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+                {phone}
+              </p>
+            </td>
+            <td align="left" valign="middle">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background:{badge_bg};border:1px solid {badge_border};
+                             border-radius:999px;padding:6px 12px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="7" height="7"
+                          style="width:7px;height:7px;border-radius:4px;
+                                 background-color:{dot_color};font-size:0;line-height:0;">
+                        </td>
+                        <td style="padding-right:6px;">
+                          <span style="font-size:12px;font-weight:600;color:{badge_color};
+                                       font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+                                       white-space:nowrap;">
+                            {status_label}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
 
-  <div style="font-size:15px;color:#475569;margin-top:6px;">
-    {phone}
-  </div>
-</td>
+    <!-- divider -->
+    <tr>
+      <td style="padding:20px 36px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td style="height:1px;background:#f4f4f5;font-size:0;line-height:0;">&nbsp;</td></tr>
+        </table>
+      </td>
+    </tr>
 
-<td align="right" valign="top">
-  <div style="display:inline-block;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:900;color:{status_text};">
-    ● {status_label}
-  </div>
-</td>
-</tr>
+    <!-- info cells -->
+    <tr>
+      <td class="pad" style="padding:20px 36px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="i1" valign="top"
+              style="width:48%;background:#fafafa;border:1px solid #ebebeb;
+                     border-radius:10px;padding:14px 16px;">
+              <p style="margin:0 0 6px;font-size:10px;font-weight:600;letter-spacing:0.08em;
+                        text-transform:uppercase;color:#a1a1aa;
+                        font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+                מתי רוצה להתחיל
+              </p>
+              <p style="margin:0;font-size:14px;font-weight:600;color:#09090b;line-height:1.4;
+                        font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+                {lead_data["urgency_user"]}
+              </p>
+            </td>
+            <td class="isp" style="width:4%;font-size:0;">&nbsp;</td>
+            <td class="i2" valign="top"
+              style="width:48%;background:#fafafa;border:1px solid #ebebeb;
+                     border-radius:10px;padding:14px 16px;">
+              <p style="margin:0 0 6px;font-size:10px;font-weight:600;letter-spacing:0.08em;
+                        text-transform:uppercase;color:#a1a1aa;
+                        font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+                מה מחפש
+              </p>
+              <p style="margin:0;font-size:14px;font-weight:600;color:#09090b;line-height:1.4;
+                        font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+                {lead_data["goal_user"]}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- CTAs -->
+    <tr>
+      <td class="cta" style="padding:24px 36px 32px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="padding-bottom:10px;">
+              <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
+                href="{whatsapp_link}"
+                style="height:48px;v-text-anchor:middle;width:508px;"
+                arcsize="21%" stroke="f" fillcolor="#16a34a">
+                <w:anchorlock/><center style="color:#fff;font-size:15px;font-weight:700;
+                font-family:Arial,sans-serif;">שלח הודעה ב-WhatsApp</center>
+              </v:roundrect><![endif]-->
+              <!--[if !mso]><!-->
+              <a href="{whatsapp_link}" class="btn"
+                style="display:block;background:#16a34a;color:#ffffff;text-align:center;
+                       padding:14px 20px;border-radius:10px;font-weight:700;font-size:15px;
+                       text-decoration:none;
+                       font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+                שלח הודעה ב-WhatsApp
+              </a>
+              <!--<![endif]-->
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
+                href="{dashboard_link}"
+                style="height:46px;v-text-anchor:middle;width:508px;"
+                arcsize="21%" strokecolor="#e4e4e7" fillcolor="#ffffff">
+                <w:anchorlock/><center style="color:#3f3f46;font-size:14px;font-weight:500;
+                font-family:Arial,sans-serif;">פרטי הליד המלאים</center>
+              </v:roundrect><![endif]-->
+              <!--[if !mso]><!-->
+              <a href="{dashboard_link}" class="btn"
+                style="display:block;background:#ffffff;color:#3f3f46;text-align:center;
+                       padding:13px 20px;border-radius:10px;font-weight:500;font-size:14px;
+                       text-decoration:none;border:1px solid #e4e4e7;
+                       font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+                פרטי הליד המלאים ←
+              </a>
+              <!--<![endif]-->
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- footer -->
+    <tr>
+      <td class="foot"
+        style="padding:16px 36px 24px;border-top:1px solid #f4f4f5;
+               text-align:center;font-size:12px;color:#a1a1aa;line-height:1.6;
+               font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">
+        המייל נשלח אוטומטית לאחר שליד מילא את הטופס.
+      </td>
+    </tr>
+
+  </table>
+
+</td></tr>
 </table>
-
-</td>
-</tr>
-
-<tr>
-<td style="padding:24px 32px 0 32px;">
-
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #dbe3ef;border-radius:18px;">
-<tr>
-<td style="padding:24px;">
-  <div style="font-size:13px;color:#64748b;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;">
-    Lead score
-  </div>
-
-  <div style="margin-top:10px;">
-    <span style="font-size:46px;font-weight:900;color:#0f172a;line-height:1;">{score}</span>
-    <span style="font-size:20px;font-weight:800;color:#94a3b8;">/10</span>
-  </div>
-
-  <div style="font-size:14px;color:#64748b;margin-top:8px;line-height:1.45;">
-    Use this to decide how quickly to follow up.
-  </div>
-</td>
-</tr>
-</table>
-
-</td>
-</tr>
-
-<tr>
-<td style="padding:22px 32px 0 32px;">
-
-<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:0 12px;">
-
-<tr>
-<td style="background:#ffffff;border:1px solid #dbe3ef;border-radius:16px;padding:18px 20px;">
-  <div style="font-size:12px;color:#94a3b8;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;">
-    Wants to start
-  </div>
-
-  <div style="font-size:16px;color:#0f172a;font-weight:800;margin-top:7px;line-height:1.45;">
-    {lead_data["urgency_user"]}
-  </div>
-</td>
-</tr>
-
-<tr>
-<td style="background:#ffffff;border:1px solid #dbe3ef;border-radius:16px;padding:18px 20px;">
-  <div style="font-size:12px;color:#94a3b8;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;">
-    Looking for
-  </div>
-
-  <div style="font-size:16px;color:#0f172a;font-weight:800;margin-top:7px;line-height:1.45;">
-    {lead_data["goal_user"]}
-  </div>
-</td>
-</tr>
-
-</table>
-
-</td>
-</tr>
-
-<tr>
-<td style="padding:22px 32px 0 32px;">
-
-<table width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td style="padding-bottom:12px;">
-  <a href="{whatsapp_link}"
-     style="display:block;background:#16a34a;color:#ffffff;text-align:center;padding:16px 18px;border-radius:14px;font-weight:900;text-decoration:none;font-size:16px;">
-    Message on WhatsApp
-  </a>
-</td>
-</tr>
-
-<tr>
-<td>
-  <a href="{dashboard_link}"
-     style="display:block;background:#ffffff;color:#111827;text-align:center;padding:15px 18px;border-radius:14px;font-weight:900;text-decoration:none;font-size:15px;border:1px solid #cbd5e1;">
-    Open lead details →
-  </a>
-</td>
-</tr>
-</table>
-
-</td>
-</tr>
-
-<tr>
-<td style="padding:26px 32px 30px 32px;">
-  <div style="border-top:1px solid #e5e7eb;padding-top:18px;font-size:12px;color:#94a3b8;line-height:1.5;text-align:center;">
-    This email was sent automatically after a new lead completed the form.
-  </div>
-</td>
-</tr>
-
-</table>
-
-</td>
-</tr>
-</table>
-"""
+</body>
+</html>"""
 
     message = Mail(
         from_email="jona.wexler@gmail.com",
         to_emails="jona.wexler@gmail.com",
-        subject=f"New Lead — {status_label} · {lead_data['name']}",
+        subject=f"ליד חדש — {status_label} · {name}",
         html_content=content,
     )
 
