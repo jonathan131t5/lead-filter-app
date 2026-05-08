@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from service.old_english_service import ServiceLayer
-
+from service.service_english import ServiceLayer
+from data_access.slots_repository import BookingSlotRepository
 from fastapi import Request, Response
 import uuid
-
+import sqlite3
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.staticfiles import StaticFiles
@@ -24,7 +24,7 @@ app.add_middleware(
 
 @app.get("/")
 def serve_chat():
-    return FileResponse("old_english_chat.html")
+    return FileResponse("chat_english.html")
 
 
 @app.get("/dashboard")
@@ -77,3 +77,27 @@ def get_dashboard_leads():
 @app.get("/api/dashboard/leads/{lead_id}/messages")
 def get_dasboard_messages(lead_id: int):
     return service_layer.messages.get_lead_messages(lead_id=lead_id)
+
+
+
+@app.get("/dev/create-test-slots")
+def create_test_slots():
+    conn = sqlite3.connect("lead_qualification.db")
+    cursor = conn.cursor()
+
+    booking_repo = BookingSlotRepository(cursor)
+
+    booking_repo.create_booking_table()
+
+    booking_repo.create_booking_slot("2026-05-10 18:00")
+    booking_repo.create_booking_slot("2026-05-10 19:00")
+    booking_repo.create_booking_slot("2026-05-11 10:00")
+
+    conn.commit()
+    conn.close()
+
+    return {"status": "ok", "message": "test slots created"}
+
+
+
+
