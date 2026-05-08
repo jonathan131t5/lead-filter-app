@@ -24,9 +24,6 @@ def validate_str(value, name, allow_empty=False):
         raise UserError(f"{name} לא יכול להיות ריק")
 
 
-#
-    
-
 
 def extract_phone(content: str):
     match = re.search(r"(?<!\d)05(?:[\s-]?\d){8}(?!\d)", content)
@@ -48,3 +45,16 @@ def extract_phone(content: str):
         "status": "missing",
         "reason": "no_info"
     }
+
+
+
+
+def is_valid_email(email):
+        if email is None:
+            return False
+
+        email = email.strip()
+
+        pattern = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
+
+        return re.match(pattern, email) is not None
