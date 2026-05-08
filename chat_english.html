@@ -483,6 +483,21 @@
   }
 
 
+  async function callBookingAPI(contentVal) {
+  const body = { content: contentVal };
+
+  const res = await fetch(`${API}/message`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) throw new Error('Server error');
+
+  return await res.json();
+}
+
 
   function showBookingInterest(){
     msgInput.style.display = 'none';
@@ -503,7 +518,9 @@
     status = false;
   }
 
-  const data = await callAPI(null, status);
+  const data = await callBookingAPI({
+  status: status
+});
 }
 
 function showBookingSlots(slots) {
@@ -530,14 +547,14 @@ function showBookingSlots(slots) {
 
 
 async function selectBookingSlot(slotId) {
-  const data = await callAPI(null, {
+  const data = await callBookingAPI({
     status: true,
     value: slotId
   });
 }
 
 async function declineBooking() {
-  const data = await callAPI(null, {
+  const data = await callBookingAPI({
     status: false,
     value: null
   });

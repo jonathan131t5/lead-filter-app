@@ -135,6 +135,7 @@ class ServiceLayer:
             question = self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
             if question["status"] == "booking":
                 return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] ,content=content)
+            return question
 
         
         if prepare_lead_context["lead_conversation_states_data"]["current_field"] == "phone":
@@ -179,8 +180,9 @@ class ServiceLayer:
         question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode)
         if question["status"] == "booking":
             return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] ,content=content)
-
         self.db.commit()
+        return question
+  
 
 
 
