@@ -7,14 +7,17 @@ from data_access.lead_booking_context_repository import LeadBookingContextReposi
 
 from utils.validators import is_valid_email
 
+from data_base.connection import Connection
 
 class BookingFlow:
     def __init__(self):
+        self.db = Connection()
+
         self.booking_questions = BookingQuestion()
-        self.leads_booking = LeadsBookingRepository()
-        self.booking_slots = BookingSlotRepository()
-        self.appointments = AppointmentRepository()
-        self.booking_context = LeadBookingContextRepository()
+        self.leads_booking = LeadsBookingRepository(self.db.cursor)
+        self.booking_slots = BookingSlotRepository(self.db.cursor)
+        self.appointments = AppointmentRepository(self.db.cursor)
+        self.booking_context = LeadBookingContextRepository(self.db.cursor)
 
 
     
