@@ -16,6 +16,9 @@ from data_base.connection import Connection
 
 from integrations.mail_integration import send_email
 
+from service.booking_english_service import BookingFlow
+
+
 from logic.ai_result_handler import OpenAIClient
 from logic.lead_classifier import LeadClassifier
 from logic.message_scorer import MessageScorer
@@ -49,6 +52,7 @@ class ServiceLayer:
     def __init__(self):
         self.db = Connection()
         
+        self.booking_flow = BookingFlow()
         self.leads_data = LeadsDataRepository(self.db.cursor)
         self.leads_states = LeadsStatesRepository(self.db.cursor)
         self.leads_scores = LeadsScoresRepository(self.db.cursor)
@@ -128,7 +132,9 @@ class ServiceLayer:
         )
         
         if content is None:
-            return self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
+            question = self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
+            if question["status"] == "booking":
+                return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] ,content=content)
 
         
         if prepare_lead_context["lead_conversation_states_data"]["current_field"] == "phone":
@@ -171,8 +177,10 @@ class ServiceLayer:
         self.db.commit()
         
         ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
-        return self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode)
         
+        question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode)
+        if question["status"] == "booking":
+            return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] ,content=content)
 
 
 
@@ -210,23 +218,15 @@ class ServiceLayer:
    
 
     def ensure_lead_data(self , session_id , name=None):
-        #validate_str(name , "name")
-        #print(f"name: {name}")
         check_lead = self.leads_data.get_lead_base_data(session_id=session_id)
-        #print(f"check_lead 1: {check_lead}")
-        #print(check_lead)
+        
         if check_lead is not None:
-            #print("exists")
             return {"status" : "exists" , "lead_id" : check_lead["lead_id"] , "session_id" : session_id}
         
         if name is None:
-            #print("no name here")
             return {"status" : "new"}
         
-        #print(f"check_lead 2: {check_lead}")
-        #print("alr bet")
-        #print("we good")
-        #print(f"second name: {name} | session id: {session_id}")        
+      
         lead_id = self.leads_data.create_new_lead(name=name , session_id=session_id)
 
 
@@ -262,14 +262,15 @@ class ServiceLayer:
         
 
     def generate_lead_question(self , lead_all_data , ack_mode=0):
-        #print(f"question_state: {lead_all_data['lead_conversation_states_data']['question_state']} | reason: {lead_all_data['lead_conversation_states_data']['question_reason']}")
-        #print(f"current field: {lead_all_data['lead_conversation_states_data']['current_field']}")
         question = self.generate_question(lead_info=lead_all_data["lead_conversation_states_data"] , ack_mode=ack_mode , final_status=lead_all_data["lead_base_data"]["final_status"])
         if question is None:
-            closing_message = self.closing_message(final_status=lead_all_data["lead_base_data"]["final_status"] , urgency_status=lead_all_data["lead_scores_data"]["urgency_status"] , name=lead_all_data["lead_base_data"]["name"])
+            return {"status" : "booking"}
             return {"status" : "DONE" , "message" : closing_message}
             
         return {"status" : "output" , "message" : question}
+
+
+
 
 
 
@@ -329,6 +330,8 @@ class ServiceLayer:
 
         self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
         return question
+    
+    
 
 
 
@@ -469,31 +472,7 @@ class ServiceLayer:
         return 
 
     
-    def closing_message(self , final_status , name , urgency_status):
-        urgency_close_message = "Got it, that gives me a clear direction."
-        
-        if final_status == "Hot Lead":
-            closing_message = (
-                f"Perfect, {name}. I’ve got your details.\n"
-                "This looks like it could be a good fit, and we’ll reach out soon to continue from here."
-                )
-        
-        elif final_status == "Cold Lead":
-            closing_message = (
-                f"Thanks, {name}. I’ve got your details.\n"
-                "Right now, it looks like it may not be the best fit, but we’ll reach out if it becomes relevant later."
-            )
-        
-        else:
-            raise ValueError("Invaild final status")
-        
-        if urgency_status == "unknown":
-            return f"{urgency_close_message} {closing_message}"
-        
-        return closing_message
     
-
-
     
     def process_lead_summary(self , summary_info):
         summary_info = self.field_unknown_check(summary_info=summary_info)
