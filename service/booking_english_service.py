@@ -151,3 +151,11 @@ def process_lead_answer(self , lead_response , lead_booking_data):
             email_result = is_valid_email(lead_response)
             if email_result == True:
                 return {"status" : True , "value" : lead_response}
+            
+
+
+bookingflow = BookingFlow()
+
+bookingflow.leads_booking.create_leads_booking_table()
+bookingflow.booking_slots.create_booking_table()
+bookingflow.appointments.create_appointment_table()
