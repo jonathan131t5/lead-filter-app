@@ -4,7 +4,7 @@ import random
 class BaseQuestions:
     def goal_base_questions(self):
         return [
-            "What would you like to achieve?"
+            "What are you looking for help with?"
         ]
 
     def urgency_base_questions(self):
@@ -49,11 +49,11 @@ class MissingQuestions:
             ]
         elif question_type == "vague":
             return [
-                "Can you share a bit more about what you want to achieve?"
+                "Can you share a bit more about what you're looking for help with?"
             ]
         elif question_type == "avoid":
             return [
-                "Just so I can understand better, what would you like to achieve?"
+                "Just so I can understand better, what are you looking for help with?"
             ]
 
     def urgency_missing_questions(self, question_type, attempt_number):
@@ -102,15 +102,15 @@ class ConfuseQuestions:
     def goal_confuse_questions(self, question_type):
         if question_type == "meaning":
             return [
-                "I mean what you're looking to achieve."
+                "I mean what you're looking for help with."
             ]
         elif question_type == "answer_type":
             return [
-                "Just tell me what you'd like to achieve"
+                "Just tell me what you're looking for help with."
             ]
         elif question_type == "focus":
             return [
-                "For now, I just need to understand what you're looking to achieve."
+                "For now, I just need to understand what you're looking for help with."
             ]
 
     def urgency_confuse_questions(self, question_type):
@@ -144,7 +144,7 @@ class FallBackQuestions:
 
     def goal_fallback_questions(self):
         return [
-            "Even a general answer helps — what would you like to achieve?"
+            "Even a general answer helps, what are you looking for help with?"
         ]
 
     def phone_fallback_question(self, fallback_type):

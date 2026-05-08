@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 
 
 class BookingQuestion:
@@ -14,6 +15,36 @@ class BookingQuestion:
         return random.choice(questions)
     
 
+    def generate_booking_options(self):
+        available_slots = []
+        all_booking_slots = self.slot_repository.get_all_slots()
+
+        for slot in all_booking_slots:
+            if slot["is_taken"] == 0:
+                raw_datetime = slot["date"]
+
+                dt = datetime.fromisoformat(raw_datetime)
+
+                available_slots.append({
+                    "id": slot["id"],
+                    "label": dt.strftime("%d/%m • %H:%M")
+                })
+
+        return available_slots
+    
+
+
+    def generate_email_question(self):
+        questions = [
+            "What’s the best email to send your meeting details to?" , 
+            "What email should we send the meeting confirmation to?"
+        ]
+        return random.choice(questions)
+    
+    
+    
+    
+    
     def generate_closing_messages(self , closing_type):
         if closing_type == "not eligible":
            return (
@@ -43,26 +74,22 @@ class BookingQuestion:
                 )
         
 
-    def generate_booking_options(self):
-        available_slots = []
-        all_booking_slots = self.slot_repository.get_all_slots()
-        for slot in all_booking_slots:
-            if slot["is_taken"] == 0:
-                available_slots.append(slot)
-
-        return available_slots
-
-
 
 
     def generate_booking_question(self , lead_data):
         if lead_data["booking_eligible"] == 0:
-            return self.generate_closing_messages(lead_data)
+            return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data)}
         
         elif lead_data["booking_eligible"] == 1:
+            
             if lead_data["booking_state"] == "booking_interest":
-                return self.generate_booking_intro()
+                return {"status" : "booking_interest" , "message" : self.generate_booking_intro()}
+            
             elif lead_data["booking_state"] == "booking_selection":
-                return self.generate_booking_options()
+                return {"status" : "booking_selection" , "message" : self.generate_booking_options()}
+            
+            elif lead_data["booking_state"] == "email":
+                return {"status" : "email" , "message" : self.generate_email_question()}
+            
             else:
-                return self.generate_closing_messages(lead_data)
+                return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data)}
