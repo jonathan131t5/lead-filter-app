@@ -144,24 +144,7 @@ class BookingFlow:
     
 
 
-    def process_lead_answer(self , lead_response , lead_booking_data):
-            if lead_booking_data["booking_state"] == "booking_interest":
-                if lead_response == "Yes":
-                    return {"status" : True}
-                elif lead_response == "No":
-                    return {"status" : False}
-            
-            elif lead_booking_data["booking_state"] == "booking_selection":
-                available_slots = self.booking_questions.generate_booking_options()
-                for slot in available_slots:
-                    if lead_response.strip() == slot["date"]:
-                        return {"status" : True , "value" : slot["slot_id"]}
-                    return {"stauts" : False}
-                
-            elif lead_booking_data["booking_state"] == "email":
-                email_result = is_valid_email(lead_response)
-                if email_result == True:
-                    return {"status" : True , "value" : lead_response}
+
             
 
 

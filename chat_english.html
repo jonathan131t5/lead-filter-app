@@ -521,7 +521,13 @@
   const data = await callBookingAPI({
   status: status
 });
+
+if (data.status == "booking_selection") {
+  showBookingSlots(data.message);
 }
+  }
+
+
 
 function showBookingSlots(slots) {
   const bookingSlots = document.getElementById('bookingSlots');
