@@ -17,7 +17,7 @@ class LeadsBookingRepository:
 
     def create_lead_booking(self , lead_id):
         self.cursor.execute(
-        "INSERT INTO leads_booking (lead_id) VALUES = (?)" , 
+        "INSERT INTO leads_booking (lead_id) VALUES (?)" , 
         (lead_id , )
         )
     
