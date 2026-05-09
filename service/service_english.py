@@ -77,7 +77,7 @@ class ServiceLayer:
             f"content_len={len(content) if content else 0}"
         )
             
-            if content is not None:
+            if isinstance(content, str):
                 content = content.strip()[:100]
 
             if name is not None:
