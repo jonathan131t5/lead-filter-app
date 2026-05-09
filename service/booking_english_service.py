@@ -42,9 +42,8 @@ class BookingFlow:
                     self.db.commit()
                     return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
             
-                response_info = self.process_lead_answer(lead_response=content , lead_booking_data=lead_booking_data)
-                process_result = self.process_booking_response_flow(response_info=response_info , lead_booking_data=lead_booking_data)
-                if "status" in process_result:
+                process_result = self.process_booking_response_flow(response_info=content , lead_booking_data=lead_booking_data)
+                if process_result and "status" in process_result:
                     self.db.commit()
                     return {"status" : process_result["status"] , "message" : process_result["message"]} 
 
@@ -142,24 +141,24 @@ class BookingFlow:
     
 
 
-def process_lead_answer(self , lead_response , lead_booking_data):
-        if lead_booking_data["booking_state"] == "booking_interest":
-            if lead_response == "Yes":
-                return {"status" : True}
-            elif lead_response == "No":
-                return {"status" : False}
-        
-        elif lead_booking_data["booking_state"] == "booking_selection":
-            available_slots = self.booking_questions.generate_booking_options()
-            for slot in available_slots:
-                if lead_response.strip() == slot["date"]:
-                    return {"status" : True , "value" : slot["slot_id"]}
-                return {"stauts" : False}
+    def process_lead_answer(self , lead_response , lead_booking_data):
+            if lead_booking_data["booking_state"] == "booking_interest":
+                if lead_response == "Yes":
+                    return {"status" : True}
+                elif lead_response == "No":
+                    return {"status" : False}
             
-        elif lead_booking_data["booking_state"] == "email":
-            email_result = is_valid_email(lead_response)
-            if email_result == True:
-                return {"status" : True , "value" : lead_response}
+            elif lead_booking_data["booking_state"] == "booking_selection":
+                available_slots = self.booking_questions.generate_booking_options()
+                for slot in available_slots:
+                    if lead_response.strip() == slot["date"]:
+                        return {"status" : True , "value" : slot["slot_id"]}
+                    return {"stauts" : False}
+                
+            elif lead_booking_data["booking_state"] == "email":
+                email_result = is_valid_email(lead_response)
+                if email_result == True:
+                    return {"status" : True , "value" : lead_response}
             
 
 
