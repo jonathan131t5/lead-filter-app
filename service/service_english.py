@@ -11,6 +11,7 @@ from data_access.leads_scores_repository import LeadsScoresRepository
 from data_access.leads_fields_repository import LeadsFieldsRepository
 from data_access.leads_messages_repository import MessagesRepository
 from data_access.lead_summary_context_repository import LeadSummaryContextRepository
+from data_access.lead_booking_repository import LeadsBookingRepository
 
 from data_base.connection import Connection
 
@@ -53,6 +54,7 @@ class ServiceLayer:
         self.db = Connection()
         
         self.booking_flow = BookingFlow()
+        self.leads_booking = LeadsBookingRepository(self.db.cursor)
         self.leads_data = LeadsDataRepository(self.db.cursor)
         self.leads_states = LeadsStatesRepository(self.db.cursor)
         self.leads_scores = LeadsScoresRepository(self.db.cursor)
@@ -235,6 +237,8 @@ class ServiceLayer:
             self.leads_scores.create_new_lead_score(lead_id=lead_id)
             self.leads_states.create_new_lead_conversation_states_data(lead_id=lead_id)
             self.leads_fields.create_new_lead_fields_data(lead_id=lead_id)
+            self.leads_booking.create_lead_booking(lead_id=lead_id)
+
 
 
         return {"status" : "created" , "lead_id" : lead_id , "session_id" : session_id}
