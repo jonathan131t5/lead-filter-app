@@ -22,30 +22,39 @@ class BookingFlow:
 
     
     def process_booking_flow(self , lead_id , content):
-        lead_booking_data = self.booking_context.prepare_lead_booking_context(lead_id=lead_id)
-        check_booking_result = self.check_lead_booking(lead_data=lead_booking_data)
-        
-        if check_booking_result["status"] == "has booking":
-            return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
-        
-        elif check_booking_result["status"] == "not eligible":
-            self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="not eligible")
-            lead_booking_data["booking_state"] = "not eligible"
-            return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
-
-
-        elif check_booking_result["status"] == True:
-            if content is None:
-                return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
-        
-            response_info = self.process_lead_answer(lead_response=content , lead_booking_data=lead_booking_data)
-            process_result = self.process_booking_response_flow(response_info=response_info , lead_booking_data=lead_booking_data)
-            if "status" in process_result:
-                return {"status" : process_result["status"] , "message" : process_result["message"]} 
-
-        
-        return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
+        try:
+            lead_booking_data = self.booking_context.prepare_lead_booking_context(lead_id=lead_id)
+            check_booking_result = self.check_lead_booking(lead_data=lead_booking_data)
             
+            if check_booking_result["status"] == "has booking":
+                self.db.commit()
+                return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
+            
+            elif check_booking_result["status"] == "not eligible":
+                self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="not eligible")
+                lead_booking_data["booking_state"] = "not eligible"
+                self.db.commit()
+                return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
+
+
+            elif check_booking_result["status"] == True:
+                if content is None:
+                    self.db.commit()
+                    return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
+            
+                response_info = self.process_lead_answer(lead_response=content , lead_booking_data=lead_booking_data)
+                process_result = self.process_booking_response_flow(response_info=response_info , lead_booking_data=lead_booking_data)
+                if "status" in process_result:
+                    self.db.commit()
+                    return {"status" : process_result["status"] , "message" : process_result["message"]} 
+
+            self.db.commit()
+            return self.booking_questions.generate_booking_question(lead_data=lead_booking_data)
+        
+        except Exception:
+            self.db.rollback()
+            raise
+                
 
 
     
