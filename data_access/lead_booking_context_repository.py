@@ -10,7 +10,8 @@ class LeadBookingContextRepository:
             li.final_status,
             ls.has_booking , 
             ls.booking_state , 
-            ls.processing_slot_id
+            ls.processing_slot_id , 
+            ls.booking_eligible
 
         FROM leads_data li
 
@@ -31,5 +32,6 @@ class LeadBookingContextRepository:
             "final_status" : row[0] , 
             "has_booking" : row[1] , 
             "booking_state" : row[2] , 
-            "processing_slot_id" : row[3]
+            "processing_slot_id" : row[3] , 
+            "booking_eligible" : row[4]
         }
