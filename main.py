@@ -33,7 +33,7 @@ def serve_dashboard():
 
 class MessageRequirements(BaseModel):
     name: str | None = None
-    content: str | None = None
+    content: dict | str | None = None
     
 
 @app.post("/message")
