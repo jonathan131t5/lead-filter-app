@@ -27,7 +27,7 @@ class BookingFlow:
         try:
             lead_booking_data = self.booking_context.prepare_lead_booking_context(lead_id=lead_id)
             if content is None:
-                return {"status" : lead_booking_data["booking_state"]} 
+                return self.generate_booking_question(lead_data=lead_booking_data)
 
             check_booking_result = self.check_lead_booking(lead_data=lead_booking_data)
             
