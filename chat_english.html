@@ -521,6 +521,8 @@
 
   const data = await callBookingAPI({ status: status });
   
+  console.log('BookingInterest response:', data); // ← הוסף את זה
+
 if (data.status == "booking_selection") {
   showBookingSlots(data.message);
   }
