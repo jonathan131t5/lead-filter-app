@@ -26,11 +26,11 @@ class BookingFlow:
     def process_booking_flow(self , lead_id , content):
         try:
             lead_booking_data = self.booking_context.prepare_lead_booking_context(lead_id=lead_id)
+            check_booking_result = self.check_lead_booking(lead_data=lead_booking_data)
+            
             if content is None:
                 return self.generate_booking_question(lead_data=lead_booking_data)
 
-            check_booking_result = self.check_lead_booking(lead_data=lead_booking_data)
-            
             if check_booking_result["status"] == "has booking":
                 self.db.commit()
                 return self.generate_booking_question(lead_data=lead_booking_data)
