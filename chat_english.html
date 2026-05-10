@@ -600,9 +600,6 @@ async function declineBooking() {
         showBookingInterest()
       }
 
-      if (data.status == "booking_selection"){
-        showBookingSlots(data.message)
-      }
 
       if (data.status == "email") {
         bookingYes.style.display = 'none';
