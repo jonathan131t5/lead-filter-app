@@ -157,7 +157,7 @@ class BookingFlow:
 
     def generate_booking_options(self):
         available_slots = []
-        all_booking_slots = self.slot_repository.get_all_slots()
+        all_booking_slots = self.booking_slots.get_all_slots()
 
         for slot in all_booking_slots:
             if slot["is_taken"] == 0:
@@ -238,7 +238,7 @@ class BookingFlow:
                 return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data)}
 
 
-            
+
 
 
 bookingflow = BookingFlow()
