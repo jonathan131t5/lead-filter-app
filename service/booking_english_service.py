@@ -127,6 +127,9 @@ class BookingFlow:
 
 
     def process_booking_email_response(self , response_info , lead_booking_data):
+        logging.info(
+            f"[Process Email] User Email Data: {response_info}"
+        )
         if lead_booking_data["booking_state"] == "email":
             self.booking_slots.close_booking_slot(slot_id=lead_booking_data["processing_slot_id"])
             self.appointments.create_appointment(slot_id=lead_booking_data["processing_slot_id"] , lead_id=lead_booking_data["lead_id"] , email=response_info["email"])
