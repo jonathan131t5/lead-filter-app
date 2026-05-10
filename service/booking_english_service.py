@@ -80,7 +80,7 @@ class BookingFlow:
         booking_interest = self.process_booking_interest_response(response_info=response_info , lead_booking_data=lead_booking_data)
         if booking_interest == False:
             booking_selection = self.process_booking_selection_response(response_info=response_info , lead_booking_data=lead_booking_data)
-            if "status" in booking_selection:
+            if isinstance(booking_selection , dict):
                 return {"status" : booking_selection["status"] , "message" : booking_selection["message"]}
             if booking_selection == False:
                 self.process_booking_email_response(response_info=response_info , lead_booking_data=lead_booking_data)
