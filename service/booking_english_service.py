@@ -64,6 +64,7 @@ class BookingFlow:
         if lead_data["final_status"] == "Hot Lead":
             if lead_data["has_booking"] == 0:
                 self.leads_booking.set_booking_param(lead_id=lead_data["lead_id"] , param="booking_eligible" , value=1)
+                lead_data["booking_eligible"] = 1
                 return {"status" : True}
             
             return {"status" : "has booking"}
