@@ -558,7 +558,16 @@ async function selectBookingSlot(slotId) {
     status: true,
     value: slotId
   });
+  if (data.status == "email") {
+    document.getElementById('bookingSlots').innerHTML = '';
+    if (data.content) addMsg(data.content, 'bot');
+    msgInput.style.display = 'block';
+    sendBtn.style.display = 'flex';
+    msgInput.disabled = false;
+    sendBtn.disabled = false;
+  }
 }
+
 
 async function declineBooking() {
   const data = await callBookingAPI({
