@@ -76,11 +76,6 @@ class BookingFlow:
 
 
     
-
-
-
-
-    
     def process_booking_response_flow(self , response_info , lead_booking_data):
         booking_interest = self.process_booking_interest_response(response_info=response_info , lead_booking_data=lead_booking_data)
         if booking_interest == False:
