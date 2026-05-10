@@ -166,7 +166,7 @@ class BookingFlow:
                 dt = datetime.fromisoformat(raw_datetime)
 
                 available_slots.append({
-                    "id": slot["id"],
+                    "id": slot["slot_id"],
                     "label": dt.strftime("%d/%m • %H:%M")
                 })
 
