@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-
+import logging
 
 class BookingQuestion:
     def __init__(self):
@@ -77,6 +77,9 @@ class BookingQuestion:
 
 
     def generate_booking_question(self , lead_data):
+        logging.info(
+            f"[BOOKING QUESTION] lead_data: {lead_data}"
+        )
         if lead_data["booking_eligible"] == 0:
             return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data)}
         
