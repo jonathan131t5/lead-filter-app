@@ -519,14 +519,13 @@
     status = false;
   }
 
-  const data = await callBookingAPI({
-  status: status
-});
-
+  await callBookingAPI({ status: status });
+  const data = await callBookingAPI(null);
+  
 if (data.status == "booking_selection") {
   showBookingSlots(data.message);
-}
   }
+}
 
 
 
