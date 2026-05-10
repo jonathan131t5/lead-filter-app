@@ -592,7 +592,8 @@ async function declineBooking() {
       }
       waitingForName = data.status === 'new';
       hideTyping();
-      addMsg(data.content, 'bot');
+      if (data.content) addMsg(data.content, 'bot');
+      else if (data.message && typeof data.message === 'string') addMsg(data.message, 'bot');
       
       if (data.status == "booking_interest"){
         showBookingInterest()
