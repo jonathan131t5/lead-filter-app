@@ -61,9 +61,10 @@ def run_message_flow(
     )
 
     return {
-        "content": result.get("message") or result.get("content") , 
+        "content": result.get("message") or result.get("content"),
+        "message": result.get("message") or result.get("content"),
         "status": result.get("status", "error")
-    }
+        }
 
 
     
