@@ -82,20 +82,12 @@ def get_dasboard_messages(lead_id: int):
 
 @app.get("/dev/create-test-slots")
 def create_test_slots():
-    conn = sqlite3.connect("lead_qualification.db")
-    cursor = conn.cursor()
-
-    booking_repo = BookingSlotRepository(cursor)
-
+    booking_repo = service_layer.booking_flow.booking_slots
     booking_repo.create_booking_table()
-
     booking_repo.create_booking_slot("2026-05-10 18:00")
     booking_repo.create_booking_slot("2026-05-10 19:00")
     booking_repo.create_booking_slot("2026-05-11 10:00")
-
-    conn.commit()
-    conn.close()
-
+    service_layer.booking_flow.db.commit()
     return {"status": "ok", "message": "test slots created"}
 
 
