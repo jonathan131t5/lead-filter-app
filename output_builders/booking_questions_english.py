@@ -2,6 +2,7 @@ import random
 from datetime import datetime
 import logging
 
+
 class BookingQuestion:
     def __init__(self):
         pass
