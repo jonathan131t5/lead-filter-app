@@ -578,7 +578,56 @@ async function declineBooking() {
   });
 }
 
+  function handleServerResponse(data) {
+    hideTyping();
 
+    if (data.content) addMsg(data.content, 'bot');
+    else if (data.message && typeof data.message === 'string') addMsg(data.message, 'bot');
+
+    if (data.status === "new") {
+      waitingForName = true;
+    }
+
+    if (data.status === "booking_interest") {
+      showBookingInterest();
+      return;
+    }
+
+    if (data.status === "booking_selection") {
+      inputArea.style.display = 'block';
+      msgInput.style.display = 'none';
+      sendBtn.style.display = 'none';
+      bookingYes.style.display = 'none';
+      bookingNo.style.display = 'none';
+      showBookingSlots(data.message);
+      return;
+    }
+
+    if (data.status === "email") {
+      waitingForEmail = true;
+      inputArea.style.display = 'block';
+      bookingYes.style.display = 'none';
+      bookingNo.style.display = 'none';
+      bookingSlots.innerHTML = '';
+      msgInput.style.display = 'block';
+      sendBtn.style.display = 'flex';
+      msgInput.disabled = false;
+      sendBtn.disabled = false;
+      return;
+    }
+
+    if (data.status === "DONE") {
+      done = true;
+      msgInput.disabled = true;
+      sendBtn.disabled = true;
+      doneBanner.style.display = 'block';
+      return;
+    }
+
+    inputArea.style.display = 'block';
+    msgInput.disabled = false;
+    sendBtn.disabled = false;
+  }
   
   async function sendMessage() {
     if (done) return;
@@ -609,34 +658,7 @@ async function declineBooking() {
         data = await callAPI(null, text);
       }
       }
-      waitingForName = data.status === 'new';
-      waitingForEmail = data.status === 'email';
-      hideTyping();
-      if (data.content) addMsg(data.content, 'bot');
-      else if (data.message && typeof data.message === 'string') addMsg(data.message, 'bot');
-      
-      if (data.status == "booking_interest"){
-        showBookingInterest()
-      }
-
-
-      if (data.status == "email") {
-        bookingYes.style.display = 'none';
-        bookingNo.style.display = 'none';
-
-        msgInput.style.display = 'block';
-        sendBtn.style.display = 'flex';
-      }
-      
-      if (data.status === 'DONE') {
-        done = true;
-        msgInput.disabled = true;
-        sendBtn.disabled = true;
-        doneBanner.style.display = 'block';
-      } else {
-      msgInput.disabled = false;
-      sendBtn.disabled = false;
-      }
+      handleServerResponse(data);
     } catch(e) {
       hideTyping();
       addMsg('Something went wrong. Please try again.', 'bot', true);
@@ -644,8 +666,8 @@ async function declineBooking() {
       sendBtn.disabled = false;
     }
   }
-
-  msgInput.addEventListener('keydown', e => {
+    
+    msgInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!sendBtn.disabled) sendMessage();
@@ -695,15 +717,7 @@ async function declineBooking() {
         body: JSON.stringify({})
       });
       const data = await res.json();
-      addMsg(data.content, 'bot');
-
-      if (data.status === 'new') waitingForName = true;
-
-      
-
-      inputArea.style.display = 'block';
-      msgInput.disabled = false;
-      sendBtn.disabled = false;
+      handleServerResponse(data);
     } catch (e) {
       addMsg('Could not connect to the server.', 'bot', true);
     }
