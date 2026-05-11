@@ -560,6 +560,7 @@ async function selectBookingSlot(slotId) {
     value: slotId
   });
   if (data.status == "email") {
+    waitingForEmail = true
     document.getElementById('bookingSlots').innerHTML = '';
     if (data.content) addMsg(data.content, 'bot');
     msgInput.style.display = 'block';
