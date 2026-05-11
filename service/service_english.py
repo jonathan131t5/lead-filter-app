@@ -53,7 +53,7 @@ class ServiceLayer:
     def __init__(self):
         self.db = Connection()
         
-        self.booking_flow = BookingFlow()
+        self.booking_flow = BookingFlow(self.db)
         self.leads_booking = LeadsBookingRepository(self.db.cursor)
         self.leads_data = LeadsDataRepository(self.db.cursor)
         self.leads_states = LeadsStatesRepository(self.db.cursor)

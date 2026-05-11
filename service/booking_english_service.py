@@ -14,8 +14,8 @@ from utils.validators import is_valid_email
 from data_base.connection import Connection
 
 class BookingFlow:
-    def __init__(self):
-        self.db = Connection()
+    def __init__(self , db):
+        self.db = db
         self.leads_booking = LeadsBookingRepository(self.db.cursor)
         self.booking_slots = BookingSlotRepository(self.db.cursor)
         self.appointments = AppointmentRepository(self.db.cursor)
