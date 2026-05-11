@@ -11,13 +11,15 @@ class LeadBookingContextRepository:
             ls.has_booking , 
             ls.booking_state , 
             ls.processing_slot_id , 
-            ls.booking_eligible
-
+            ls.booking_eligible,
+            lcs.current_field
         FROM leads_data li
 
         JOIN leads_booking ls 
             ON li.lead_id = ls.lead_id
 
+        JOIN leads_conversation_states lcs
+            ON li.lead_id = lcs.lead_id
         
         WHERE li.lead_id = ?
     """ , (lead_id , ))
@@ -33,5 +35,6 @@ class LeadBookingContextRepository:
             "has_booking" : row[1] , 
             "booking_state" : row[2] , 
             "processing_slot_id" : row[3] , 
-            "booking_eligible" : row[4]
+            "booking_eligible" : row[4] , 
+            "current_field": row[5]
         }
