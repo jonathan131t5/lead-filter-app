@@ -135,66 +135,70 @@ class ServiceLayer:
         
         logging.info(f"run lead flow email:{content}")
         
-        if isinstance(content, dict) and "status" in content:
-            return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
 
-        if content is None:
-            question = self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
-            if question["status"] == "booking":
-                self.db.commit()
-                if content and "status" not in content:
-                    return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=None)
-                return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] ,content=content)
-            return question
-
-        
-        if prepare_lead_context["lead_conversation_states_data"]["current_field"] == "phone":
-            generate_ai_analysis = extract_phone(content=content)
-            logging.info(f"Phone analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
-            
-        
+        if content and "status" not in content:
+            booking_result = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=None)
         else:
-            try:
-                validate_str(value=content , name="content")
-                generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
-                logging.info(f"Regular analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
-            
-            except UserError:
-                generate_ai_analysis = {"status": "missing", "reason": "no_info"}
-                logging.info(f"UserError analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
-        
+            booking_result = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
 
-        self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
-        #print(generate_ai_analysis)
-        self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"] , regular_attempt_number=prepare_lead_context["lead_conversation_states_data"]["regular_attempt_number"])
-        logging.info(f"Lead scores updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
-        logging.debug(prepare_lead_context['lead_scores_data'])
+        if isinstance(booking_result , dict):
+            return booking_result
+        
+        elif isinstance(booking_result , bool):
+            if booking_result == False:
+                if content is None:
+                    question = self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
+                    self.db.commit()
+                    return question
 
-#
-        self.update_flow_state(lead_all_data=prepare_lead_context , ai_response=generate_ai_analysis , content=content)
+                
+                if prepare_lead_context["lead_conversation_states_data"]["current_field"] == "phone":
+                    generate_ai_analysis = extract_phone(content=content)
+                    logging.info(f"Phone analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
+                    
+                
+                else:
+                    try:
+                        validate_str(value=content , name="content")
+                        generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
+                        logging.info(f"Regular analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
+                    
+                    except UserError:
+                        generate_ai_analysis = {"status": "missing", "reason": "no_info"}
+                        logging.info(f"UserError analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
+                
+
+                self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
+                #print(generate_ai_analysis)
+                self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"] , regular_attempt_number=prepare_lead_context["lead_conversation_states_data"]["regular_attempt_number"])
+                logging.info(f"Lead scores updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
+                logging.debug(prepare_lead_context['lead_scores_data'])
+
         
-        logging.info(f"Flow updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']}")
-        logging.debug(prepare_lead_context['lead_conversation_states_data'])
-        
-        determine_final_status = self.determine_final_status(lead_all_data=prepare_lead_context)
-        logging.info(f"Lead finalize try, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | final_status={prepare_lead_context["lead_base_data"]["final_status"]} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
-        logging.debug(prepare_lead_context)
-        if determine_final_status == True:
-            raw_summary_context = self.build_lead_summary(lead_all_data=prepare_lead_context)
-            final_summary_context = self.field_unknown_check(raw_summary_context)
-            
-            send_email(final_summary_context)
-        
-        ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
-        
-        question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode)
-        if question["status"] == "booking":
-            self.db.commit()
-            if content and "status" not in content:
-                return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=None)
-            return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
-        self.db.commit()
-        return question
+                self.update_flow_state(lead_all_data=prepare_lead_context , ai_response=generate_ai_analysis , content=content)
+                
+                logging.info(f"Flow updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']}")
+                logging.debug(prepare_lead_context['lead_conversation_states_data'])
+                
+                determine_final_status = self.determine_final_status(lead_all_data=prepare_lead_context)
+                logging.info(f"Lead finalize try, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | final_status={prepare_lead_context["lead_base_data"]["final_status"]} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
+                logging.debug(prepare_lead_context)
+                if determine_final_status == True:
+                    raw_summary_context = self.build_lead_summary(lead_all_data=prepare_lead_context)
+                    final_summary_context = self.field_unknown_check(raw_summary_context)
+                    
+                    send_email(final_summary_context)
+                
+                ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
+                
+                question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode)
+                if question["status"] == "booking":
+                    self.db.commit()
+                    if content and "status" not in content:
+                        return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=None)
+                    return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
+                self.db.commit()
+                return question
   
 
 

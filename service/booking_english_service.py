@@ -26,7 +26,11 @@ class BookingFlow:
     def process_booking_flow(self , lead_id , content):
         try:
             lead_booking_data = self.booking_context.prepare_lead_booking_context(lead_id=lead_id)
+            
             check_booking_result = self.check_lead_booking(lead_data=lead_booking_data)
+        
+            if check_booking_result["status"] == "invaild flow":
+                return False
             
             if content is None:
                 return self.generate_booking_question(lead_data=lead_booking_data)
@@ -60,7 +64,6 @@ class BookingFlow:
             raise
                 
 
-
     
     def check_lead_booking(self , lead_data):
         if lead_data["final_status"] == "Hot Lead":
@@ -70,6 +73,9 @@ class BookingFlow:
                 return {"status" : True}
             
             return {"status" : "has booking"}
+        
+        elif lead_data["current_field"] is not None or lead_data["final_status"] == "pending":
+            return {"status" : "invaild flow"}
         
         return {"status" : "not eligible"}
     
@@ -204,7 +210,7 @@ class BookingFlow:
                 "The team will contact you to arrange another time."
                 )
         
-        elif  closing_type["booking_state"] == "booking_accepted_options":
+        elif closing_type["booking_state"] == "booking_accepted_options":
             return (
                 "Your meeting has been scheduled successfully.\n"
                 "A confirmation email has been sent with the meeting details.\n"
