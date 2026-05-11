@@ -184,27 +184,27 @@ class BookingFlow:
     
     
     def generate_closing_messages(self , closing_type):
-        if closing_type == "not eligible":
+        if closing_type["booking_state"] == "not eligible":
            return (
                "Thanks for taking the time to answer the questions.\n"
                "Your information has been received successfully."
                )
 
-        elif closing_type == "booking_declined_intro":
+        elif  closing_type["booking_state"]== "booking_declined_intro":
             return (
                 "No problem at all.\n"
                 "Your information has been received successfully.\n"
                 "The team will reach out to you shortly."
                 )
         
-        elif closing_type == "booking_declined_options":
+        elif  closing_type["booking_state"] == "booking_declined_options":
             return (
                 "No worries.\n"
                 "Your information has been received successfully.\n"
                 "The team will contact you to arrange another time."
                 )
         
-        elif closing_type == "booking_accepted_options":
+        elif  closing_type["booking_state"] == "booking_accepted_options":
             return (
                 "Your meeting has been scheduled successfully.\n"
                 "A confirmation email has been sent with the meeting details.\n"
