@@ -133,7 +133,8 @@ class ServiceLayer:
             f"field={prepare_lead_context['lead_conversation_states_data']['current_field']}"
         )
         
-
+        logging.info(f"run lead flow email:{content}")
+        
         if isinstance(content, dict) and "status" in content:
             return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
 

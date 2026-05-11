@@ -424,6 +424,7 @@
   let name = null;
   let waitingForName = false;
   let done = false;
+  let waitingForEmail = false;
 
   const bookingYes = document.getElementById('bookingYes');
   const bookingNo = document.getElementById('bookingNo');
@@ -598,9 +599,17 @@ async function declineBooking() {
         name = text;
         data = await callAPI(name, null);
       } else {
+        if (waitingForEmail) {
+        data = await callAPI(null, {
+          status: true,
+          value: text
+        });
+      } else {
         data = await callAPI(null, text);
       }
+      }
       waitingForName = data.status === 'new';
+      waitingForEmail = data.status === 'email';
       hideTyping();
       if (data.content) addMsg(data.content, 'bot');
       else if (data.message && typeof data.message === 'string') addMsg(data.message, 'bot');
