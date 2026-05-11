@@ -428,7 +428,7 @@
 
   const bookingYes = document.getElementById('bookingYes');
   const bookingNo = document.getElementById('bookingNo');
-  const booking_slots = document.getElementById("bookingSlots")
+  const bookingSlots = document.getElementById("bookingSlots");
   const messagesEl = document.getElementById('messages');
   const inputArea = document.getElementById('inputArea');
   const msgInput = document.getElementById('msgInput');
@@ -560,7 +560,7 @@ async function selectBookingSlot(slotId) {
     value: slotId
   });
   if (data.status == "email") {
-    waitingForEmail = true
+    waitingForEmail = true;
     document.getElementById('bookingSlots').innerHTML = '';
     if (data.content) addMsg(data.content, 'bot');
     msgInput.style.display = 'block';
@@ -571,12 +571,14 @@ async function selectBookingSlot(slotId) {
 }
 
 
-async function declineBooking() {
-  const data = await callBookingAPI({
-    status: false,
-    value: null
-  });
-}
+  async function declineBooking() {
+    const data = await callBookingAPI({
+      status: false,
+      value: null
+    });
+
+    handleServerResponse(data);
+  }
 
   function handleServerResponse(data) {
     hideTyping();
@@ -625,8 +627,13 @@ async function declineBooking() {
     }
 
     inputArea.style.display = 'block';
+    msgInput.style.display = 'block';
+    sendBtn.style.display = 'flex';
+    bookingYes.style.display = 'none';
+    bookingNo.style.display = 'none';
+    bookingSlots.innerHTML = '';
     msgInput.disabled = false;
-    sendBtn.disabled = false;
+    sendBtn.disabled = msgInput.value.trim() === '';
   }
   
   async function sendMessage() {
@@ -645,9 +652,11 @@ async function declineBooking() {
     showTyping();
     try {
       let data;
-      if (waitingForName) {
-        name = text;
-        data = await callAPI(name, null);
+        if (waitingForName) {
+          name = text;
+          waitingForName = false;
+            data = await callAPI(name, null);
+
       } else {
         if (waitingForEmail) {
         data = await callAPI(null, {
@@ -665,8 +674,8 @@ async function declineBooking() {
       msgInput.disabled = false;
       sendBtn.disabled = false;
     }
-  }
     
+  }
     msgInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
