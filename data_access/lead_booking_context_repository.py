@@ -18,7 +18,7 @@ class LeadBookingContextRepository:
         JOIN leads_booking ls 
             ON li.lead_id = ls.lead_id
 
-        JOIN leads_conversation_states lcs
+        JOIN lead_conversation_states lcs
             ON li.lead_id = lcs.lead_id
         
         WHERE li.lead_id = ?
