@@ -16,7 +16,7 @@ class BaseQuestions:
         return [
             "What's the best number to reach you?"
         ]
-
+#
     def process_base_question(self, field, ack_mode):
         if field == "goal":
             questions = self.goal_base_questions()
