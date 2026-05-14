@@ -5,6 +5,7 @@ from data_access.slots_repository import BookingSlotRepository
 from fastapi import Request, Response
 import uuid
 import sqlite3
+import logging
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.staticfiles import StaticFiles
@@ -92,5 +93,14 @@ def create_test_slots():
     return {"status": "ok", "message": "test slots created"}
 
 
+
+@app.post("/webhook/whatsapp")
+async def whatsapp_webhook(request: Request):
+    body = await request.json()
+
+    logging.info("WHATSAPP WEBHOOK BODY:")
+    logging.info(body)
+
+    return {"status": "received"}
 
 
