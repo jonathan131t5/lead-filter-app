@@ -3,7 +3,7 @@ class MessageScorer:
         pass
     
     
-    def score_message(self , message_to_rank , field , reason , regular_attempt_number):
+    def score_message(self , message_to_rank , field , reason):
         rank_score = 0
 
         if message_to_rank["status"] == "missing" or message_to_rank["status"] == "confused":
@@ -20,14 +20,6 @@ class MessageScorer:
                 else:
                     rank_score += 1
 
-            
-            if field == "phone":
-                if regular_attempt_number <= 1:
-                    rank_score += 2
-                else:
-                    rank_score = 0
-            
-                print(f"PHONE SCORE: {rank_score}", flush=True)
             
             elif field == "urgency":
                 if 8 <= float(message_to_rank["value"]) <= 10:

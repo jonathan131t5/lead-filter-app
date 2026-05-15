@@ -8,7 +8,7 @@ class LeadClassifier:
         if lead_score_info["score_count"] < 3:
             return None
         
-        elif lead_score_info["total_score"] >= 6:
+        elif lead_score_info["total_score"] > 4:
             return "Hot Lead"
           
         else:
