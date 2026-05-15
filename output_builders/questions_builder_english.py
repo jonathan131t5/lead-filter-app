@@ -142,10 +142,15 @@ class FallBackQuestions:
     def __init__(self):
         pass
 
-    def goal_fallback_questions(self):
-        return [
-            "Even a general answer helps, what are you looking for help with?"
-        ]
+    def goal_fallback_questions(self , fallback_type):
+        if fallback_type == "after_fallback":    
+            return [
+                "Even a general answer helps, what are you looking for help with?"
+            ]
+        elif fallback_type == "regular_fallback":
+            return [
+                "Even a general answer helps, what are you looking for help with?"
+            ]
 
     def phone_fallback_question(self, fallback_type):
         if fallback_type == "after_fallback":
