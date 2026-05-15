@@ -8,6 +8,7 @@ class MessagesRepository:
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS leads_messages(
         message_id INTEGER PRIMARY KEY AUTOINCREMENT ,
+        external_message_id INTEGER ,
         lead_id INTEGER ,
         role TEXT ,
         content TEXT ,
@@ -20,6 +21,14 @@ class MessagesRepository:
         self.cursor.execute(
         "INSERT INTO leads_messages (lead_id , role , content) VALUES (? , ? , ?)" ,
         (lead_id , role , content)
+        )
+        return self.cursor.lastrowid
+
+
+    def add_external_message_id(self , message_id , external_message_id):
+        self.cursor.execute(
+        "UPDATE leads_messages SET external_message_id ? WHERE message_id = ?" , 
+        (external_message_id , message_id)
         )
 
 

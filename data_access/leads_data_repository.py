@@ -19,9 +19,10 @@ class LeadsDataRepository:
         """)
 
     
-    def create_new_lead(self, name , session_id):
-        self.cursor.execute("INSERT INTO leads_data (name , session_id) VALUES (? , ?)", 
-        (name , session_id))
+    def create_new_lead(self, session_id):
+        self.cursor.execute("INSERT INTO leads_data (session_id) VALUES (?)", 
+        (session_id , )
+        )
 
         return self.cursor.lastrowid
          
@@ -98,6 +99,12 @@ class LeadsDataRepository:
         (phone , lead_id)
         )
 
+    
+    def update_lead_name(self , name , lead_id):
+        self.cursor.execute(
+        "UPDATE leads_data SET name = ? WHERE lead_id = ?" , 
+        (name , lead_id)
+        )
 
 
     def get_all_leads_data(self):
