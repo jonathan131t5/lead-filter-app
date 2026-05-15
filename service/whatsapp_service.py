@@ -35,11 +35,13 @@ def send_whatsapp_message(number: str, text: str):
 
 
 def extract_whatsapp_message_data(body):
-    phone = body["data"]["key"]["remoteJid"].split("@")[0]
+    remote_jid = body["data"]["key"].get("remoteJidAlt") or body["data"]["key"].get("remoteJid")
+    phone = remote_jid.split("@")[0]
 
     name = body["data"]["pushName"]
 
-    text = body["data"]["message"]["conversation"]
+    message = body["data"].get("message", {})
+    text = message.get("conversation") or message.get("extendedTextMessage", {}).get("text", "")
 
     message_id = body["data"]["key"]["id"]
 
