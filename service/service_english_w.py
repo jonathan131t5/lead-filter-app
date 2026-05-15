@@ -454,6 +454,9 @@ class ServiceLayer:
     
     
     def apply_message_score(self , lead_info , current_field , ai_analyze_response , reason):
+        if current_field == "name":
+            return
+        
         lead_message_score = self.message_scorer.score_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason)
         
         if lead_message_score["status"] == "invaild":
@@ -471,10 +474,10 @@ class ServiceLayer:
 
         return True
 
-#
+
     
     def finalize_lead_status(self , lead_info):
-        if lead_info["score_count"] == 3:
+        if lead_info["score_count"] == 2:
             final_lead_status = self.lead_classifier.classify_lead_score(lead_info)
             
             if final_lead_status:
