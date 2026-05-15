@@ -84,8 +84,6 @@ class ServiceLayer:
             init_result = self.initialize_lead_context(session_id=session_id)
 
 
-            self.messages.add_lead_message(lead_id=init_result['lead_base_data']['lead_id'] , role="user" , )
-
             result = self.run_lead_flow(prepare_lead_context=init_result, content=content , external_message_id=external_message_id)
             logging.info(f"Response sent session_id={session_id} | status={result.get('status')}")
             return result
