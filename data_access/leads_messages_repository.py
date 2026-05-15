@@ -27,7 +27,7 @@ class MessagesRepository:
 
     def add_external_message_id(self , message_id , external_message_id):
         self.cursor.execute(
-        "UPDATE leads_messages SET external_message_id ? WHERE message_id = ?" , 
+        "UPDATE leads_messages SET external_message_id  = ? WHERE message_id = ?" , 
         (external_message_id , message_id)
         )
 
