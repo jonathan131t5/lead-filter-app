@@ -31,3 +31,31 @@ def send_whatsapp_message(number: str, text: str):
 
 
 
+
+def extract_whatsapp_message_data(body):
+    phone = body["data"]["key"]["remoteJid"].split("@")[0]
+
+    name = body["data"]["pushName"]
+
+    text = body["data"]["message"]["conversation"]
+
+    message_id = body["data"]["key"]["id"]
+
+    from_me = body["data"]["key"]["fromMe"]
+
+    message_type = body["data"]["messageType"]
+
+    return {
+        "phone" : phone , 
+        "name" : name , 
+        "text" : text , 
+        "message_id" : message_id , 
+        "from_me" : from_me ,
+        "message_type" : message_type
+    }
+
+
+
+
+
+

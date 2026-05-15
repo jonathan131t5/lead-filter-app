@@ -19,6 +19,7 @@ from integrations.mail_integration import send_email
 
 from service.booking_english_service import BookingFlow
 
+from service.whatsapp_service import send_whatsapp_message, extract_whatsapp_message_data, handle_whatsapp_message
 
 from logic.ai_result_handler import OpenAIClient
 from logic.lead_classifier import LeadClassifier
@@ -69,28 +70,23 @@ class ServiceLayer:
         self.process_question = ProcessQuestion(base_questions=BaseQuestions() , missing_questions=MissingQuestions() , confuse_questions=ConfuseQuestions() , fallback_questions=FallBackQuestions())
 
 
-    def process_lead_message(self , session_id , name=None , content=None):
+    def process_lead_message(self , session_id , external_message_id , content=None):
         try:
             logging.info(
             f"[NEW MESSAGE] session_id={session_id} | "
-            f"name_provided={name is not None} | "
             f"content_len={len(content) if content else 0}"
         )
             
             if isinstance(content, str):
                 content = content.strip()[:100]
 
-            if name is not None:
-                name = name.strip()[:100]
-            
-            init_result = self.initialize_lead_context(session_id=session_id , name=name)
-            
-            if init_result.get("status") == "new":
-                logging.info(f"New user detected session_id={session_id}")
-                return init_result
-            
-            
-            result = self.run_lead_flow(prepare_lead_context=init_result, content=content)
+        
+            init_result = self.initialize_lead_context(session_id=session_id)
+
+
+            self.messages.add_lead_message(lead_id=init_result['lead_base_data']['lead_id'] , role="user" , )
+
+            result = self.run_lead_flow(prepare_lead_context=init_result, content=content , external_message_id=external_message_id)
             logging.info(f"Response sent session_id={session_id} | status={result.get('status')}")
             return result
         
@@ -110,23 +106,18 @@ class ServiceLayer:
 
     
     
-    def initialize_lead_context(self , session_id , name=None):
-        check = self.ensure_lead_data(session_id=session_id , name=name)
-        
-        #print(check)
-        if check["status"] == "new":
-            return {"status" : "new" , "message" : "Hi, before we get started, what's your name?"}
+    def initialize_lead_context(self , session_id):
+        check = self.ensure_lead_data(session_id=session_id)
         
         if check["status"] == "exists" or check["status"] == "created":
             logging.info(f"User logged in / created. session_id={session_id} | lead_id={check["lead_id"]}")
-            self.leads_states.update_lead_current_field(lead_id=check["lead_id"] , updated_field="phone")
+            self.leads_data.update_lead_phone(lead_id=check["lead_id"] , phone=session_id)
             return self.prepare_lead_context(lead_id=check["lead_id"] , session_id=check["session_id"])
 
 
 
 
-    def run_lead_flow(self , prepare_lead_context , content=None):
-        start_total = time.time()
+    def run_lead_flow(self , prepare_lead_context , external_message_id , content=None):
         logging.info("[TIMER] run_lead_flow START")
         
         logging.info(
@@ -148,7 +139,7 @@ class ServiceLayer:
         elif isinstance(booking_result , bool):
             if booking_result == False:
                 if content is None:
-                    question = self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0)
+                    question = self.generate_lead_question(lead_all_data=prepare_lead_context , ack_mode=0 , external_message_id=external_message_id)
                     self.db.commit()
                     return question
 
@@ -171,7 +162,7 @@ class ServiceLayer:
 
                 self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
                 #print(generate_ai_analysis)
-                self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"] , regular_attempt_number=prepare_lead_context["lead_conversation_states_data"]["regular_attempt_number"])
+                self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"])
                 logging.info(f"Lead scores updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
                 logging.debug(prepare_lead_context['lead_scores_data'])
 
@@ -192,7 +183,7 @@ class ServiceLayer:
                 
                 ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
                 
-                question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode)
+                question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode , external_message_id=external_message_id)
                 if question["status"] == "booking":
                     self.db.commit()
                     if content and "status" not in content:
@@ -236,17 +227,15 @@ class ServiceLayer:
 
    
 
-    def ensure_lead_data(self , session_id , name=None):
+    def ensure_lead_data(self , session_id):
         check_lead = self.leads_data.get_lead_base_data(session_id=session_id)
         
         if check_lead is not None:
             return {"status" : "exists" , "lead_id" : check_lead["lead_id"] , "session_id" : session_id}
         
-        if name is None:
-            return {"status" : "new"}
+
         
-      
-        lead_id = self.leads_data.create_new_lead(name=name , session_id=session_id)
+        lead_id = self.leads_data.create_new_lead(session_id=session_id)
 
 
         if lead_id is not None:
@@ -282,8 +271,8 @@ class ServiceLayer:
         
         
 
-    def generate_lead_question(self , lead_all_data , ack_mode=0):
-        question = self.generate_question(lead_info=lead_all_data["lead_conversation_states_data"] , ack_mode=ack_mode , final_status=lead_all_data["lead_base_data"]["final_status"])
+    def generate_lead_question(self , lead_all_data , external_message_id , ack_mode=0):
+        question = self.generate_question(lead_info=lead_all_data["lead_conversation_states_data"] , ack_mode=ack_mode , final_status=lead_all_data["lead_base_data"]["final_status"] , external_message_id=external_message_id)
         if question is None:
             return {"status" : "booking"}
             return {"status" : "DONE" , "message" : closing_message}
@@ -338,7 +327,7 @@ class ServiceLayer:
     
     
     
-    def generate_question(self , lead_info , ack_mode , final_status):
+    def generate_question(self , lead_info , ack_mode , final_status , external_message_id):
         if final_status != "pending":
             return None
         
@@ -349,7 +338,8 @@ class ServiceLayer:
             attempt_number=lead_info["regular_attempt_number"],
             ack_mode=ack_mode)
 
-        self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
+        message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
+        self.messages.add_external_message_id(message_id=message_id ,external_message_id=external_message_id)
         return question
     
     
@@ -361,6 +351,11 @@ class ServiceLayer:
         need_to_change = None
         #print("found")
         if ai_response["status"] == "found":
+            if lead_info["current_field"] == "name":
+                lead_info["current_field"] = "goal"
+                self.leads_data.update_lead_name(lead_id=lead_info["lead_id"] , name=content)
+
+
             if lead_info["current_field"] == "goal":
                 lead_info["current_field"] = "urgency"
                 self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content)
@@ -457,8 +452,8 @@ class ServiceLayer:
                 lead_info["confuse_attempt_number"] = 1
     
     
-    def apply_message_score(self , lead_info , current_field , ai_analyze_response , reason , regular_attempt_number ):
-        lead_message_score = self.message_scorer.score_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason , regular_attempt_number=regular_attempt_number)
+    def apply_message_score(self , lead_info , current_field , ai_analyze_response , reason):
+        lead_message_score = self.message_scorer.score_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason)
         
         if lead_message_score["status"] == "invaild":
             return
