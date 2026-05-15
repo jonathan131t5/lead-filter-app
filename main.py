@@ -119,7 +119,7 @@ async def whatsapp_webhook(request: Request):
     result = service_layer.process_lead_message(
         session_id=message_data["phone"],
         content=message_data["text"] , 
-        external_message_id=message_data["message_data"]
+        external_message_id=message_data["message_type"]
     )
 
     send_whatsapp_message(
