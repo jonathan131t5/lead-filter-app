@@ -100,6 +100,9 @@ def create_test_slots():
 async def whatsapp_webhook(request: Request):
     body = await request.json()
 
+    if body.get("event") != "messages.upsert":
+        return {"status": "ignored"}
+
     logging.info("WHATSAPP WEBHOOK BODY:")
     logging.info(body)
 
