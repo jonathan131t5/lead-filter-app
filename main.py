@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from service.service_english import ServiceLayer
+from service.service_english_w import ServiceLayer
 from data_access.slots_repository import BookingSlotRepository
 from fastapi import Request, Response
 import uuid
 import sqlite3
 import logging
 from fastapi.middleware.cors import CORSMiddleware
+
+from service.whatsapp_service import send_whatsapp_message , extract_whatsapp_message_data
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -101,6 +103,30 @@ async def whatsapp_webhook(request: Request):
     logging.info("WHATSAPP WEBHOOK BODY:")
     logging.info(body)
 
-    return {"status": "received"}
+    message_data = extract_whatsapp_message_data(body)
+
+    if message_data["from_me"]:
+        return {"status": "ignored"}
+
+    if message_data["message_type"] != "conversation":
+        send_whatsapp_message(
+            message_data["phone"],
+            "I can only read text messages here. Please type your message and I’ll help you from there."
+        )
+        return {"status": "ok"}
+    
+    
+    result = service_layer.process_lead_message(
+        session_id=message_data["phone"],
+        content=message_data["text"] , 
+        external_message_id=message_data["message_data"]
+    )
+
+    send_whatsapp_message(
+        message_data["phone"],
+        result.get("message") or result.get("content")
+    )
+
+    return {"status": "ok"}
 
 
