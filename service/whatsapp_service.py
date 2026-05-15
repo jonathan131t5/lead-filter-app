@@ -18,9 +18,11 @@ def send_whatsapp_message(number: str, text: str):
     }
 
     body = {
-        "number": number,
+    "number": number,
+    "textMessage": {
         "text": text
     }
+}
 
     response = requests.post(url, headers=headers, json=body)
 
