@@ -18,7 +18,7 @@ class ConversationBuilder:
 
         elif current_field == "urgency":
             prompt = self.urgency_analyze_prompt(content=content)
-
+        
         return prompt
     
 

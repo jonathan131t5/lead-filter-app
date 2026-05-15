@@ -309,6 +309,9 @@ class ServiceLayer:
 
     
     def generate_analyze(self , lead_id , current_field , content):
+        if current_field == "name":
+            return {"status" : "found" , "value" : content}
+        
         ai_input = self.conversation_builder.build_prompt(current_field=current_field , content=content)
 
         before_ai = time.time()
