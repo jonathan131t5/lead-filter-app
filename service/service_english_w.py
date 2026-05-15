@@ -19,7 +19,7 @@ from integrations.mail_integration import send_email
 
 from service.booking_english_service import BookingFlow
 
-from service.whatsapp_service import send_whatsapp_message, extract_whatsapp_message_data, handle_whatsapp_message
+from service.whatsapp_service import send_whatsapp_message, extract_whatsapp_message_data
 
 from logic.ai_result_handler import OpenAIClient
 from logic.lead_classifier import LeadClassifier
