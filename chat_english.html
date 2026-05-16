@@ -539,7 +539,7 @@ function showBookingSlots(slots) {
     button.className = 'booking-slot';
     button.textContent = slot.label;
     button.onclick = () => {
-      selectBookingSlot(slot.id);
+      selectBookingSlot(slot.id, slot.label);
     };
     bookingSlots.appendChild(button);
   });
@@ -554,7 +554,8 @@ function showBookingSlots(slots) {
 }
 
 
-async function selectBookingSlot(slotId) {
+async function selectBookingSlot(slotId, slotLabel) {
+  addMsg(slotLabel, 'user');
   const data = await callBookingAPI({
     status: true,
     value: slotId
