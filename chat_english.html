@@ -510,6 +510,8 @@
   }
   
   async function BookingInterest(choice) {
+    if (choice === 'yes') addMsg('Yes, schedule a call', 'user');
+    else addMsg('Not right now', 'user');
     bookingYes.style.display = 'none';
     bookingNo.style.display = 'none';
     let status;
