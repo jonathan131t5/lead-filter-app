@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>FitLead Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --surface: #151519;
+    --surface2: #1d1d23;
+    --surface3: #24242b;
+    --border: #2d2d36;
+    --border-soft: rgba(255,255,255,0.06);
+    --accent: #c8ff57;
+    --accent-dim: rgba(200,255,87,0.12);
+    --text: #f2f2f2;
+    --muted: #8a8a98;
+    --muted2: #666675;
+    --hot: #c8ff57;
+    --cold: #ff7474;
+    --pending: #ffcc66;
+    --bot-bubble: #111114;
+    --user-bubble: rgba(200,255,87,0.13);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background-image:
+      radial-gradient(ellipse at 15% 10%, rgba(200,255,87,0.055), transparent 45%),
+      radial-gradient(ellipse at 85% 90%, rgba(90,90,255,0.055), transparent 45%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button { font-family: inherit; }
+
+  /* ── TABS ── */
+  .tabs-bar {
+    display: flex;
+    gap: 4px;
+    padding: 14px 16px 0;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .tab-btn {
+    padding: 10px 20px;
+    border-radius: 14px 14px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+
+  .tab-btn.active {
+    color: var(--accent);
+    background: rgba(21,21,25,0.96);
+    border-color: var(--border);
+    border-bottom-color: rgba(21,21,25,0.96);
+    margin-bottom: -1px;
+    z-index: 1;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; width: 100%; height: calc(100dvh - 49px); }
+  .page.active { display: flex; }
+
+  /* ── LEADS PAGE (original layout) ── */
+  #page-leads {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px 16px;
+    gap: 16px;
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+  }
+
+  .panel {
+    background: rgba(21,21,25,0.96);
+    border: 1px solid var(--border);
+    border-radius: 0 24px 24px 24px;
+    overflow: hidden;
+    min-height: 0;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.34);
+  }
+
+  .leads-panel { display: flex; flex-direction: column; }
+
+  .panel-header {
+    padding: 18px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .dashboard-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+  .dashboard-subtitle { margin-top: 4px; color: var(--muted); font-size: 13px; font-weight: 300; }
+
+  .search-wrap {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    width: 100%;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    padding: 0 14px;
+    outline: none;
+    font-size: 15px;
+    font-family: inherit;
+  }
+
+  .search-input:focus { border-color: rgba(200,255,87,0.45); }
+  .search-input::placeholder { color: var(--muted2); }
+
+  .leads-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lead-card {
+    width: 100%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    border-radius: 18px;
+    padding: 14px;
+    text-align: left;
+    cursor: pointer;
+    display: grid;
+    gap: 8px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+  }
+
+  .lead-card:hover { background: rgba(255,255,255,0.035); }
+  .lead-card:active { transform: scale(0.99); }
+  .lead-card.active { background: var(--accent-dim); border-color: rgba(200,255,87,0.22); }
+
+  .lead-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+  .lead-name {
+    font-size: 15px; font-weight: 650;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+
+  .status-pill {
+    flex-shrink: 0; font-size: 12px; font-weight: 700;
+    padding: 5px 9px; border-radius: 999px;
+    border: 1px solid transparent; line-height: 1;
+  }
+
+  .status-hot    { color: var(--hot);     background: rgba(200,255,87,0.11);  border-color: rgba(200,255,87,0.22);  }
+  .status-cold   { color: var(--cold);    background: rgba(255,116,116,0.09); border-color: rgba(255,116,116,0.18); }
+  .status-pending{ color: var(--pending); background: rgba(255,204,102,0.09); border-color: rgba(255,204,102,0.18); }
+
+  .lead-phone { color: var(--muted); font-size: 13px; direction: ltr; text-align: left; }
+
+  .detail-panel { display: flex; flex-direction: column; min-width: 0; }
+
+  .detail-empty {
+    flex: 1; display: grid; place-items: center;
+    padding: 24px; color: var(--muted); text-align: center;
+  }
+
+  .empty-card {
+    max-width: 360px; padding: 24px;
+    border: 1px dashed var(--border);
+    border-radius: 22px; background: rgba(255,255,255,0.02);
+  }
+
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  .lead-detail { display: none; flex: 1; min-height: 0; flex-direction: column; }
+
+  .detail-topbar {
+    padding: 16px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+
+  .back-btn {
+    display: none; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text);
+    border-radius: 12px; padding: 9px 12px; font-size: 14px; cursor: pointer;
+  }
+
+  .detail-person { min-width: 0; flex: 1; }
+
+  .detail-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .detail-name { font-size: 20px; font-weight: 750; letter-spacing: -0.4px; }
+  .detail-phone { margin-top: 3px; color: var(--muted); font-size: 14px; direction: ltr; text-align: left; }
+
+  .detail-scroll {
+    flex: 1; min-height: 0; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; padding: 16px 18px 20px;
+  }
+
+  .summary-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 16px; margin-bottom: 16px;
+  }
+
+  .section-title { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 8px; }
+  .summary-text { font-size: 15px; line-height: 1.7; white-space: pre-wrap; }
+  .messages-title { margin: 4px 0 12px; font-size: 14px; color: var(--muted); font-weight: 700; }
+
+  .chat-history { display: flex; flex-direction: column; gap: 10px; }
+
+  .chat-msg { max-width: min(78%, 620px); display: flex; flex-direction: column; }
+  .chat-msg.user  { align-self: flex-start; align-items: flex-start; }
+  .chat-msg.bot,
+  .chat-msg.assistant { align-self: flex-end; align-items: flex-end; }
+
+  .chat-bubble {
+    padding: 11px 14px; border-radius: 18px;
+    font-size: 14px; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-word;
+  }
+
+  .chat-msg.user .chat-bubble {
+    background: var(--user-bubble);
+    border: 1px solid rgba(200,255,87,0.22);
+    border-bottom-left-radius: 6px;
+  }
+
+  .chat-msg.bot .chat-bubble,
+  .chat-msg.assistant .chat-bubble {
+    background: var(--bot-bubble);
+    border: 1px solid var(--border);
+    border-bottom-right-radius: 6px;
+  }
+
+  .msg-time { margin-top: 4px; padding: 0 5px; font-size: 11px; color: var(--muted2); }
+
+  .loading, .error { padding: 18px; color: var(--muted); font-size: 14px; }
+  .error { color: #ff8b8b; }
+
+  .whatsapp-btn {
+    margin-top: 8px; background: #25D366; color: white;
+    border: none; padding: 8px 12px; border-radius: 10px;
+    cursor: pointer; font-size: 13px; font-weight: 600;
+  }
+  .whatsapp-btn:hover { background: #1ebe5d; }
+
+  /* ── APPOINTMENTS PAGE ── */
+  #page-appointments {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px 16px;
+    flex-direction: column;
+  }
+
+  .appt-panel {
+    background: rgba(21,21,25,0.96);
+    border: 1px solid var(--border);
+    border-radius: 0 24px 24px 24px;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.34);
+  }
+
+  .appt-toolbar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .appt-toolbar-left { flex: 1; min-width: 160px; }
+
+  .filter-select {
+    height: 40px; border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text);
+    padding: 0 12px; outline: none;
+    font-size: 14px; font-family: inherit; cursor: pointer;
+  }
+
+  .appt-search {
+    height: 40px; border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text);
+    padding: 0 14px; outline: none;
+    font-size: 14px; width: 200px; font-family: inherit;
+  }
+
+  .appt-search:focus { border-color: rgba(200,255,87,0.45); }
+  .appt-search::placeholder { color: var(--muted2); }
+
+  .table-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    position: sticky; top: 0;
+    background: var(--surface);
+    padding: 12px 20px;
+    text-align: left; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap; z-index: 2;
+  }
+
+  tbody tr { border-bottom: 1px solid var(--border-soft); transition: background 0.12s; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+  tbody td { padding: 14px 20px; font-size: 14px; vertical-align: middle; }
+
+  .td-name  { font-weight: 600; }
+  .td-phone { color: var(--muted); direction: ltr; }
+  .td-email { color: var(--muted); }
+  .td-date  { white-space: nowrap; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px;
+    border: 1px solid transparent; line-height: 1; white-space: nowrap;
+  }
+
+  .pill-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  .pill-hot       { color: var(--hot);     background: rgba(200,255,87,0.11);  border-color: rgba(200,255,87,0.22);  }
+  .pill-cold      { color: var(--cold);    background: rgba(255,116,116,0.09); border-color: rgba(255,116,116,0.18); }
+  .pill-confirmed { color: #57c8ff;        background: rgba(87,200,255,0.09);  border-color: rgba(87,200,255,0.2);   }
+  .pill-cancelled { color: var(--cold);    background: rgba(255,116,116,0.09); border-color: rgba(255,116,116,0.18); }
+  .pill-completed { color: var(--hot);     background: rgba(200,255,87,0.11);  border-color: rgba(200,255,87,0.22);  }
+
+  .actions-cell { display: flex; gap: 8px; align-items: center; }
+
+  .action-btn {
+    height: 32px; padding: 0 12px;
+    border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s, border-color 0.12s;
+    white-space: nowrap;
+  }
+
+  .action-btn:hover { background: var(--surface3); border-color: rgba(255,255,255,0.15); }
+  .action-btn.danger { color: var(--cold); border-color: rgba(255,116,116,0.25); }
+  .action-btn.danger:hover { background: rgba(255,116,116,0.08); }
+  .action-btn.wa { color: #25D366; border-color: rgba(37,211,102,0.25); }
+  .action-btn.wa:hover { background: rgba(37,211,102,0.08); }
+
+  .state-msg { padding: 60px 20px; text-align: center; color: var(--muted); font-size: 14px; }
+
+  /* ── EDIT MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 100; place-items: center;
+  }
+  .modal-overlay.open { display: grid; }
+
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 24px; padding: 28px;
+    width: min(480px, 94vw);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  }
+
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.3px; }
+  .modal-field { margin-bottom: 14px; }
+
+  .modal-label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.3px; }
+
+  .modal-input, .modal-select {
+    width: 100%; height: 44px; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text); padding: 0 14px; outline: none;
+    font-size: 15px; font-family: inherit;
+  }
+
+  .modal-input:focus, .modal-select:focus { border-color: rgba(200,255,87,0.45); }
+
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+  .btn-primary {
+    height: 42px; padding: 0 20px; border-radius: 14px;
+    border: none; background: var(--accent); color: #0d0d0f;
+    font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  .btn-secondary {
+    height: 42px; padding: 0 20px; border-radius: 14px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text); font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+
+  ::-webkit-scrollbar { width: 0; background: transparent; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 760px) {
+    .tabs-bar { padding: 10px 0 0; }
+    .tab-btn { padding: 8px 14px; font-size: 13px; }
+
+    #page-leads { padding: 0; display: block; height: calc(100dvh - 43px); }
+    #page-appointments { padding: 0; }
+
+    .panel, .appt-panel { border-radius: 0; border: none; box-shadow: none; }
+
+    .leads-panel, .detail-panel { width: 100%; height: calc(100dvh - 43px); }
+    .detail-panel { display: none; }
+
+    body.detail-open .leads-panel { display: none; }
+    body.detail-open .detail-panel { display: flex; }
+
+    .panel-header { padding-top: max(18px, env(safe-area-inset-top)); }
+    .detail-topbar { padding-top: max(14px, env(safe-area-inset-top)); }
+    .back-btn { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .chat-msg { max-width: 86%; }
+    .detail-scroll { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+
+    thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
+    .appt-search { width: 100%; }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('leads')">Leads</button>
+  <button class="tab-btn" onclick="switchTab('appointments')">Appointments</button>
+</div>
+
+<!-- ══ LEADS PAGE ══ -->
+<div id="page-leads" class="page active">
+  <section class="panel leads-panel">
+    <header class="panel-header">
+      <h1 class="dashboard-title">Leads</h1>
+      <p class="dashboard-subtitle">Review and follow up with new leads</p>
+    </header>
+    <div class="search-wrap">
+      <input id="searchInput" class="search-input" type="text" placeholder="Search by name or phone..." />
+    </div>
+    <div id="leadsList" class="leads-list">
+      <div class="loading">Loading leads...</div>
+    </div>
+  </section>
+
+  <section class="panel detail-panel">
+    <div id="detailEmpty" class="detail-empty">
+      <div class="empty-card">
+        <div class="empty-icon">👈</div>
+        <div>Select a lead to view the details and conversation</div>
+      </div>
+    </div>
+
+    <div id="leadDetail" class="lead-detail">
+      <div class="detail-topbar">
+        <button class="back-btn" onclick="closeLeadDetail()">Back</button>
+        <div class="detail-person">
+          <div class="detail-name-row">
+            <div id="detailName" class="detail-name"></div>
+            <div id="detailStatus"></div>
+          </div>
+          <div id="detailPhone" class="detail-phone"></div>
+          <button id="whatsappBtn" class="whatsapp-btn" type="button">Open in WhatsApp</button>
+        </div>
+      </div>
+      <div class="detail-scroll">
+        <section class="summary-box">
+          <div class="section-title">Lead Summary</div>
+          <div id="detailSummary" class="summary-text"></div>
+        </section>
+        <div class="messages-title">Conversation History</div>
+        <div id="chatHistory" class="chat-history"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══ APPOINTMENTS PAGE ══ -->
+<div id="page-appointments" class="page">
+  <div class="appt-panel">
+    <div class="appt-toolbar">
+      <div class="appt-toolbar-left">
+        <div class="dashboard-title">Appointments</div>
+        <div class="dashboard-subtitle">Manage scheduled meetings with your leads</div>
+      </div>
+      <input id="apptSearch" class="appt-search" type="text" placeholder="Search name, phone…" />
+      <select id="apptFilter" class="filter-select">
+        <option value="">All statuses</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>NAME</th>
+            <th>PHONE</th>
+            <th>EMAIL</th>
+            <th>DATE & TIME</th>
+            <th>LEAD SCORE</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="apptTableBody">
+          <tr><td colspan="7" class="state-msg">Loading appointments…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="editModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Edit Appointment</div>
+    <div class="modal-field">
+      <label class="modal-label">NAME</label>
+      <input id="editName" class="modal-input" type="text" />
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">PHONE</label>
+      <input id="editPhone" class="modal-input" type="text" />
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">EMAIL</label>
+      <input id="editEmail" class="modal-input" type="email" />
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">DATE & TIME</label>
+      <input id="editDate" class="modal-input" type="datetime-local" />
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">BOOKING STATUS</label>
+      <select id="editStatus" class="modal-select">
+        <option value="confirmed">Confirmed</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = window.location.origin;
+
+  // ══ TAB SWITCHING ══
+  function switchTab(tab) {
+    document.querySelectorAll(".tab-btn").forEach((b, i) => {
+      b.classList.toggle("active", (i === 0 && tab === "leads") || (i === 1 && tab === "appointments"));
+    });
+    document.getElementById("page-leads").classList.toggle("active", tab === "leads");
+    document.getElementById("page-appointments").classList.toggle("active", tab === "appointments");
+  }
+
+  // ══ LEADS ══
+  const leadsListEl   = document.getElementById("leadsList");
+  const leadDetailEl  = document.getElementById("leadDetail");
+  const detailEmptyEl = document.getElementById("detailEmpty");
+  const detailNameEl  = document.getElementById("detailName");
+  const detailPhoneEl = document.getElementById("detailPhone");
+  const detailStatusEl= document.getElementById("detailStatus");
+  const detailSummaryEl = document.getElementById("detailSummary");
+  const chatHistoryEl = document.getElementById("chatHistory");
+  const whatsappBtn   = document.getElementById("whatsappBtn");
+  const searchInput   = document.getElementById("searchInput");
+
+  let allLeads = [];
+  let selectedLeadId = null;
+
+  function statusToLabel(s) {
+    if (s === "Hot Lead") return "Hot Lead";
+    if (s === "Cold Lead") return "Cold Lead";
+    return "Pending";
+  }
+
+  function statusClass(s) {
+    if (s === "Hot Lead") return "status-hot";
+    if (s === "Cold Lead") return "status-cold";
+    return "status-pending";
+  }
+
+  function statusPill(s) {
+    return `<span class="status-pill ${statusClass(s)}">${statusToLabel(s)}</span>`;
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    if (isNaN(d)) return String(value);
+    return d.toLocaleString("en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function esc(v) {
+    return String(v ?? "")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  function getLeadStatus(l) { return l.final_status || l.status || "pending"; }
+  function getLeadPhone(l)  { return l.phone || l.phone_number || "No phone"; }
+
+  function renderLeads(leads) {
+    if (!leads.length) { leadsListEl.innerHTML = `<div class="loading">No leads found</div>`; return; }
+    leadsListEl.innerHTML = "";
+    leads.forEach(lead => {
+      const btn = document.createElement("button");
+      btn.className = "lead-card" + (lead.lead_id === selectedLeadId ? " active" : "");
+      btn.innerHTML = `
+        <div class="lead-top">
+          <div class="lead-name">${esc(lead.name || "No name")}</div>
+          ${statusPill(getLeadStatus(lead))}
+        </div>
+        <div class="lead-phone">${esc(getLeadPhone(lead))}</div>`;
+      btn.onclick = () => openLead(lead);
+      leadsListEl.appendChild(btn);
+    });
+  }
+
+  async function loadLeads() {
+    try {
+      const res = await fetch(`${API}/api/dashboard/leads`);
+      if (!res.ok) throw new Error();
+      allLeads = await res.json();
+      renderLeads(allLeads);
+    } catch {
+      leadsListEl.innerHTML = `<div class="error">Failed to load leads</div>`;
+    }
+  }
+
+  async function openLead(lead) {
+    selectedLeadId = lead.lead_id;
+    renderLeads(getFilteredLeads());
+    detailEmptyEl.style.display = "none";
+    leadDetailEl.style.display = "flex";
+    document.body.classList.add("detail-open");
+    detailNameEl.textContent = lead.name || "No name";
+    detailPhoneEl.textContent = getLeadPhone(lead);
+    detailStatusEl.innerHTML = statusPill(getLeadStatus(lead));
+    detailSummaryEl.textContent = lead.summary || "No summary yet.";
+    whatsappBtn.onclick = () => {
+      let phone = getLeadPhone(lead).replace(/\D/g, "");
+      if (phone.startsWith("0")) phone = "972" + phone.slice(1);
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(`Hi ${lead.name || ""}, I saw you left your details 👋`)}`, "_blank");
+    };
+    chatHistoryEl.innerHTML = `<div class="loading">Loading conversation...</div>`;
+    try {
+      const res = await fetch(`${API}/api/dashboard/leads/${lead.lead_id}/messages`);
+      if (!res.ok) throw new Error();
+      renderMessages(await res.json());
+    } catch {
+      chatHistoryEl.innerHTML = `<div class="error">Failed to load conversation</div>`;
+    }
+  }
+
+  function renderMessages(messages) {
+    if (!messages.length) { chatHistoryEl.innerHTML = `<div class="loading">No messages</div>`; return; }
+    chatHistoryEl.innerHTML = "";
+    messages.forEach(msg => {
+      const role = msg.role === "user" ? "user" : "bot";
+      const div = document.createElement("div");
+      div.className = `chat-msg ${role}`;
+      div.innerHTML = `<div class="chat-bubble">${esc(msg.content)}</div><div class="msg-time">${esc(formatDate(msg.created_at))}</div>`;
+      chatHistoryEl.appendChild(div);
+    });
+  }
+
+  function closeLeadDetail() { document.body.classList.remove("detail-open"); }
+
+  function getFilteredLeads() {
+    const q = searchInput.value.trim().toLowerCase();
+    if (!q) return allLeads;
+    return allLeads.filter(l => {
+      return String(l.name||"").toLowerCase().includes(q) ||
+             String(getLeadPhone(l)).toLowerCase().includes(q) ||
+             statusToLabel(getLeadStatus(l)).toLowerCase().includes(q);
+    });
+  }
+
+  searchInput.addEventListener("input", () => renderLeads(getFilteredLeads()));
+
+  // ══ APPOINTMENTS ══
+  const MOCK = [
+    { booking_id:1, lead_id:101, name:"Yossi Cohen",     phone:"0521234567", email:"yossi@gmail.com",    slot_date:"2026-05-20T10:00:00", final_status:"Hot Lead",  booking_status:"confirmed" },
+    { booking_id:2, lead_id:102, name:"Dana Levi",       phone:"0541112233", email:"dana@gmail.com",     slot_date:"2026-05-21T14:30:00", final_status:"Cold Lead", booking_status:"cancelled" },
+    { booking_id:3, lead_id:103, name:"Avi Shapiro",     phone:"0509988776", email:"avi@business.co.il", slot_date:"2026-05-19T09:00:00", final_status:"Hot Lead",  booking_status:"completed" },
+    { booking_id:4, lead_id:104, name:"Michal Ben David",phone:"0533344556", email:"michal@shop.com",    slot_date:"2026-05-22T16:00:00", final_status:"Hot Lead",  booking_status:"confirmed" },
+    { booking_id:5, lead_id:105, name:"Ron Katz",        phone:"0526677889", email:"ron@studio.co.il",   slot_date:"2026-05-23T11:00:00", final_status:"Cold Lead", booking_status:"confirmed" },
+  ];
+
+  let appointments = MOCK.map(a => ({...a}));
+  let editingId = null;
+
+  function leadScorePill(s) {
+    if (s === "Hot Lead")  return `<span class="pill pill-hot"><span class="pill-dot" style="background:var(--hot)"></span>Hot</span>`;
+    if (s === "Cold Lead") return `<span class="pill pill-cold"><span class="pill-dot" style="background:var(--cold)"></span>Cold</span>`;
+    return "—";
+  }
+
+  function bookingPill(s) {
+    const map = {
+      confirmed: `<span class="pill pill-confirmed">Confirmed</span>`,
+      cancelled:  `<span class="pill pill-cancelled">Cancelled</span>`,
+      completed:  `<span class="pill pill-completed">Completed</span>`,
+    };
+    return map[s] || `<span class="pill">${s}</span>`;
+  }
+
+  function formatApptDate(val) {
+    if (!val) return "—";
+    const d = new Date(val);
+    if (isNaN(d)) return val;
+    return d.toLocaleString("en-GB", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+  }
+
+  function renderApptTable(data) {
+    const tbody = document.getElementById("apptTableBody");
+    if (!data.length) { tbody.innerHTML = `<tr><td colspan="7" class="state-msg">No appointments found</td></tr>`; return; }
+    tbody.innerHTML = data.map(a => `
+      <tr>
+        <td class="td-name">${esc(a.name)}</td>
+        <td class="td-phone">${esc(a.phone)}</td>
+        <td class="td-email">${esc(a.email)}</td>
+        <td class="td-date">${formatApptDate(a.slot_date)}</td>
+        <td>${leadScorePill(a.final_status)}</td>
+        <td>${bookingPill(a.booking_status)}</td>
+        <td>
+          <div class="actions-cell">
+            <button class="action-btn wa"     onclick="openWA('${esc(a.phone)}','${esc(a.name)}')">WhatsApp</button>
+            <button class="action-btn"        onclick="openEdit(${a.booking_id})">Edit</button>
+            <button class="action-btn danger" onclick="deleteAppt(${a.booking_id})">Delete</button>
+          </div>
+        </td>
+      </tr>`).join("");
+  }
+
+  function getFilteredAppts() {
+    const q = document.getElementById("apptSearch").value.trim().toLowerCase();
+    const s = document.getElementById("apptFilter").value;
+    return appointments.filter(a => {
+      const mq = !q || a.name.toLowerCase().includes(q) || a.phone.includes(q) || a.email.toLowerCase().includes(q);
+      const ms = !s || a.booking_status === s;
+      return mq && ms;
+    });
+  }
+
+  document.getElementById("apptSearch").addEventListener("input",  () => renderApptTable(getFilteredAppts()));
+  document.getElementById("apptFilter").addEventListener("change", () => renderApptTable(getFilteredAppts()));
+
+  function openWA(phone, name) {
+    let p = phone.replace(/\D/g,"");
+    if (p.startsWith("0")) p = "972" + p.slice(1);
+    window.open(`https://wa.me/${p}?text=${encodeURIComponent(`Hi ${name}, just confirming our upcoming meeting 👋`)}`, "_blank");
+  }
+
+  function openEdit(id) {
+    const a = appointments.find(x => x.booking_id === id);
+    if (!a) return;
+    editingId = id;
+    document.getElementById("editName").value   = a.name;
+    document.getElementById("editPhone").value  = a.phone;
+    document.getElementById("editEmail").value  = a.email;
+    document.getElementById("editDate").value   = a.slot_date?.slice(0,16) || "";
+    document.getElementById("editStatus").value = a.booking_status;
+    document.getElementById("editModal").classList.add("open");
+  }
+
+  function closeModal() {
+    document.getElementById("editModal").classList.remove("open");
+    editingId = null;
+  }
+
+  function saveEdit() {
+    const a = appointments.find(x => x.booking_id === editingId);
+    if (!a) return;
+    a.name           = document.getElementById("editName").value;
+    a.phone          = document.getElementById("editPhone").value;
+    a.email          = document.getElementById("editEmail").value;
+    a.slot_date      = document.getElementById("editDate").value;
+    a.booking_status = document.getElementById("editStatus").value;
+    // TODO: PUT /api/dashboard/appointments/${editingId}
+    closeModal();
+    renderApptTable(getFilteredAppts());
+  }
+
+  function deleteAppt(id) {
+    if (!confirm("Delete this appointment?")) return;
+    appointments = appointments.filter(x => x.booking_id !== id);
+    // TODO: DELETE /api/dashboard/appointments/${id}
+    renderApptTable(getFilteredAppts());
+  }
+
+  async function loadAppointments() {
+    try {
+      const res = await fetch(`${API}/api/dashboard/appointments`);
+      appointments = await res.json();
+      appointments = MOCK.map(a => ({...a}));
+      renderApptTable(appointments);
+    } catch {
+      document.getElementById("apptTableBody").innerHTML =
+        `<tr><td colspan="7" class="state-msg" style="color:#ff8b8b">Failed to load appointments</td></tr>`;
+    }
+  }
+
+  document.getElementById("editModal").addEventListener("click", e => { if (e.target === e.currentTarget) closeModal(); });
+
+  // ══ INIT ══
+  loadLeads().then(() => {
+    const id = new URLSearchParams(window.location.search).get("lead");
+    if (id) {
+      const lead = allLeads.find(l => String(l.lead_id) === String(id));
+      if (lead) openLead(lead);
+    }
+  });
+
+  loadAppointments();
+</script>
+</body>
+</html>
