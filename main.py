@@ -88,6 +88,30 @@ def get_dashboard_appointments():
     return service_layer.booking_dashboard.get_all_appointments()
 
 
+class AppointmentUpdateRequest(BaseModel):
+    name: str
+    phone: str
+    email: str
+    slot_date: str
+    booking_status: str
+
+@app.put("/api/dashboard/appointments/{appointment_id}")
+def update_dashboard_appointment(appointment_id: int, data: AppointmentUpdateRequest):
+    result = service_layer.update_appointment(
+        appointment_id=appointment_id,
+        name=data.name,
+        phone=data.phone,
+        email=data.email,
+        slot_date=data.slot_date,
+        booking_status=data.booking_status
+    )
+
+    return {
+        "message": result.get("message"),
+        "status": result.get("status", "error")
+    }
+
+
 @app.get("/dev/create-test-slots")
 def create_test_slots():
     booking_repo = service_layer.booking_flow.booking_slots

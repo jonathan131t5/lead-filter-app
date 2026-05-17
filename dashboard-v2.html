@@ -733,15 +733,9 @@
   searchInput.addEventListener("input", () => renderLeads(getFilteredLeads()));
 
   // ══ APPOINTMENTS ══
-  const MOCK = [
-    { booking_id:1, lead_id:101, name:"Yossi Cohen",     phone:"0521234567", email:"yossi@gmail.com",    slot_date:"2026-05-20T10:00:00", final_status:"Hot Lead",  booking_status:"confirmed" },
-    { booking_id:2, lead_id:102, name:"Dana Levi",       phone:"0541112233", email:"dana@gmail.com",     slot_date:"2026-05-21T14:30:00", final_status:"Cold Lead", booking_status:"cancelled" },
-    { booking_id:3, lead_id:103, name:"Avi Shapiro",     phone:"0509988776", email:"avi@business.co.il", slot_date:"2026-05-19T09:00:00", final_status:"Hot Lead",  booking_status:"completed" },
-    { booking_id:4, lead_id:104, name:"Michal Ben David",phone:"0533344556", email:"michal@shop.com",    slot_date:"2026-05-22T16:00:00", final_status:"Hot Lead",  booking_status:"confirmed" },
-    { booking_id:5, lead_id:105, name:"Ron Katz",        phone:"0526677889", email:"ron@studio.co.il",   slot_date:"2026-05-23T11:00:00", final_status:"Cold Lead", booking_status:"confirmed" },
-  ];
+  
 
-  let appointments = MOCK.map(a => ({...a}));
+  let appointments = [];
   let editingId = null;
 
   function leadScorePill(s) {
@@ -772,14 +766,14 @@
     tbody.innerHTML = data.map(a => `
       <tr>
         <td class="td-name">${esc(a.name)}</td>
-        <td class="td-phone">${esc(a.phone)}</td>
+        <td class="td-phone">${esc(a.phone_number)}</td>
         <td class="td-email">${esc(a.email)}</td>
         <td class="td-date">${formatApptDate(a.slot_date)}</td>
         <td>${leadScorePill(a.final_status)}</td>
         <td>${bookingPill(a.booking_status)}</td>
         <td>
           <div class="actions-cell">
-            <button class="action-btn wa"     onclick="openWA('${esc(a.phone)}','${esc(a.name)}')">WhatsApp</button>
+            <button class="action-btn wa"     onclick="openWA('${esc(a.phone_number)}','${esc(a.name)}')">WhatsApp</button>
             <button class="action-btn"        onclick="openEdit(${a.booking_id})">Edit</button>
             <button class="action-btn danger" onclick="deleteAppt(${a.booking_id})">Delete</button>
           </div>
@@ -811,7 +805,7 @@
     if (!a) return;
     editingId = id;
     document.getElementById("editName").value   = a.name;
-    document.getElementById("editPhone").value  = a.phone;
+    document.getElementById("editPhone").value  = a.phone_number;
     document.getElementById("editEmail").value  = a.email;
     document.getElementById("editDate").value   = a.slot_date?.slice(0,16) || "";
     document.getElementById("editStatus").value = a.booking_status;
@@ -823,17 +817,28 @@
     editingId = null;
   }
 
-  function saveEdit() {
-    const a = appointments.find(x => x.booking_id === editingId);
-    if (!a) return;
-    a.name           = document.getElementById("editName").value;
-    a.phone          = document.getElementById("editPhone").value;
-    a.email          = document.getElementById("editEmail").value;
-    a.slot_date      = document.getElementById("editDate").value;
-    a.booking_status = document.getElementById("editStatus").value;
-    // TODO: PUT /api/dashboard/appointments/${editingId}
+  async function saveEdit() {
+    const res = await fetch(`${API}/api/dashboard/appointments/${editingId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: document.getElementById("editName").value,
+        phone: document.getElementById("editPhone").value,
+        email: document.getElementById("editEmail").value,
+        slot_date: document.getElementById("editDate").value,
+        booking_status: document.getElementById("editStatus").value
+      })
+    });
+
+    if (!res.ok) {
+      alert("Failed to update appointment");
+      return;
+    }
+
     closeModal();
-    renderApptTable(getFilteredAppts());
+    loadAppointments();
   }
 
   function deleteAppt(id) {

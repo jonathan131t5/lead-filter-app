@@ -13,6 +13,7 @@ from data_access.leads_messages_repository import MessagesRepository
 from data_access.lead_summary_context_repository import LeadSummaryContextRepository
 from data_access.lead_booking_repository import LeadsBookingRepository
 from data_access.lead_booking_dashboard_repository import BookingDashDataRepository
+from data_access.appointment_context_dpdate_repository import AppointmentsContextRepository
 
 from data_base.connection import Connection
 
@@ -55,6 +56,7 @@ class ServiceLayer:
         self.db = Connection()
         
         self.booking_flow = BookingFlow(self.db)
+        self.appointments_changes =AppointmentsContextRepository(self.db.cursor)
         self.booking_dashboard = BookingDashDataRepository(self.db.cursor)
         self.leads_booking = LeadsBookingRepository(self.db.cursor)
         self.leads_data = LeadsDataRepository(self.db.cursor)
@@ -204,9 +206,19 @@ class ServiceLayer:
   
 
 
+    def update_appointment(self, appointment_id, name, phone, email, slot_date, booking_status):
+        result = self.appointments_changes.update_appointment(
+            appointment_id=appointment_id,
+            name=name,
+            phone=phone,
+            email=email,
+            slot_date=slot_date,
+            booking_status=booking_status
+        )
 
+        self.db.commit()
 
-
+        return result
 
 
 
