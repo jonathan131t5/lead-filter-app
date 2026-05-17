@@ -17,7 +17,7 @@ class BookingDashDataRepository:
                 ls.date
             FROM leads_data li
 
-            JOIN leads_booking lp
+            JOIN appointment lp
                 ON li.lead_id = lp.lead_id
 
             JOIN booking_slot ls
