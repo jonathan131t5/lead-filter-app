@@ -21,7 +21,7 @@ class LeadsDataRepository:
     
     def create_new_lead(self, session_id):
         self.cursor.execute("INSERT INTO leads_data (session_id) VALUES (?)", 
-        (session_id)
+        (session_id , )
         )
 
         return self.cursor.lastrowid
