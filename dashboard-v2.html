@@ -450,6 +450,19 @@
     thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
     .appt-search { width: 100%; }
   }
+  #page-leads:not(.active),
+  #page-appointments:not(.active) {
+    display: none;
+  }
+
+  #page-leads.active {
+    display: grid;
+  }
+
+  #page-appointments.active {
+    display: flex;
+  }
+
 </style>
 </head>
 
@@ -834,7 +847,6 @@
     try {
       const res = await fetch(`${API}/api/dashboard/appointments`);
       appointments = await res.json();
-      appointments = MOCK.map(a => ({...a}));
       renderApptTable(appointments);
     } catch {
       document.getElementById("apptTableBody").innerHTML =
