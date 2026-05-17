@@ -128,36 +128,46 @@ def create_test_slots():
 async def whatsapp_webhook(request: Request):
     body = await request.json()
 
-    if body.get("event") != "messages.upsert":
-        return {"status": "ignored"}
-
-    logging.info("WHATSAPP WEBHOOK BODY:")
+    logging.info("META WHATSAPP WEBHOOK BODY:")
     logging.info(body)
 
-    message_data = extract_whatsapp_message_data(body)
+    try:
+        value = body["entry"][0]["changes"][0]["value"]
 
-    if message_data["from_me"]:
-        return {"status": "ignored"}
+        # אם אין הודעה אמיתית — להתעלם
+        if "messages" not in value:
+            return {"status": "ignored"}
 
-    if message_data["message_type"] != "conversation":
-        send_whatsapp_message(
-            message_data["phone"],
-            "I can only read text messages here. Please type your message and I’ll help you from there."
+        message = value["messages"][0]
+
+        # רק הודעות טקסט
+        if message.get("type") != "text":
+            phone = message.get("from")
+            send_whatsapp_message(
+                phone,
+                "I can only read text messages here. Please type your message and I’ll help you from there."
+            )
+            return {"status": "ok"}
+
+        phone = message["from"]
+        text = message["text"]["body"]
+        message_id = message["id"]
+
+        result = service_layer.process_lead_message(
+            session_id=phone,
+            content=text,
+            external_message_id=message_id
         )
+
+        reply_text = result.get("message") or result.get("content")
+
+        if reply_text:
+            send_whatsapp_message(phone, reply_text)
+
         return {"status": "ok"}
-    
-    
-    result = service_layer.process_lead_message(
-        session_id=message_data["phone"],
-        content=message_data["text"] , 
-        external_message_id=message_data["message_type"]
-    )
 
-    send_whatsapp_message(
-        message_data["phone"],
-        result.get("message") or result.get("content")
-    )
-
-    return {"status": "ok"}
+    except Exception:
+        logging.exception("META WHATSAPP WEBHOOK ERROR")
+        return {"status": "error"}
 
 
