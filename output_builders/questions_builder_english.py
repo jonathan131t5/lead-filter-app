@@ -18,6 +18,7 @@ class BaseQuestions:
         ]
 #
     def process_base_question(self, field, ack_mode):
+        print(f"PROCESS BASE QUESTION FIELD={repr(field)} ACK_MODE={repr(ack_mode)}", flush=True)
         if field == "goal":
             questions = self.goal_base_questions()
         elif field == "urgency":
