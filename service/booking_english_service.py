@@ -8,6 +8,7 @@ from data_access.lead_booking_repository import LeadsBookingRepository
 from data_access.slots_repository import BookingSlotRepository
 from data_access.appointment_repository import AppointmentRepository
 from data_access.lead_booking_context_repository import LeadBookingContextRepository
+from data_access.leads_messages_repository import MessagesRepository
 
 from utils.validators import is_valid_email
 
@@ -16,6 +17,7 @@ from data_base.connection import Connection
 class BookingFlow:
     def __init__(self , db):
         self.db = db
+        self.messages = MessagesRepository(self.db.cursor)
         self.leads_booking = LeadsBookingRepository(self.db.cursor)
         self.booking_slots = BookingSlotRepository(self.db.cursor)
         self.appointments = AppointmentRepository(self.db.cursor)
@@ -97,10 +99,12 @@ class BookingFlow:
         if lead_booking_data["booking_state"] == "booking_interest":
             if response_info["status"] == True:
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="booking_selection")
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content="yes")
                 lead_booking_data["booking_state"] = "booking_selection"
 
             elif response_info["status"] == False:
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] ,  param="booking_state" , value="booking_declined_intro")
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content="yes")
                 lead_booking_data["booking_state"] = "booking_declined_intro"
             
             return True
@@ -119,6 +123,8 @@ class BookingFlow:
                 
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="processing_slot_id" , value=response_info["value"])
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="email")
+
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=response_info["value"])
 
                 lead_booking_data["processing_slot_id"] = response_info["value"]
                 lead_booking_data["booking_state"] = "email"
@@ -143,12 +149,13 @@ class BookingFlow:
 
             lead_booking_data["booking_state"] = "booking_accepted_options"
 
+            self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=response_info["value"])
+
             return True
         return False
             
     
     
-
 
 
     def generate_booking_intro(self):

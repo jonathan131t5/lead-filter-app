@@ -32,7 +32,7 @@ def serve_chat():
 
 @app.get("/dashboard")
 def serve_dashboard():
-    return FileResponse("dashboard_hebrew.html")
+    return FileResponse("dashboard-v2.html")
 
 class MessageRequirements(BaseModel):
     name: str | None = None
@@ -82,6 +82,10 @@ def get_dashboard_leads():
 def get_dasboard_messages(lead_id: int):
     return service_layer.messages.get_lead_messages(lead_id=lead_id)
 
+
+@app.get("/api/dashboard/appointments")
+def get_dashboard_appointments():
+    return service_layer.booking_dashboard.get_all_appointments()
 
 
 @app.get("/dev/create-test-slots")
