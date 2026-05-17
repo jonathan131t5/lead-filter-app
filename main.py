@@ -122,6 +122,20 @@ def create_test_slots():
     service_layer.booking_flow.db.commit()
     return {"status": "ok", "message": "test slots created"}
 
+VERIFY_TOKEN = "lead_filter_verify_123"
+
+@app.get("/webhook/whatsapp")
+async def verify_whatsapp_webhook(request: Request):
+    mode = request.query_params.get("hub.mode")
+    token = request.query_params.get("hub.verify_token")
+    challenge = request.query_params.get("hub.challenge")
+
+    if mode == "subscribe" and token == VERIFY_TOKEN:
+        return int(challenge)
+
+    return {"status": "verification_failed"}
+
+
 
 
 @app.post("/webhook/whatsapp")
