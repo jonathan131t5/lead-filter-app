@@ -21,7 +21,7 @@ class BookingDashDataRepository:
                 ON li.lead_id = lp.lead_id
 
             JOIN booking_slot ls
-                ON lp.slot_id = ls.id
+                ON lp.slot_id = ls.slot_id
         """)
 
         rows = self.cursor.fetchall()

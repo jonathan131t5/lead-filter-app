@@ -33,7 +33,7 @@ class AppointmentsContextRepository:
         self.cursor.execute("""
             UPDATE booking_slot
             SET date = ?
-            WHERE id = ?
+            WHERE slot_id = ?
         """, (slot_date, slot_id))
 
         return {"status": True , "message": "updated successfully"}
