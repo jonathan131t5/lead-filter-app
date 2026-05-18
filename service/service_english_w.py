@@ -351,7 +351,7 @@ class ServiceLayer:
                 self.leads_data.update_lead_name(lead_id=lead_info["lead_id"] , name=content)
 
 
-            if lead_info["current_field"] == "goal":
+            elif lead_info["current_field"] == "goal":
                 lead_info["current_field"] = "urgency"
                 self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content)
 
