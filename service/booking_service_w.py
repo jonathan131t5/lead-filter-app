@@ -159,10 +159,10 @@ class BookingFlow:
 
 
     def generate_booking_intro(self):
-        interest_questions = {
-            "id" : "interest_yes" , "title" : "yes" , 
-            "id" : "interest_no" , "title" : "no"
-        }
+        interest_questions = [
+            {"id": "interest_yes", "title": "yes"},
+            {"id": "interest_no", "title": "no"}
+            ]
         
         questions = [
             "Would you like to book your first session?" , 
@@ -184,7 +184,7 @@ class BookingFlow:
                 dt = datetime.fromisoformat(raw_datetime)
 
                 available_slots.append({
-                    "id": slot["id"],
+                    "id": str(slot["id"]),
                     "title": dt.strftime("%d/%m • %H:%M")
                 })
         available_slots.append({"id" : "selection_declined" , "title" : "I don’t see a time that works"})
