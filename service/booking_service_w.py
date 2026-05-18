@@ -46,10 +46,6 @@ class BookingFlow:
 
 
             elif check_booking_result["status"] == True:
-                if content is None:
-                    self.db.commit()
-                    return self.generate_booking_question(lead_data=lead_booking_data)
-            
                 process_result = self.process_booking_response_flow(response_info=content , lead_booking_data=lead_booking_data)
                 if process_result and "status" in process_result:
                     self.db.commit()
@@ -112,6 +108,8 @@ class BookingFlow:
 
 
     def process_booking_selection_response(self , response_info , lead_booking_data):
+        if type(response_info , str):
+            return
         if lead_booking_data["booking_state"] == "booking_selection":
             if response_info["id"] != "selection_declined":
                 slot_status = self.booking_slots.get_booking_slot(slot_id=response_info["id"])
@@ -138,6 +136,8 @@ class BookingFlow:
 
 
     def process_booking_email_response(self , response_info , lead_booking_data):
+        if type(response_info , str):
+            return
         logging.info(
             f"[Process Email] User Email Data: {response_info}"
         )
