@@ -34,9 +34,6 @@ class BookingFlow:
             if check_booking_result["status"] == "invaild flow":
                 return False
             
-            if content is None:
-                return self.generate_booking_question(lead_data=lead_booking_data)
-
             if check_booking_result["status"] == "has booking":
                 self.db.commit()
                 return self.generate_booking_question(lead_data=lead_booking_data)

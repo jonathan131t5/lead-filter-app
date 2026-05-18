@@ -126,10 +126,8 @@ class ServiceLayer:
         logging.info(f"run lead flow email:{content}")
         
 
-        if content and "status" not in content:
-            booking_result = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=None)
-        else:
-            booking_result = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
+       
+        booking_result = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
 
         if isinstance(booking_result , dict):
             return booking_result
