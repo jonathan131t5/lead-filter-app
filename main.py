@@ -164,7 +164,7 @@ async def whatsapp_webhook(request: Request):
         message = value["messages"][0]
 
         # רק הודעות טקסט
-        if message.get("type") != "text" or  message.get("type") != "interactive":
+        if message.get("type") not in ["text", "interactive"]:
             phone = message.get("from")
             send_whatsapp_message(
                 phone,
