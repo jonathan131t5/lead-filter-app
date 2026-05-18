@@ -176,7 +176,7 @@ class FallBackQuestions:
     def process_fallback_question(self, field, reason):
         questions = []
         if field == "goal":
-            questions = self.goal_fallback_questions()
+            questions = self.goal_fallback_questions(fallback_type=reason)
         elif field == "phone":
             questions = self.phone_fallback_question(fallback_type=reason)
         elif field == "urgency":
