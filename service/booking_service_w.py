@@ -96,6 +96,8 @@ class BookingFlow:
     
     
     def process_booking_interest_response(self , response_info , lead_booking_data):
+        print("BOOKING INTEREST RESPONSE:", response_info, flush=True)
+        print("BOOKING STATE:", lead_booking_data["booking_state"], flush=True)
         if lead_booking_data["booking_state"] == "booking_interest":
             if response_info["id"] == "interest_yes":
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="booking_selection")
@@ -104,7 +106,7 @@ class BookingFlow:
 
             elif response_info["id"] == "interest_no":
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] ,  param="booking_state" , value="booking_declined_intro")
-                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content="yes")
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content="no")
                 lead_booking_data["booking_state"] = "booking_declined_intro"
             
             return True
