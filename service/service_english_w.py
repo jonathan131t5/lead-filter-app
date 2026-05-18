@@ -17,7 +17,7 @@ from data_base.connection import Connection
 
 from integrations.mail_integration import send_email
 
-from service.booking_english_service import BookingFlow
+from service.booking_service_w import BookingFlow
 
 from service.whatsapp_service import send_whatsapp_message, extract_whatsapp_message_data
 

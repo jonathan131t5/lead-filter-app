@@ -35,6 +35,61 @@ def send_whatsapp_message(number: str, text: str):
 
 
 
+def send_whatsapp_buttons(to, body, buttons):
+    url = f"https://graph.facebook.com/v20.0/{META_PHONE_NUMBER_ID}/messages"
+
+    headers = {
+        "Authorization": f"Bearer {META_ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {
+                "text": body
+            },
+            "action": {
+                "buttons": [
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": btn["id"],
+                            "title": btn["title"]
+                        }
+                    }
+                    for btn in buttons
+                ]
+            }
+        }
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    print("WHATSAPP BUTTON STATUS:", response.status_code, flush=True)
+    print("WHATSAPP BUTTON RESPONSE:", response.text, flush=True)
+
+    return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def extract_whatsapp_message_data(body):
     remote_jid = body["data"]["key"].get("remoteJidAlt") or body["data"]["key"].get("remoteJid")
     phone = remote_jid.split("@")[0]

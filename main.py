@@ -8,7 +8,7 @@ import sqlite3
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 
-from service.whatsapp_service import send_whatsapp_message , extract_whatsapp_message_data
+from service.whatsapp_service import send_whatsapp_message , send_whatsapp_buttons
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -177,11 +177,15 @@ async def whatsapp_webhook(request: Request):
         )
 
         reply_text = result.get("message") or result.get("content")
-
+        reply_status = result.get("status")
         if reply_text:
-            send_whatsapp_message(phone, reply_text)
+            if reply_status == "booking_interest" or reply_status == "booking_selection":
+                send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"])
+            
+            else:
+                send_whatsapp_message(phone, reply_text)
 
-        return {"status": "ok"}
+            return {"status": "ok"}
 
     except Exception:
         logging.exception("META WHATSAPP WEBHOOK ERROR")
