@@ -112,6 +112,12 @@ def update_dashboard_appointment(appointment_id: int, data: AppointmentUpdateReq
     }
 
 
+@app.get("/privacy")
+def privacy():
+    return FileResponse("privacy.html")
+
+
+
 @app.get("/dev/create-test-slots")
 def create_test_slots():
     booking_repo = service_layer.booking_flow.booking_slots
