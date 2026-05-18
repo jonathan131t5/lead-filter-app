@@ -180,7 +180,7 @@ async def whatsapp_webhook(request: Request):
         reply_status = result.get("status")
         if reply_text:
             if reply_status == "booking_interest" or reply_status == "booking_selection":
-                send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"])
+                send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"] , to=phone)
             
             else:
                 send_whatsapp_message(phone, reply_text)
