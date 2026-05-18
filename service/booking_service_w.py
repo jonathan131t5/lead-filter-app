@@ -186,7 +186,7 @@ class BookingFlow:
                     "id": str(slot["id"]),
                     "title": dt.strftime("%d/%m • %H:%M")
                 })
-        available_slots.append({"id" : "selection_declined" , "title" : "I don’t see a time that works"})
+        available_slots.append({"id" : "selection_declined" , "title": "None work"})
         return {"buttons" : available_slots , "body" : "Great — please choose a time that works for you:"}
     
 
