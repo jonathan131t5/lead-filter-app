@@ -12,6 +12,6 @@ main_app_test.py
 mvp_main.py
 mvp.py
 output_questions.py
-
+product-logs.txt
 # אם לא צריך DB מוכן
 # *.db
