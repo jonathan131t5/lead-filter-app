@@ -203,6 +203,6 @@ async def whatsapp_webhook(request: Request):
         return {"status": "error"}
 
 
-@app.get("/")
+@app.get("/business")
 def home():
     return FileResponse("business-web.html")
