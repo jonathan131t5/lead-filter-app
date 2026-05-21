@@ -179,7 +179,11 @@ async def whatsapp_webhook(request: Request):
             text = message["text"]["body"]
 
         elif message.get("type") == "interactive":
-            text = {"id": message["interactive"]["button_reply"]["id"]}
+            interactive = message["interactive"]
+            if interactive.get("type") == "button_reply":
+                text = {"id": interactive["button_reply"]["id"]}
+            elif interactive.get("type") == "list_reply":
+                text = {"id": interactive["list_reply"]["id"]}
 
         result = service_layer.process_lead_message(
             session_id=phone,
