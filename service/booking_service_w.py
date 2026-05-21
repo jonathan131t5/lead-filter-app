@@ -90,6 +90,8 @@ class BookingFlow:
     
     
     def process_booking_interest_response(self , response_info , lead_booking_data):
+        if type(response_info , str):
+            return
         print("BOOKING INTEREST RESPONSE:", response_info, flush=True)
         print("BOOKING STATE:", lead_booking_data["booking_state"], flush=True)
         if lead_booking_data["booking_state"] == "booking_interest":
@@ -137,8 +139,6 @@ class BookingFlow:
 
 
     def process_booking_email_response(self , response_info , lead_booking_data):
-        if type(response_info , str):
-            return
         logging.info(
             f"[Process Email] User Email Data: {response_info}"
         )
