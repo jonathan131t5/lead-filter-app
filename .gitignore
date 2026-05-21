@@ -13,5 +13,7 @@ mvp_main.py
 mvp.py
 output_questions.py
 product-logs.txt
+integrations/credentials.json
+integrations/token.json
 # אם לא צריך DB מוכן
 # *.db

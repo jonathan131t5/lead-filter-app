@@ -46,6 +46,7 @@ class BookingFlow:
 
 
             elif check_booking_result["status"] == True:
+                print(f"CONTENT: {content}" , flush=True)
                 process_result = self.process_booking_response_flow(response_info=content , lead_booking_data=lead_booking_data)
                 if process_result and "status" in process_result:
                     self.db.commit()
