@@ -90,7 +90,7 @@ class BookingFlow:
     
     
     def process_booking_interest_response(self , response_info , lead_booking_data):
-        if type(response_info , str):
+        if isinstance(response_info , str):
             return
         print("BOOKING INTEREST RESPONSE:", response_info, flush=True)
         print("BOOKING STATE:", lead_booking_data["booking_state"], flush=True)
@@ -111,7 +111,7 @@ class BookingFlow:
 
 
     def process_booking_selection_response(self , response_info , lead_booking_data):
-        if type(response_info , str):
+        if isinstance(response_info , str):
             return
         if lead_booking_data["booking_state"] == "booking_selection":
             if response_info["id"] != "selection_declined":
