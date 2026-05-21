@@ -184,7 +184,7 @@ class BookingFlow:
                 dt = datetime.fromisoformat(raw_datetime)
 
                 available_slots.append({
-                    "id": str(slot["id"]),
+                    "id": str(slot["slot_id"]),
                     "title": dt.strftime("%d/%m • %H:%M")
                 })
         available_slots.append({"id" : "selection_declined" , "title": "None work"})
