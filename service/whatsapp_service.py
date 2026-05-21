@@ -78,6 +78,53 @@ def send_whatsapp_buttons(to, body, buttons):
 
 
 
+def send_whatsapp_list(to, body, button_label, sections):
+    url = f"https://graph.facebook.com/v20.0/{META_PHONE_NUMBER_ID}/messages"
+
+    headers = {
+        "Authorization": f"Bearer {META_ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "interactive",
+        "interactive": {
+            "type": "list",
+            "body": {
+                "text": body
+            },
+            "action": {
+                "button": button_label,
+                "sections": [
+                    {
+                        "title": section["title"],
+                        "rows": [
+                            {
+                                "id": row["id"],
+                                "title": row["title"],
+                                "description": row.get("description", "")
+                            }
+                            for row in section["rows"]
+                        ]
+                    }
+                    for section in sections
+                ]
+            }
+        }
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    print("WHATSAPP LIST STATUS:", response.status_code, flush=True)
+    print("WHATSAPP LIST RESPONSE:", response.text, flush=True)
+
+    return response
+
+
+
+
 
 
 
