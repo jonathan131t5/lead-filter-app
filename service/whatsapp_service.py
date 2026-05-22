@@ -1,7 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
-
+import logging
 load_dotenv()
 
 META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN")
@@ -138,6 +138,7 @@ def send_typing_indicator(to):
     }
     
     response = requests.post(url, headers=headers, json=payload)
+    logging.info(f"TYPING INDICATOR RESPONSE: {response.status_code} | {response.json()}")
     return response.json()
 
 
