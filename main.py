@@ -171,7 +171,9 @@ async def run_ai_logic(message: dict):
         session_id=phone,
         content=text,
         external_message_id=message_id
-    )   
+    )
+
+        await send_typing_indicator(message_id=message_id)   
 
         reply_text = result.get("message") or result.get("content")
         reply_status = result.get("status")
