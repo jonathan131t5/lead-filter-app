@@ -199,7 +199,7 @@ async def whatsapp_webhook(request: Request):
                 if len(reply_text["buttons"]) < 3:
                     send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"] , to=phone)
                 else:
-                    send_whatsapp_list(body=reply_text["body"] , button_label=reply_text["button_label"], sections=reply_text["buttons"])
+                    send_whatsapp_list(body=reply_text["body"] , button_label=reply_text["button_label"], sections=reply_text["buttons"] , to=phone)
             
             else:
                 send_whatsapp_message(phone, reply_text)
