@@ -133,12 +133,12 @@ def send_typing_indicator(to):
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
         "to": to,
-        "sender_action": "typing_on"
+        "type": "typing_indicator",
+        "typing_indicator": {"type": "text"}
     }
     
     response = requests.post(url, headers=headers, json=payload)
     return response.json()
-
 
 
 
