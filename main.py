@@ -189,7 +189,7 @@ async def whatsapp_webhook(request: Request):
             session_id=phone,
             content=text,
             external_message_id=message_id
-        )
+        )   
 
         reply_text = result.get("message") or result.get("content")
         reply_status = result.get("status")
@@ -198,7 +198,7 @@ async def whatsapp_webhook(request: Request):
                 if len(reply_text["body"]) < 3:
                     send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"] , to=phone)
                 else:
-                    send_whatsapp_list(body=reply_text["body"] , button_label=reply_status["button_label"], sections=reply_text["buttons"])
+                    send_whatsapp_list(body=reply_text["body"] , button_label=reply_text["button_label"], sections=reply_text["buttons"])
             
             else:
                 send_whatsapp_message(phone, reply_text)
