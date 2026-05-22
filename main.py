@@ -167,6 +167,7 @@ async def run_ai_logic(message: dict):
         
         stop_typing = asyncio.Event()
         typing_task = asyncio.create_task(keep_typing(message_id, stop_typing))
+        await asyncio.sleep(0)
 
         if message.get("type") == "text":
             text = message["text"]["body"]
