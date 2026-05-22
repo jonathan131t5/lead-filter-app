@@ -8,7 +8,7 @@ import sqlite3
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 
-from service.whatsapp_service import send_whatsapp_message , send_whatsapp_buttons , send_whatsapp_list
+from service.whatsapp_service import send_whatsapp_message , send_whatsapp_buttons , send_whatsapp_list , send_typing_indicator
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -171,8 +171,10 @@ async def whatsapp_webhook(request: Request):
                 "I can only read text messages here. Please type your message and I’ll help you from there."
             )
             return {"status": "ok"}
+        
 
         phone = message["from"]
+        send_typing_indicator(to=phone)
         message_id = message["id"]
 
         if message.get("type") == "text":

@@ -121,6 +121,25 @@ def send_whatsapp_list(to, body, button_label, sections):
 
 
 
+def send_typing_indicator(to):
+    url = f"https://graph.facebook.com/v19.0/{META_PHONE_NUMBER_ID}/messages"
+    
+    headers = {
+        "Authorization": f"Bearer {META_ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": to,
+        "sender_action": "typing"
+    }
+    
+    response = requests.post(url, headers=headers, json=payload)
+    return response.json()
+
+
 
 
 
