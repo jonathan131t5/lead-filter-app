@@ -10,14 +10,15 @@ class AppointmentRepository:
         id INTEGER PRIMARY KEY AUTOINCREMENT , 
         slot_id INTEGER , 
         lead_id INTEGER , 
-        email TEXT , 
         status DEFAULT 'pending'
         )
         """)
 
 
-    def create_appointment(self , slot_id , lead_id , email):
+    def create_appointment(self , slot_id , lead_id):
         self.cursor.execute(
-        "INSERT INTO appointment (slot_id , lead_id , email) VALUES (? , ? , ?)" , 
-        (slot_id , lead_id , email)
+        "INSERT INTO appointment (slot_id , lead_id) VALUES (? , ?)" , 
+        (slot_id , lead_id)
         )
+
+

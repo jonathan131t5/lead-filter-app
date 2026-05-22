@@ -9,14 +9,16 @@ from data_access.slots_repository import BookingSlotRepository
 from data_access.appointment_repository import AppointmentRepository
 from data_access.lead_booking_context_repository import LeadBookingContextRepository
 from data_access.leads_messages_repository import MessagesRepository
+from data_access.lead_booking_dashboard_repository import BookingDashDataRepository
 
-from utils.validators import is_valid_email
+
 
 from data_base.connection import Connection
 
 class BookingFlow:
     def __init__(self , db):
         self.db = db
+        self.booking_dash_data = BookingDashDataRepository(self.db.cursor)
         self.messages = MessagesRepository(self.db.cursor)
         self.leads_booking = LeadsBookingRepository(self.db.cursor)
         self.booking_slots = BookingSlotRepository(self.db.cursor)
@@ -79,19 +81,19 @@ class BookingFlow:
 
     
     def process_booking_response_flow(self , response_info , lead_booking_data):
+        print(f"BOOKING STAT: {lead_booking_data["booking_state"]}" , flush=True)
         booking_interest = self.process_booking_interest_response(response_info=response_info , lead_booking_data=lead_booking_data)
         if booking_interest == False:
             booking_selection = self.process_booking_selection_response(response_info=response_info , lead_booking_data=lead_booking_data)
             if isinstance(booking_selection , dict):
                 return {"status" : booking_selection["status"] , "message" : booking_selection["message"]}
-            if booking_selection == False:
-                self.process_booking_email_response(response_info=response_info , lead_booking_data=lead_booking_data)
-    
+
     
     
     def process_booking_interest_response(self , response_info , lead_booking_data):
         if isinstance(response_info , str):
             return
+        
         print("BOOKING INTEREST RESPONSE:", response_info, flush=True)
         print("BOOKING STATE:", lead_booking_data["booking_state"], flush=True)
         if lead_booking_data["booking_state"] == "booking_interest":
@@ -113,6 +115,7 @@ class BookingFlow:
     def process_booking_selection_response(self , response_info , lead_booking_data):
         if isinstance(response_info , str):
             return
+    
         if lead_booking_data["booking_state"] == "booking_selection":
             if response_info["id"] != "selection_declined":
                 slot_status = self.booking_slots.get_booking_slot(slot_id=response_info["id"])
@@ -121,13 +124,12 @@ class BookingFlow:
                 elif slot_status == 1:
                     return {"status" : "output" , "message" : "This time slot has already been booked. Please choose another available time."}
                 
-                self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="processing_slot_id" , value=response_info["id"])
-                self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="email")
-
+                self.booking_slots.close_booking_slot(slot_id=response_info["id"])
+                self.appointments.create_appointment(slot_id=response_info["id"], lead_id=lead_booking_data["lead_id"])
+                self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="booking_accepted_options")
                 self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=response_info["id"])
 
-                lead_booking_data["processing_slot_id"] = response_info["id"]
-                lead_booking_data["booking_state"] = "email"
+                lead_booking_data["booking_state"] = "booking_accepted_options"
             
             elif response_info["id"] == "selection_declined":
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="booking_declined_options")
@@ -138,22 +140,6 @@ class BookingFlow:
     
 
 
-    def process_booking_email_response(self , response_info , lead_booking_data):
-        logging.info(
-            f"[Process Email] User Email Data: {response_info}"
-        )
-        if lead_booking_data["booking_state"] == "email":
-            self.booking_slots.close_booking_slot(slot_id=lead_booking_data["processing_slot_id"])
-            self.appointments.create_appointment(slot_id=lead_booking_data["processing_slot_id"] , lead_id=lead_booking_data["lead_id"] , email=response_info)
-            self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="booking_accepted_options")
-
-            lead_booking_data["booking_state"] = "booking_accepted_options"
-
-            self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=response_info)
-
-            return True
-        return False
-            
     
     
 
@@ -191,19 +177,9 @@ class BookingFlow:
         return {"buttons" : available_slots , "body" : "Great — please choose a time that works for you:" , "button_label" : "View slots"}
     
 
-
-    def generate_email_question(self):
-        questions = [
-            "What’s the best email to send your meeting details to?" , 
-            "What email should we send the meeting confirmation to?"
-        ]
-        return random.choice(questions)
     
     
-    
-    
-    
-    def generate_closing_messages(self , closing_type):
+    def generate_closing_messages(self , closing_type , lead_id):
         if closing_type["booking_state"] == "not eligible":
            return (
                "Thanks for taking the time to answer the questions.\n"
@@ -225,11 +201,13 @@ class BookingFlow:
                 )
         
         elif closing_type["booking_state"] == "booking_accepted_options":
+            appointment_data = self.booking_dash_data.get_appointment_by_lead_id(lead_id=lead_id)
             return (
-                "Your meeting has been scheduled successfully.\n"
-                "A confirmation email has been sent with the meeting details.\n"
-                "See you at the meeting."
-                )
+                f"✅ You're all set, {appointment_data['name']}!\n"
+                f"Your session is confirmed for {appointment_data['slot_date']}.\n"
+                f"See you then!"
+            )
+
         
 
 
@@ -249,11 +227,8 @@ class BookingFlow:
             elif lead_data["booking_state"] == "booking_selection":
                 return {"status" : "booking_selection" , "message" : self.generate_booking_options()}
             
-            elif lead_data["booking_state"] == "email":
-                return {"status" : "email" , "message" : self.generate_email_question()}
-            
             else:
-                return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data)}
+                return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data , lead_data["lead_id"])}
 
 
 
