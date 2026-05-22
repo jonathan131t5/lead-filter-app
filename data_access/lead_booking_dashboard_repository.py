@@ -11,7 +11,6 @@ class BookingDashDataRepository:
                 li.phone_number,
                 li.name,
                 lp.id,
-                lp.email,
                 lp.status,
                 lp.slot_id,
                 ls.date
@@ -33,10 +32,9 @@ class BookingDashDataRepository:
                 "phone_number": row[2],
                 "name": row[3],
                 "booking_id": row[4],
-                "email": row[5],
-                "booking_status": row[6],
-                "slot_id": row[7],
-                "slot_date": row[8]
+                "booking_status": row[5],
+                "slot_id": row[6],
+                "slot_date": row[7]
             }
             for row in rows
         ]
@@ -52,7 +50,6 @@ class BookingDashDataRepository:
                 li.phone_number,
                 li.name,
                 lp.id,
-                lp.email,
                 lp.status,
                 lp.slot_id,
                 ls.date
@@ -78,8 +75,7 @@ class BookingDashDataRepository:
             "phone_number": row[2],
             "name": row[3],
             "booking_id": row[4],
-            "email": row[5],
-            "booking_status": row[6],
-            "slot_id": row[7],
-            "slot_date": row[8]
+            "booking_status": row[5],
+            "slot_id": row[6],
+            "slot_date": row[7]
         }
