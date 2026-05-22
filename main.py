@@ -211,50 +211,6 @@ async def run_ai_logic(message: dict):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @app.get("/business")
 def home():
     return FileResponse("business-web.html")
