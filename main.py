@@ -152,7 +152,6 @@ def run_ai_logic(message: dict):
     try:
         phone = message["from"]
         message_id = message["id"]
-        send_typing_indicator(message_id=message_id)
 
         if message.get("type") == "text":
             text = message["text"]["body"]
@@ -176,11 +175,14 @@ def run_ai_logic(message: dict):
             if reply_status == "booking_interest" or reply_status == "booking_selection":
                 print(f"BODY: {reply_text['body']} , flush=True")
                 if len(reply_text["buttons"]) < 3:
+                    send_typing_indicator(message_id=message_id)
                     send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
                 else:
+                    send_typing_indicator(message_id=message_id)
                     send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
             
             else:
+                send_typing_indicator(message_id=message_id)
                 send_whatsapp_message(phone, reply_text)
 
     except Exception:
