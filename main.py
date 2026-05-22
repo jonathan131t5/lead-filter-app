@@ -148,10 +148,11 @@ async def verify_whatsapp_webhook(request: Request):
 
 
 
-def run_ai_logic(message: dict):
-    try:
+async def run_ai_logic(message: dict):
+    try: 
         phone = message["from"]
         message_id = message["id"]
+        await send_typing_indicator(message_id=message["id"])
 
         if message.get("type") == "text":
             text = message["text"]["body"]
@@ -215,13 +216,11 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
             return {"status": "ok"}
         
 
-        message_id = message["id"]
-        background_tasks.add_task(send_typing_indicator, message_id=message_id)
-
+        
         background_tasks.add_task(run_ai_logic, message)
         
         # מחזירים לוואטסאפ אישור מיד!
-        return {"status": "ok"}
+        return {"status":   "ok"}
 
     except Exception:
         logging.exception("META WHATSAPP WEBHOOK ERROR")
