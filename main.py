@@ -149,58 +149,77 @@ async def verify_whatsapp_webhook(request: Request):
 
 
 
+import asyncio
+import logging
+from fastapi import FastAPI, Request, BackgroundTasks
+
+app = FastAPI()
+
+# וודא שה-VERIFY_TOKEN והפונקציות של service_layer ו-whatsapp_api מוגדרות אצלך למעלה
+
 @app.post("/webhook/whatsapp")
 async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
-    body = await request.json()
-    value = body["entry"][0]["changes"][0]["value"]
+    try:
+        body = await request.json()
+        value = body["entry"][0]["changes"][0]["value"]
 
-    if "messages" not in value:
-        return {"status": "ignored"}
+        if "messages" not in value:
+            return {"status": "ignored"}
 
-    message = value["messages"][0]
-    phone = message["from"]
+        message = value["messages"][0]
+        phone = message["from"]
 
-    # זה מדליק את המקלדת פעם אחת וזהו
-    await send_typing_indicator(phone)
-    
-    # זה מריץ את כל השאר ברקע
-    background_tasks.add_task(run_ai_logic, message)
-    
-    return {"status": "ok"}
+        # 1. שליחה מיידית וסינכרונית (חובה שזה יקרה לפני ה-return)
+        # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
+        await send_typing_indicator(phone)
+        
+        # 2. שליחת הלוגיקה לעיבוד ברקע כדי לא לתקוע את ה-Webhook
+        background_tasks.add_task(run_ai_logic, message)
+        
+        # 3. החזרת אישור ל-Meta (חייב לקרות מיד כדי למנוע Timeout)
+        return {"status": "ok"}
+        
+    except Exception:
+        logging.exception("WEBHOOK ERROR")
+        return {"status": "error"}
 
 async def run_ai_logic(message: dict):
-    phone = message["from"]
-    message_id = message["id"]
-    
-    # עיבוד טקסט/כפתורים
-    if message.get("type") == "text":
-        text = message["text"]["body"]
-    elif message.get("type") == "interactive":
-        int_data = message["interactive"]
-        text = {"id": int_data.get("button_reply", {}).get("id") or int_data.get("list_reply", {}).get("id")}
-    else:
-        return
-
-    # הרצת הלוגיקה
-    result = await asyncio.to_thread(
-        service_layer.process_lead_message,
-        session_id=phone,
-        content=text,
-        external_message_id=message_id
-    )
-
-    # שליחת התשובה
-    reply_text = result.get("message") or result.get("content")
-    reply_status = result.get("status")
-    
-    if reply_text:
-        if reply_status in ["booking_interest", "booking_selection"]:
-            if len(reply_text["buttons"]) < 3:
-                send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
-            else:
-                send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
+    try:
+        phone = message["from"]
+        message_id = message["id"]
+        
+        # עיבוד סוג ההודעה
+        if message.get("type") == "text":
+            text = message["text"]["body"]
+        elif message.get("type") == "interactive":
+            int_data = message["interactive"]
+            text = {"id": int_data.get("button_reply", {}).get("id") or int_data.get("list_reply", {}).get("id")}
         else:
-            send_whatsapp_message(phone, reply_text)
+            return
+
+        # הרצת הלוגיקה הכבדה ב-Thread נפרד כדי לא לעצור את ה-Event Loop
+        result = await asyncio.to_thread(
+            service_layer.process_lead_message,
+            session_id=phone,
+            content=text,
+            external_message_id=message_id
+        )
+
+        # שליחת התשובה
+        reply_text = result.get("message") or result.get("content")
+        reply_status = result.get("status")
+        
+        if reply_text:
+            if reply_status in ["booking_interest", "booking_selection"]:
+                if len(reply_text.get("buttons", [])) < 3:
+                    send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
+                else:
+                    send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
+            else:
+                send_whatsapp_message(phone, reply_text)
+
+    except Exception:
+        logging.exception("AI PROCESSING ERROR")
 
 
 
