@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from service.service_english_w import ServiceLayer
 from data_access.slots_repository import BookingSlotRepository
 
+import asyncio
+
 import uuid
 import sqlite3
 import logging
@@ -164,11 +166,12 @@ async def run_ai_logic(message: dict):
             elif interactive.get("type") == "list_reply":
                 text = {"id": interactive["list_reply"]["id"]}
 
-        result = service_layer.process_lead_message(
-            session_id=phone,
-            content=text,
-            external_message_id=message_id
-        )   
+        result = await asyncio.to_thread(
+        service_layer.process_lead_message,
+        session_id=phone,
+        content=text,
+        external_message_id=message_id
+    )   
 
         reply_text = result.get("message") or result.get("content")
         reply_status = result.get("status")
