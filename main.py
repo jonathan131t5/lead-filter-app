@@ -149,103 +149,58 @@ async def verify_whatsapp_webhook(request: Request):
 
 
 
-
-async def keep_typing(message_id: str, stop_event: asyncio.Event):
-    while not stop_event.is_set():
-        await send_typing_indicator(message_id=message_id)
-        try:
-            await asyncio.wait_for(asyncio.shield(stop_event.wait()), timeout=4.0)
-        except asyncio.TimeoutError:
-            pass
-
-
-
-async def run_ai_logic(message: dict):
-    try: 
-        phone = message["from"]
-        message_id = message["id"]
-
-        stop_typing = asyncio.Event()
-
-        async def typing_loop():
-            while not stop_typing.is_set():
-                await send_typing_indicator(message_id=message_id)
-                await asyncio.sleep(4)
-
-        typing_task = asyncio.create_task(typing_loop())
-
-        try:
-            if message.get("type") == "text":
-                text = message["text"]["body"]
-            elif message.get("type") == "interactive":
-                interactive = message["interactive"]
-                if interactive.get("type") == "button_reply":
-                    text = {"id": interactive["button_reply"]["id"]}
-                elif interactive.get("type") == "list_reply":
-                    text = {"id": interactive["list_reply"]["id"]}
-
-            result = await asyncio.to_thread(
-                service_layer.process_lead_message,
-                session_id=phone,
-                content=text,
-                external_message_id=message_id
-            )
-        finally:
-            stop_typing.set()
-            typing_task.cancel()
-
-        reply_text = result.get("message") or result.get("content")
-        reply_status = result.get("status")
-        if reply_text:
-            if reply_status == "booking_interest" or reply_status == "booking_selection":
-                print(f"BODY: {reply_text['body']} , flush=True")
-                if len(reply_text["buttons"]) < 3:
-                    send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
-                else:
-                    send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
-            else:
-                send_whatsapp_message(phone, reply_text)
-
-    except Exception:
-        logging.exception("AI PROCESSING ERROR")
-
-
 @app.post("/webhook/whatsapp")
 async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
     body = await request.json()
+    value = body["entry"][0]["changes"][0]["value"]
 
-    logging.info("META WHATSAPP WEBHOOK BODY:")
-    logging.info(body)
+    if "messages" not in value:
+        return {"status": "ignored"}
 
-    try:
-        value = body["entry"][0]["changes"][0]["value"]
+    message = value["messages"][0]
+    phone = message["from"]
 
-        # אם אין הודעה אמיתית — להתעלם
-        if "messages" not in value:
-            return {"status": "ignored"}
+    # זה מדליק את המקלדת פעם אחת וזהו
+    await send_typing_indicator(phone)
+    
+    # זה מריץ את כל השאר ברקע
+    background_tasks.add_task(run_ai_logic, message)
+    
+    return {"status": "ok"}
 
-        message = value["messages"][0]
+async def run_ai_logic(message: dict):
+    phone = message["from"]
+    message_id = message["id"]
+    
+    # עיבוד טקסט/כפתורים
+    if message.get("type") == "text":
+        text = message["text"]["body"]
+    elif message.get("type") == "interactive":
+        int_data = message["interactive"]
+        text = {"id": int_data.get("button_reply", {}).get("id") or int_data.get("list_reply", {}).get("id")}
+    else:
+        return
 
-        # רק הודעות טקסט או אינטראקטיביות
-        if message.get("type") not in ["text", "interactive"]:
-            phone = message.get("from")
-            send_whatsapp_message(
-                phone,
-                "I can only read text messages here. Please type your message and I’ll help you from there."
-            )
-            return {"status": "ok"}
-        
+    # הרצת הלוגיקה
+    result = await asyncio.to_thread(
+        service_layer.process_lead_message,
+        session_id=phone,
+        content=text,
+        external_message_id=message_id
+    )
 
-        
-        background_tasks.add_task(run_ai_logic, message)
-        
-        # מחזירים לוואטסאפ אישור מיד!
-        return {"status":   "ok"}
-
-    except Exception:
-        logging.exception("META WHATSAPP WEBHOOK ERROR")
-        return {"status": "error"}
-
+    # שליחת התשובה
+    reply_text = result.get("message") or result.get("content")
+    reply_status = result.get("status")
+    
+    if reply_text:
+        if reply_status in ["booking_interest", "booking_selection"]:
+            if len(reply_text["buttons"]) < 3:
+                send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
+            else:
+                send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
+        else:
+            send_whatsapp_message(phone, reply_text)
 
 
 
