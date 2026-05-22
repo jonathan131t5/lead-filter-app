@@ -216,7 +216,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         
 
         message_id = message["id"]
-        send_typing_indicator(message_id=message_id)
+        background_tasks.add_task(send_typing_indicator, message_id=message_id)
 
         background_tasks.add_task(run_ai_logic, message)
         
