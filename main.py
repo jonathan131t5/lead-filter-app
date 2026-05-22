@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, BackgroundTasks , Response
 from pydantic import BaseModel
 from service.service_english_w import ServiceLayer
 from data_access.slots_repository import BookingSlotRepository
-from fastapi import Request, Response
+
 import uuid
 import sqlite3
 import logging
@@ -147,32 +147,9 @@ async def verify_whatsapp_webhook(request: Request):
 
 
 
-@app.post("/webhook/whatsapp")
-async def whatsapp_webhook(request: Request):
-    body = await request.json()
 
-    logging.info("META WHATSAPP WEBHOOK BODY:")
-    logging.info(body)
-
+def run_ai_logic(message: dict):
     try:
-        value = body["entry"][0]["changes"][0]["value"]
-
-        # אם אין הודעה אמיתית — להתעלם
-        if "messages" not in value:
-            return {"status": "ignored"}
-
-        message = value["messages"][0]
-
-        # רק הודעות טקסט
-        if message.get("type") not in ["text", "interactive"]:
-            phone = message.get("from")
-            send_whatsapp_message(
-                phone,
-                "I can only read text messages here. Please type your message and I’ll help you from there."
-            )
-            return {"status": "ok"}
-        
-
         phone = message["from"]
         message_id = message["id"]
         send_typing_indicator(message_id=message_id)
@@ -197,20 +174,106 @@ async def whatsapp_webhook(request: Request):
         reply_status = result.get("status")
         if reply_text:
             if reply_status == "booking_interest" or reply_status == "booking_selection":
-                print(f"BODY: {reply_text["body"]} , flush=True")
+                print(f"BODY: {reply_text['body']} , flush=True")
                 if len(reply_text["buttons"]) < 3:
-                    send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"] , to=phone)
+                    send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
                 else:
-                    send_whatsapp_list(body=reply_text["body"] , button_label=reply_text["button_label"], sections=reply_text["buttons"] , to=phone)
+                    send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
             
             else:
                 send_whatsapp_message(phone, reply_text)
 
+    except Exception:
+        logging.exception("AI PROCESSING ERROR")
+
+
+@app.post("/webhook/whatsapp")
+async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
+    body = await request.json()
+
+    logging.info("META WHATSAPP WEBHOOK BODY:")
+    logging.info(body)
+
+    try:
+        value = body["entry"][0]["changes"][0]["value"]
+
+        # אם אין הודעה אמיתית — להתעלם
+        if "messages" not in value:
+            return {"status": "ignored"}
+
+        message = value["messages"][0]
+
+        # רק הודעות טקסט או אינטראקטיביות
+        if message.get("type") not in ["text", "interactive"]:
+            phone = message.get("from")
+            send_whatsapp_message(
+                phone,
+                "I can only read text messages here. Please type your message and I’ll help you from there."
+            )
             return {"status": "ok"}
+        
+        # מפעילים את כל ה-AI ברקע
+        background_tasks.add_task(run_ai_logic, message)
+        
+        # מחזירים לוואטסאפ אישור מיד!
+        return {"status": "ok"}
 
     except Exception:
         logging.exception("META WHATSAPP WEBHOOK ERROR")
         return {"status": "error"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @app.get("/business")
