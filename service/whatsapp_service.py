@@ -77,7 +77,6 @@ def send_whatsapp_buttons(to, body, buttons):
 
 
 
-
 def send_whatsapp_list(to, body, button_label, sections):
     url = f"https://graph.facebook.com/v20.0/{META_PHONE_NUMBER_ID}/messages"
 
@@ -99,17 +98,15 @@ def send_whatsapp_list(to, body, button_label, sections):
                 "button": button_label,
                 "sections": [
                     {
-                        "title": section["title"],
+                        # מייצרים קטגוריה אחת רציפה ללא כותרת, ולוקחים את הנתונים ישירות מהמערך שלך
                         "rows": [
                             {
-                                "id": row["id"],
-                                "title": row["title"],
-                                "description": row.get("description", "")
+                                "id": item["id"],
+                                "title": item["title"]
                             }
-                            for row in section["rows"]
+                            for item in sections
                         ]
                     }
-                    for section in sections
                 ]
             }
         }
