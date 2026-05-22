@@ -2,6 +2,8 @@ import json
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
+import logging
+
 
 class OpenAIClient:
     def __init__(self):
@@ -11,6 +13,8 @@ class OpenAIClient:
         self.client = OpenAI(api_key=api_key)
     
     def ai_reply(self, messages):
+        import time
+        start = time.time()
         res = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
@@ -22,6 +26,8 @@ class OpenAIClient:
             response_format={"type": "json_object"}
         )
 
+
+        logging.info(f"OpenAI took: {time.time() - start:.2f}s")
 
         text = res.choices[0].message.content
         #print("RAW:", text)
