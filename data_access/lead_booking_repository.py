@@ -9,7 +9,6 @@ class LeadsBookingRepository:
         lead_id INTEGER PRIMARY KEY,
         booking_eligible INTEGER DEFAULT 0 ,
         has_booking INTEGER DEFAULT 0,
-        processing_slot_id INTEGER , 
         booking_state TEXT DEFAULT 'booking_interest' 
         )              
         """)
