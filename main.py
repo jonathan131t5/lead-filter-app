@@ -164,22 +164,26 @@ async def run_ai_logic(message: dict):
     try: 
         phone = message["from"]
         message_id = message["id"]
-        
+
         stop_typing = asyncio.Event()
-        typing_task = asyncio.create_task(keep_typing(message_id, stop_typing))
-        await asyncio.sleep(0)
 
-        if message.get("type") == "text":
-            text = message["text"]["body"]
+        async def typing_loop():
+            while not stop_typing.is_set():
+                await send_typing_indicator(message_id=message_id)
+                await asyncio.sleep(4)
 
-        elif message.get("type") == "interactive":
-            interactive = message["interactive"]
-            if interactive.get("type") == "button_reply":
-                text = {"id": interactive["button_reply"]["id"]}
-            elif interactive.get("type") == "list_reply":
-                text = {"id": interactive["list_reply"]["id"]}
+        typing_task = asyncio.create_task(typing_loop())
 
         try:
+            if message.get("type") == "text":
+                text = message["text"]["body"]
+            elif message.get("type") == "interactive":
+                interactive = message["interactive"]
+                if interactive.get("type") == "button_reply":
+                    text = {"id": interactive["button_reply"]["id"]}
+                elif interactive.get("type") == "list_reply":
+                    text = {"id": interactive["list_reply"]["id"]}
+
             result = await asyncio.to_thread(
                 service_layer.process_lead_message,
                 session_id=phone,
@@ -188,7 +192,7 @@ async def run_ai_logic(message: dict):
             )
         finally:
             stop_typing.set()
-            await typing_task  
+            typing_task.cancel()
 
         reply_text = result.get("message") or result.get("content")
         reply_status = result.get("status")
@@ -196,14 +200,10 @@ async def run_ai_logic(message: dict):
             if reply_status == "booking_interest" or reply_status == "booking_selection":
                 print(f"BODY: {reply_text['body']} , flush=True")
                 if len(reply_text["buttons"]) < 3:
-                    
                     send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
                 else:
-                    
                     send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
-            
             else:
-                
                 send_whatsapp_message(phone, reply_text)
 
     except Exception:
