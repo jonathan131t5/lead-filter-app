@@ -121,7 +121,9 @@ def send_whatsapp_list(to, body, button_label, sections):
 
 
 
-def send_typing_indicator(to):
+
+
+def send_typing_indicator(message_id: str):
     url = f"https://graph.facebook.com/v19.0/{META_PHONE_NUMBER_ID}/messages"
     
     headers = {
@@ -131,17 +133,14 @@ def send_typing_indicator(to):
     
     payload = {
         "messaging_product": "whatsapp",
-        "recipient_type": "individual",
-        "to": to,
-        "type": "typing_indicator",
+        "status": "read",
+        "message_id": message_id,
         "typing_indicator": {"type": "text"}
     }
     
     response = requests.post(url, headers=headers, json=payload)
     logging.info(f"TYPING INDICATOR RESPONSE: {response.status_code} | {response.json()}")
     return response.json()
-
-
 
 
 

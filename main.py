@@ -174,8 +174,8 @@ async def whatsapp_webhook(request: Request):
         
 
         phone = message["from"]
-        send_typing_indicator(to=phone)
         message_id = message["id"]
+        send_typing_indicator(message_id=message_id)
 
         if message.get("type") == "text":
             text = message["text"]["body"]
