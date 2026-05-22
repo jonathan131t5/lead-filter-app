@@ -150,11 +150,23 @@ async def verify_whatsapp_webhook(request: Request):
 
 
 
+async def keep_typing(message_id: str, stop_event: asyncio.Event):
+    while not stop_event.is_set():
+        await send_typing_indicator(message_id=message_id)
+        try:
+            await asyncio.wait_for(asyncio.shield(stop_event.wait()), timeout=4.0)
+        except asyncio.TimeoutError:
+            pass
+
+
+
 async def run_ai_logic(message: dict):
     try: 
         phone = message["from"]
         message_id = message["id"]
-        await send_typing_indicator(message_id=message["id"])
+        
+        stop_typing = asyncio.Event()
+        typing_task = asyncio.create_task(keep_typing(message_id, stop_typing))
 
         if message.get("type") == "text":
             text = message["text"]["body"]
@@ -166,14 +178,16 @@ async def run_ai_logic(message: dict):
             elif interactive.get("type") == "list_reply":
                 text = {"id": interactive["list_reply"]["id"]}
 
-        result = await asyncio.to_thread(
-        service_layer.process_lead_message,
-        session_id=phone,
-        content=text,
-        external_message_id=message_id
-    )
-
-        await send_typing_indicator(message_id=message_id)   
+        try:
+            result = await asyncio.to_thread(
+                service_layer.process_lead_message,
+                session_id=phone,
+                content=text,
+                external_message_id=message_id
+            )
+        finally:
+            stop_typing.set()
+            await typing_task  
 
         reply_text = result.get("message") or result.get("content")
         reply_status = result.get("status")
