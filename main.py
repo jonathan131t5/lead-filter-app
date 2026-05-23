@@ -182,10 +182,19 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         logging.exception("WEBHOOK ERROR")
         return {"status": "error"}
 
+
+processed_messages = set()
+
 async def run_ai_logic(message: dict):
     try:
+
         phone = message["from"]
         message_id = message["id"]
+
+        if message_id in processed_messages:
+            return
+        processed_messages.add(message_id)
+
 
         await send_typing_indicator(message_id=message_id, phone=phone)
 
