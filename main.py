@@ -175,7 +175,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         # 1. שליחה מיידית וסינכרונית (חובה שזה יקרה לפני ה-return)
         # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
         
-        # 2. שליחת הלוגיקה לעיבוד ברקע כדי לא לתקוע את ה-Webhook
+        await send_typing_indicator(message_id=message["id"], phone=phone)
         background_tasks.add_task(run_ai_logic, message)
         
         # 3. החזרת אישור ל-Meta (חייב לקרות מיד כדי למנוע Timeout)
@@ -211,7 +211,6 @@ async def run_ai_logic(message: dict):
         else:
             return
         
-        await send_typing_indicator(message_id=message_id, phone=phone)
 
         # הרצת הלוגיקה הכבדה ב-Thread נפרד כדי לא לעצור את ה-Event Loop
         result = await asyncio.to_thread(
