@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, BackgroundTasks , Response
 from pydantic import BaseModel
 from service.service_english_w import ServiceLayer
 from data_access.slots_repository import BookingSlotRepository
-
+import time
 import asyncio
 
 import uuid
@@ -161,6 +161,7 @@ app = FastAPI()
 async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
     try:
         body = await request.json()
+        logging.info(f"[WEBHOOK] received timestamp={body['entry'][0]['changes'][0]['value']['messages'][0].get('timestamp')}_server={int(time.time())}")
         value = body["entry"][0]["changes"][0]["value"]
 
         if "messages" not in value:
