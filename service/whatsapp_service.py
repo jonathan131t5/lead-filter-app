@@ -142,9 +142,8 @@ async def send_typing_indicator(message_id: str, phone: str):
     # 2. בקשה שנייה - הפעלת אינדיקטור ההקלדה
     payload_typing = {
         "messaging_product": "whatsapp",
-        "recipient_type": "individual",
-        "to": phone,  # בוואטסאפ של מטא, שליחת ה-typing מתבצעת מול ה-message_id או ה-Phone בהתאם לגרסת ה-API, בקוד המקורי השתמשת ב-message_id ולכן נשאר איתו
-        "type": "typing_indicator",
+        "status": "read",
+        "message_id": message_id, # בוואטסאפ של מטא, שליחת ה-typing מתבצעת מול ה-message_id או ה-Phone בהתאם לגרסת ה-API, בקוד המקורי השתמשת ב-message_id ולכן נשאר איתו
         "typing_indicator": {"type": "text"}
     }
     
