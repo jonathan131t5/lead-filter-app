@@ -161,11 +161,13 @@ app = FastAPI()
 async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
     try:
         body = await request.json()
-        logging.info(f"[WEBHOOK] received timestamp={body['entry'][0]['changes'][0]['value']['messages'][0].get('timestamp')}_server={int(time.time())}")
+        
         value = body["entry"][0]["changes"][0]["value"]
 
         if "messages" not in value:
             return {"status": "ignored"}
+        
+        logging.info(f"[WEBHOOK] received timestamp={body['entry'][0]['changes'][0]['value']['messages'][0].get('timestamp')}_server={int(time.time())}")
         
         if value["messages"][0].get("from") is None:
             return {"status": "ignored"}
@@ -213,7 +215,8 @@ async def run_ai_logic(message: dict):
             return
         
 
-        # הרצת הלוגיקה הכבדה ב-Thread נפרד כדי לא לעצור את ה-Event Loop
+        start = time.time()
+
         result = await asyncio.to_thread(
             service_layer.process_lead_message,
             session_id=phone,
@@ -221,6 +224,8 @@ async def run_ai_logic(message: dict):
             external_message_id=message_id
         )
 
+
+        logging.info(f"[TIMER] total={time.time()-start:.2f}s")
         # שליחת התשובה
         reply_text = result.get("message") or result.get("content")
         reply_status = result.get("status")
