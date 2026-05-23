@@ -124,7 +124,7 @@ def send_whatsapp_list(to, body, button_label, sections):
 
 
 
-async def send_typing_indicator(message_id: str):
+async def send_typing_indicator(message_id: str, phone: str):
     url = f"https://graph.facebook.com/v19.0/{META_PHONE_NUMBER_ID}/messages"
     
     headers = {
@@ -132,18 +132,26 @@ async def send_typing_indicator(message_id: str):
         "Content-Type": "application/json"
     }
     
-    payload = {
+    
+    payload_read = {
         "messaging_product": "whatsapp",
         "status": "read",
-        "message_id": message_id,
+        "message_id": message_id
+    }
+    
+    # 2. בקשה שנייה - הפעלת אינדיקטור ההקלדה
+    payload_typing = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": phone,  # בוואטסאפ של מטא, שליחת ה-typing מתבצעת מול ה-message_id או ה-Phone בהתאם לגרסת ה-API, בקוד המקורי השתמשת ב-message_id ולכן נשאר איתו
         "typing_indicator": {"type": "text"}
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
-    logging.info(f"TYPING INDICATOR RESPONSE: {response.status_code} | {response.json()}")
-    return response.json()
-
+        # שולחים קודם את ה-Read ומחכים שיסתיים
+        await client.post(url, headers=headers, json=payload_read)
+        # רק אחרי שה-Read הסתיים, שולחים את ה-Typing
+        response = await client.post(url, headers=headers, json=payload_typing)
 
 
 

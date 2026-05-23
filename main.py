@@ -171,7 +171,6 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
 
         # 1. שליחה מיידית וסינכרונית (חובה שזה יקרה לפני ה-return)
         # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
-        await send_typing_indicator(phone)
         
         # 2. שליחת הלוגיקה לעיבוד ברקע כדי לא לתקוע את ה-Webhook
         background_tasks.add_task(run_ai_logic, message)
@@ -187,6 +186,8 @@ async def run_ai_logic(message: dict):
     try:
         phone = message["from"]
         message_id = message["id"]
+
+        await send_typing_indicator(message_id=message_id, phone=phone)
         
         # עיבוד סוג ההודעה
         if message.get("type") == "text":
