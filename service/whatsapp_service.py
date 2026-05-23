@@ -133,11 +133,7 @@ async def send_typing_indicator(message_id: str, phone: str):
     }
     
     
-    payload_read = {
-        "messaging_product": "whatsapp",
-        "status": "read",
-        "message_id": message_id
-    }
+
     
     # 2. בקשה שנייה - הפעלת אינדיקטור ההקלדה
     payload_typing = {
@@ -149,7 +145,7 @@ async def send_typing_indicator(message_id: str, phone: str):
     
     async with httpx.AsyncClient() as client:
         # שולחים קודם את ה-Read ומחכים שיסתיים
-        await client.post(url, headers=headers, json=payload_read)
+        
         # רק אחרי שה-Read הסתיים, שולחים את ה-Typing
         response = await client.post(url, headers=headers, json=payload_typing)
         if response.status_code != 200:

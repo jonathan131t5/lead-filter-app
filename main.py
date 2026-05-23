@@ -199,7 +199,6 @@ async def run_ai_logic(message: dict):
         processed_messages.add(message_id)
 
 
-        await send_typing_indicator(message_id=message_id, phone=phone)
 
         
         
