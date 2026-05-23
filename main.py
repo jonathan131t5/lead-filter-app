@@ -165,6 +165,9 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
 
         if "messages" not in value:
             return {"status": "ignored"}
+        
+        if value["messages"][0].get("from") is None:
+            return {"status": "ignored"}
 
         message = value["messages"][0]
         phone = message["from"]
