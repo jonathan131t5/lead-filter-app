@@ -10,7 +10,7 @@ META_PHONE_NUMBER_ID = os.getenv("META_PHONE_NUMBER_ID")
 
 
 def send_whatsapp_message(number: str, text: str):
-    url = f"https://graph.facebook.com/v20.0/{META_PHONE_NUMBER_ID}/messages"
+    url = f"https://graph.facebook.com/v22.0/{META_PHONE_NUMBER_ID}/messages"
 
     headers = {
         "Authorization": f"Bearer {META_ACCESS_TOKEN}",
@@ -37,7 +37,7 @@ def send_whatsapp_message(number: str, text: str):
 
 
 def send_whatsapp_buttons(to, body, buttons):
-    url = f"https://graph.facebook.com/v20.0/{META_PHONE_NUMBER_ID}/messages"
+    url = f"https://graph.facebook.com/v22.0/{META_PHONE_NUMBER_ID}/messages"
 
     headers = {
         "Authorization": f"Bearer {META_ACCESS_TOKEN}",
@@ -79,7 +79,7 @@ def send_whatsapp_buttons(to, body, buttons):
 
 
 def send_whatsapp_list(to, body, button_label, sections):
-    url = f"https://graph.facebook.com/v20.0/{META_PHONE_NUMBER_ID}/messages"
+    url = f"https://graph.facebook.com/v22.0/{META_PHONE_NUMBER_ID}/messages"
 
     headers = {
         "Authorization": f"Bearer {META_ACCESS_TOKEN}",
@@ -125,7 +125,7 @@ def send_whatsapp_list(to, body, button_label, sections):
 
 
 async def send_typing_indicator(message_id: str, phone: str):
-    url = f"https://graph.facebook.com/v19.0/{META_PHONE_NUMBER_ID}/messages"
+    url = url = f"https://graph.facebook.com/v22.0/{META_PHONE_NUMBER_ID}/messages"
     
     headers = {
         "Authorization": f"Bearer {META_ACCESS_TOKEN}",
