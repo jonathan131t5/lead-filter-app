@@ -188,6 +188,8 @@ async def run_ai_logic(message: dict):
         message_id = message["id"]
 
         await send_typing_indicator(message_id=message_id, phone=phone)
+
+        
         
         # עיבוד סוג ההודעה
         if message.get("type") == "text":
@@ -197,6 +199,8 @@ async def run_ai_logic(message: dict):
             text = {"id": int_data.get("button_reply", {}).get("id") or int_data.get("list_reply", {}).get("id")}
         else:
             return
+        
+        await send_typing_indicator(message_id=message_id, phone=phone)
 
         # הרצת הלוגיקה הכבדה ב-Thread נפרד כדי לא לעצור את ה-Event Loop
         result = await asyncio.to_thread(
