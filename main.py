@@ -149,13 +149,8 @@ async def verify_whatsapp_webhook(request: Request):
 
 
 
-import asyncio
-import logging
-from fastapi import FastAPI, Request, BackgroundTasks
 
-app = FastAPI()
 
-# וודא שה-VERIFY_TOKEN והפונקציות של service_layer ו-whatsapp_api מוגדרות אצלך למעלה
 
 @app.post("/webhook/whatsapp")
 async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
