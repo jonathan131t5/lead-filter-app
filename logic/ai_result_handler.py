@@ -16,7 +16,7 @@ class OpenAIClient:
         import time
         start = time.time()
         res = self.client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4.1-nano",
             messages=messages,
             temperature=0,
             top_p=1,
