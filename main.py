@@ -11,11 +11,13 @@ import logging
 from fastapi.middleware.cors import CORSMiddleware
 
 from service.whatsapp_service import send_whatsapp_message , send_whatsapp_buttons , send_whatsapp_list , send_typing_indicator
+from data_access.lead_booking_dashboard_repository import BookingDashDataRepository
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 service_layer = ServiceLayer()
+booking_dashboard = BookingDashDataRepository()
 
 app = FastAPI()
 
@@ -87,7 +89,7 @@ def get_dasboard_messages(lead_id: int):
 
 @app.get("/api/dashboard/appointments")
 def get_dashboard_appointments():
-    return service_layer.booking_dashboard.get_all_appointments()
+    return booking_dashboard.get_all_appointments()
 
 
 class AppointmentUpdateRequest(BaseModel):
@@ -175,7 +177,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
         
         typing_start = time.time()
-        #await send_typing_indicator(message_id=message["id"], phone=phone)
+        await send_typing_indicator(message_id=message["id"], phone=phone)
         logging.info(f"[TIMER] typing_send={time.time()-typing_start:.2f}s")
         background_tasks.add_task(run_ai_logic, message)
         
