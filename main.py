@@ -175,7 +175,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
         
         typing_start = time.time()
-        await send_typing_indicator(message_id=message["id"], phone=phone)
+        #await send_typing_indicator(message_id=message["id"], phone=phone)
         logging.info(f"[TIMER] typing_send={time.time()-typing_start:.2f}s")
         background_tasks.add_task(run_ai_logic, message)
         
