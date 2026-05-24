@@ -9,7 +9,7 @@ META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN")
 META_PHONE_NUMBER_ID = os.getenv("META_PHONE_NUMBER_ID")
 
 
-def send_whatsapp_message(number: str, text: str):
+async def send_whatsapp_message(number: str, text: str):
     url = f"https://graph.facebook.com/v22.0/{META_PHONE_NUMBER_ID}/messages"
 
     headers = {
@@ -26,7 +26,8 @@ def send_whatsapp_message(number: str, text: str):
         }
     }
 
-    response = requests.post(url, headers=headers, json=body)
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=body)
 
     print("WHATSAPP STATUS:", response.status_code)
     print("WHATSAPP RESPONSE:", response.text)
@@ -36,7 +37,7 @@ def send_whatsapp_message(number: str, text: str):
 
 
 
-def send_whatsapp_buttons(to, body, buttons):
+async def send_whatsapp_buttons(to, body, buttons):
     url = f"https://graph.facebook.com/v22.0/{META_PHONE_NUMBER_ID}/messages"
 
     headers = {
@@ -68,7 +69,8 @@ def send_whatsapp_buttons(to, body, buttons):
         }
     }
 
-    response = requests.post(url, headers=headers, json=payload)
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=payload)
 
     print("WHATSAPP BUTTON STATUS:", response.status_code, flush=True)
     print("WHATSAPP BUTTON RESPONSE:", response.text, flush=True)
@@ -78,7 +80,7 @@ def send_whatsapp_buttons(to, body, buttons):
 
 
 
-def send_whatsapp_list(to, body, button_label, sections):
+async def send_whatsapp_list(to, body, button_label, sections):
     url = f"https://graph.facebook.com/v22.0/{META_PHONE_NUMBER_ID}/messages"
 
     headers = {
@@ -113,7 +115,9 @@ def send_whatsapp_list(to, body, button_label, sections):
         }
     }
 
-    response = requests.post(url, headers=headers, json=payload)
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=payload)
 
     print("WHATSAPP LIST STATUS:", response.status_code, flush=True)
     print("WHATSAPP LIST RESPONSE:", response.text, flush=True)

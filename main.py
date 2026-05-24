@@ -213,7 +213,7 @@ async def run_ai_logic(message: dict):
             return
         
         if text == "testfast":
-            send_whatsapp_message(phone, "test")
+            await send_whatsapp_message(phone, "test")
             return
 
         start = time.time()
@@ -235,12 +235,13 @@ async def run_ai_logic(message: dict):
             send_start = time.time()
             if reply_status in ["booking_interest", "booking_selection"]:
                 if len(reply_text.get("buttons", [])) < 3:
-                    send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
+                    await send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
                 else:
-                    send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
+                    await send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
             else:
-                send_whatsapp_message(phone, reply_text)
-        logging.info(f"[TIMER] whatsapp_reply_send={time.time()-send_start:.2f}s")
+               await send_whatsapp_message(phone, reply_text)
+            
+            logging.info(f"[TIMER] whatsapp_reply_send={time.time()-send_start:.2f}s")
     except Exception:
         logging.exception("AI PROCESSING ERROR")
 

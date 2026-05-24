@@ -169,7 +169,7 @@ class ServiceLayer:
                 raw_summary_context = self.build_lead_summary(lead_all_data=prepare_lead_context)
                 final_summary_context = self.field_unknown_check(raw_summary_context)
                 
-                send_email(final_summary_context)
+                #send_email(final_summary_context)
             
             ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
             
