@@ -100,11 +100,10 @@ class AppointmentUpdateRequest(BaseModel):
 
 @app.put("/api/dashboard/appointments/{appointment_id}")
 def update_dashboard_appointment(appointment_id: int, data: AppointmentUpdateRequest):
-    result = service_layer.update_appointment(
+    result = service_layer.appointments.update_appointment(
         appointment_id=appointment_id,
         name=data.name,
         phone=data.phone,
-        email=data.email,
         slot_date=data.slot_date,
         booking_status=data.booking_status
     )

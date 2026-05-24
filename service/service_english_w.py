@@ -13,6 +13,7 @@ from data_access.leads_messages_repository import MessagesRepository
 from data_access.lead_summary_context_repository import LeadSummaryContextRepository
 from data_access.lead_booking_repository import LeadsBookingRepository
 from data_access.lead_booking_dashboard_repository import BookingDashDataRepository
+from data_access.appointment_context_dpdate_repository import AppointmentsContextRepository
 
 from data_base.connection import Connection
 
@@ -57,6 +58,7 @@ class ServiceLayer:
         
         self.booking_flow = BookingFlow(self.db)
         self.booking_dashboard = BookingDashDataRepository(self.db.cursor)
+        self.appointments = AppointmentsContextRepository(self.db.cursor)
         self.leads_booking = LeadsBookingRepository(self.db.cursor)
         self.leads_data = LeadsDataRepository(self.db.cursor)
         self.leads_states = LeadsStatesRepository(self.db.cursor)
