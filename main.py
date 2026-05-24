@@ -11,13 +11,12 @@ import logging
 from fastapi.middleware.cors import CORSMiddleware
 
 from service.whatsapp_service import send_whatsapp_message , send_whatsapp_buttons , send_whatsapp_list , send_typing_indicator
-from data_access.lead_booking_dashboard_repository import BookingDashDataRepository
+
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 service_layer = ServiceLayer()
-booking_dashboard = BookingDashDataRepository()
 
 app = FastAPI()
 
