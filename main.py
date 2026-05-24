@@ -160,6 +160,7 @@ app = FastAPI()
 @app.post("/webhook/whatsapp")
 async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
     try:
+        webhook_start = time.time()
         body = await request.json()
         
         value = body["entry"][0]["changes"][0]["value"]
@@ -178,10 +179,12 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         # 1. שליחה מיידית וסינכרונית (חובה שזה יקרה לפני ה-return)
         # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
         
+        typing_start = time.time()
         await send_typing_indicator(message_id=message["id"], phone=phone)
+        logging.info(f"[TIMER] typing_send={time.time()-typing_start:.2f}s")
         background_tasks.add_task(run_ai_logic, message)
         
-        # 3. החזרת אישור ל-Meta (חייב לקרות מיד כדי למנוע Timeout)
+        logging.info(f"[TIMER] webhook_total={time.time()-webhook_start:.2f}s")
         return {"status": "ok"}
         
     except Exception:
