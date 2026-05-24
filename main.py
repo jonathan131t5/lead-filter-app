@@ -212,6 +212,9 @@ async def run_ai_logic(message: dict):
         else:
             return
         
+        if text == "testfast":
+            send_whatsapp_message(phone, "test")
+            return
 
         start = time.time()
 
