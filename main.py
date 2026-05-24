@@ -131,7 +131,7 @@ def create_demo_data():
     service_layer.leads_states.create_lead_conversation_states()
     service_layer.leads_booking.create_leads_booking_table()
     service_layer.booking_flow.booking_slots.create_booking_table()
-    service_layer.booking_flow.appointment.create_appointment_table()
+    service_layer.booking_flow.appointments.create_appointment_table()
 
     demo_slots = [
         "2026-05-25 10:00",
