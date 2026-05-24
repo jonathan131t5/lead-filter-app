@@ -89,7 +89,7 @@ def get_dasboard_messages(lead_id: int):
 
 @app.get("/api/dashboard/appointments")
 def get_dashboard_appointments():
-    return booking_dashboard.get_all_appointments()
+    return service_layer.booking_dashboard.get_all_appointments()
 
 
 class AppointmentUpdateRequest(BaseModel):
