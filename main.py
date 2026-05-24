@@ -124,8 +124,14 @@ def create_demo_data():
     db = service_layer.booking_flow.db
     cursor = db.cursor
 
-    booking_repo = service_layer.booking_flow.booking_slots
-    booking_repo.create_booking_table()
+    # create tables
+    service_layer.leads_data.create_leads_data_table()
+    service_layer.leads_fields.create_leads_fields_data()
+    service_layer.leads_scores.create_leads_scores_table()
+    service_layer.leads_states.create_lead_conversation_states()
+    service_layer.leads_booking.create_leads_booking_table()
+    service_layer.booking_flow.booking_slots.create_booking_table()
+    service_layer.booking_flow.appointment.create_appointment_table()
 
     demo_slots = [
         "2026-05-25 10:00",
@@ -135,8 +141,14 @@ def create_demo_data():
         "2026-05-28 09:30",
     ]
 
-    for slot in demo_slots:
-        booking_repo.create_booking_slot(slot)
+    created_slots = []
+
+    for slot_date in demo_slots:
+        cursor.execute(
+            "INSERT INTO booking_slot (date, is_taken) VALUES (?, ?)",
+            (slot_date, 0)
+        )
+        created_slots.append(cursor.lastrowid)
 
     demo_leads = [
         ("Jake", "0521111111", "I want to be fit", "like 2 months", "Cold Lead", 3),
@@ -148,47 +160,135 @@ def create_demo_data():
 
     created_leads = []
 
-    for name, phone, goal, urgency, status, score in demo_leads:
+    for name, phone, goal, urgency, final_status, total_score in demo_leads:
         cursor.execute("""
-            INSERT INTO leads (
+            INSERT INTO leads_data (
+                session_id,
                 name,
                 phone_number,
-                goal_user,
-                urgency_user,
                 final_status,
-                total_score
+                summary,
+                last_interaction_at
             )
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (name, phone, goal, urgency, status, score))
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        """, (
+            None,
+            name,
+            phone,
+            final_status,
+            f"{name} — {final_status}\n\nGoal: {goal}\nTimeline: {urgency}\n\nScore: {total_score}\nPhone: {phone}"
+        ))
 
         lead_id = cursor.lastrowid
         created_leads.append(lead_id)
 
-    demo_appointments = [
-        (created_leads[2], 1, "confirmed"),
-        (created_leads[3], 2, "completed"),
-        (created_leads[0], 3, "cancelled"),
-    ]
-
-    for lead_id, slot_id, status in demo_appointments:
         cursor.execute("""
-            INSERT INTO appointments (
+            INSERT INTO leads_fields_data (
                 lead_id,
-                slot_id,
-                email,
-                status
+                goal_user,
+                urgency_user,
+                phone_user,
+                updated_at
+            )
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        """, (
+            lead_id,
+            goal,
+            urgency,
+            phone
+        ))
+
+        cursor.execute("""
+            INSERT INTO leads_scores (
+                lead_id,
+                goal_score,
+                phone_score,
+                urgency_score,
+                goal_status,
+                urgency_status,
+                score_count,
+                total_score
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            lead_id,
+            0,
+            1,
+            0,
+            "found",
+            "found",
+            2,
+            total_score
+        ))
+
+        cursor.execute("""
+            INSERT INTO lead_conversation_states (
+                lead_id,
+                current_field,
+                last_interaction_at
+            )
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+        """, (
+            lead_id,
+            "done"
+        ))
+
+        cursor.execute("""
+            INSERT INTO leads_booking (
+                lead_id,
+                booking_eligible,
+                has_booking,
+                booking_state
             )
             VALUES (?, ?, ?, ?)
         """, (
             lead_id,
+            1 if final_status == "Hot Lead" else 0,
+            0,
+            "booking_interest"
+        ))
+
+    demo_appointments = [
+        (created_leads[2], created_slots[0], "confirmed"),
+        (created_leads[3], created_slots[1], "completed"),
+        (created_leads[0], created_slots[2], "cancelled"),
+    ]
+
+    for lead_id, slot_id, status in demo_appointments:
+        cursor.execute("""
+            INSERT INTO appointment (
+                lead_id,
+                slot_id,
+                status
+            )
+            VALUES (?, ?, ?)
+        """, (
+            lead_id,
             slot_id,
-            "demo@example.com",
             status
         ))
 
+        cursor.execute("""
+            UPDATE booking_slot
+            SET is_taken = 1
+            WHERE slot_id = ?
+        """, (slot_id,))
+
+        cursor.execute("""
+            UPDATE leads_booking
+            SET has_booking = 1
+            WHERE lead_id = ?
+        """, (lead_id,))
+
     db.commit()
 
-    return {"status": "ok", "message": "demo leads and appointments created"}
+    return {
+        "status": "ok",
+        "message": "demo data created",
+        "leads_created": len(created_leads),
+        "slots_created": len(created_slots),
+        "appointments_created": len(demo_appointments)
+    }
 
 
 
