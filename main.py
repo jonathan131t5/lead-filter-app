@@ -94,7 +94,6 @@ def get_dashboard_appointments():
 class AppointmentUpdateRequest(BaseModel):
     name: str
     phone: str
-    email: str
     slot_date: str
     booking_status: str
 
@@ -120,15 +119,76 @@ def privacy():
 
 
 
-@app.get("/dev/create-test-slots")
-def create_test_slots():
+@app.get("/dev/create-demo-data")
+def create_demo_data():
+    db = service_layer.booking_flow.db
     booking_repo = service_layer.booking_flow.booking_slots
+
     booking_repo.create_booking_table()
-    booking_repo.create_booking_slot("2026-05-10 18:00")
-    booking_repo.create_booking_slot("2026-05-10 19:00")
-    booking_repo.create_booking_slot("2026-05-11 10:00")
-    service_layer.booking_flow.db.commit()
-    return {"status": "ok", "message": "test slots created"}
+
+    # open slots
+    demo_slots = [
+        "2026-05-25 10:00",
+        "2026-05-25 14:00",
+        "2026-05-26 11:00",
+        "2026-05-27 16:00",
+        "2026-05-28 09:30",
+    ]
+
+    for slot in demo_slots:
+        booking_repo.create_booking_slot(slot)
+
+    demo_leads = [
+        ("Jake", "0521111111", "I want to be fit", "like 2 months", "Cold Lead", 3),
+        ("Brandon", "0525586823", "I want more clients", "In a few months", "Cold Lead", 4),
+        ("Michael", "0523687333", "I want to scale my online coaching business", "Next week", "Hot Lead", 6),
+        ("Emily", "0524423644", "I want better lead follow-up", "As soon as possible", "Hot Lead", 7),
+        ("Jason", "0525551255", "Still checking options", "Not sure yet", "pending", 2),
+    ]
+
+    created_leads = []
+
+    for name, phone, goal, urgency, status, score in demo_leads:
+        db.execute("""
+            INSERT INTO leads (
+                name,
+                phone_number,
+                goal_user,
+                urgency_user,
+                final_status,
+                total_score
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (name, phone, goal, urgency, status, score))
+
+        lead_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+        created_leads.append(lead_id)
+
+    demo_appointments = [
+        (created_leads[2], 1, "confirmed"),
+        (created_leads[3], 2, "completed"),
+        (created_leads[0], 3, "cancelled"),
+    ]
+
+    for lead_id, slot_id, status in demo_appointments:
+        db.execute("""
+            INSERT INTO appointments (
+                lead_id,
+                slot_id,
+                email,
+                status
+            )
+            VALUES (?, ?, ?, ?)
+        """, (
+            lead_id,
+            slot_id,
+            "demo@example.com",
+            status
+        ))
+
+    db.commit()
+
+    return {"status": "ok", "message": "demo leads and appointments created"}
 
 
 
