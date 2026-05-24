@@ -4,12 +4,13 @@ from dotenv import load_dotenv
 import os
 import time
 
+#from logic.ai_result_handler import OpenAIClient
 
 
 class ConversationBuilder:
     def __init__(self):
+        #self.open_ai_client = OpenAIClient()
         pass
-
 
     def build_prompt(self , current_field , content): 
         if current_field == "goal":
@@ -30,61 +31,43 @@ class ConversationBuilder:
             {
                 "role": "system",
                 "content": (
-                    "You are an information extraction engine for the goal field only.\n"
-                    "Return JSON only. No extra text, no questions, no explanations.\n"
+                    "Classify the user's answer for the GOAL field.\n"
+                    "Return ONLY valid JSON.\n\n"
 
-                    "\nTop priority rules:\n"
-                    "- If the message contains only symbols or no words, for example '???', '...', '-' -> missing:no_info.\n"
-                    "- If the user expresses confusion or did not understand the question, for example 'what?', 'what', 'I didn't understand', 'what do you mean', 'what does that mean' -> confused:meaning.\n"
-                    "- If the user asks how to answer, for example 'what should I write', 'how should I answer' -> confused:answer_type.\n"
-                    "- If the answer is a start time, for example 'today', 'tomorrow', 'this week', 'soon', 'in a month', 'as soon as possible' -> confused:focus.\n"
-                    "- If the answer is money, for example '450', '300 dollars', 'up to 400' -> confused:focus.\n"
-                    "- If the answer is avoidance/uncertainty, for example 'we'll see', 'I don't know', 'not sure', 'depends' -> missing:vague.\n"
-                    "- If the user refuses to answer, for example 'I don't want to answer', 'I'd rather not say' -> missing:avoid.\n"
+                    "Allowed formats only:\n"
+                    "{\"status\":\"found\",\"value\":number}\n"
+                    "{\"status\":\"missing\",\"reason\":\"no_info|vague|avoid\"}\n"
+                    "{\"status\":\"confused\",\"reason\":\"meaning|answer_type|focus\"}\n\n"
 
-                    "\nResponse format:\n"
-                    '{"status":"found","value":<number>}\n'
-                    '{"status":"missing","reason":"no_info"}\n'
-                    '{"status":"missing","reason":"vague"}\n'
-                    '{"status":"missing","reason":"avoid"}\n'
-                    '{"status":"confused","reason":"meaning"}\n'
-                    '{"status":"confused","reason":"answer_type"}\n'
-                    '{"status":"confused","reason":"focus"}\n'
+                    "Rules:\n"
+                    "- Symbols/no real words like '???', '...' or '-' -> missing no_info\n"
+                    "- User confused about the question -> confused meaning\n"
+                    "- User asks how to answer -> confused answer_type\n"
+                    "- Time/start-date answer -> confused focus\n"
+                    "- Money/budget answer -> confused focus\n"
+                    "- Uncertain answers like 'we'll see', 'depends' -> missing vague\n"
+                    "- Refusal/avoidance like 'not sure yet', 'prefer not to say' -> missing avoid\n"
+                    "- Clear desired outcome -> found\n\n"
 
-                    "\nDefinition of goal:\n"
-                    "- goal is the main objective the user wants to achieve.\n"
-                    "- The goal can be short, general, or specific, as long as it is clear what the user wants.\n"
+                    "Goal = what the user wants to achieve.\n"
+                    "Short clear goals are valid.\n\n"
 
-                    "\nNormal decision order:\n"
-                    "1. If there is a clear enough goal -> found\n"
-                    "2. If there is no information at all -> missing:no_info\n"
-                    "3. If there is a direction that is too weak or too general -> missing:vague\n"
-                    "4. If the answer is clearly not a goal but money or time -> confused:focus\n"
+                    "Scoring:\n"
+                    "- 8-10 = strong/specific/serious goal\n"
+                    "- 5-7 = normal clear goal, even if short\n"
+                    "- 3-4 = weak unclear direction\n"
+                    "- 1-2 = almost no goal\n"
+                    "- Most clear goals should be 5-7, not 3-4.\n"
+                    "- Do not give 8+ unless the goal is clearly strong or specific.\n\n"
 
-                    "\nValue scoring rules:\n"
-                    "- Return a number from 1-10 based on clarity, specificity, and strength of the goal.\n"
-                    "- 8-10: Very strong goal. It is clear what the user wants, and there is a sharp, specific, or serious enough direction. Do not give 8 or higher just because the answer is understandable.\n"
-                    "- 5-7: Understandable and clear goal, but relatively general or without much detail. Most short and normal answers should be here.\n"
-                    "- 3-4: Weak or vague goal, but there is still some direction.\n"
-                    "- 1-2: Almost no goal at all.\n"
-                    "- A short answer can get 8-10 only if it is very strong and clear by itself.\n"
-                    "- If the answer is clear but general, prefer 5-7 and not 8-10.\n"
-
-                    "\nImportant rules:\n"
-                    "- Identify by meaning, not only by exact words.\n"
-                    "- Account for typos, slang, and short answers.\n"
-                    "- General but understandable answers can still be found.\n"
-                    "- Do not return confused:meaning unless the user is actually expressing confusion.\n"
-                    "- Do not return focus because of a short or weak answer.\n"
-
-                    "\nExamples:\n"
-                    "- '???' -> missing:no_info\n"
-                    "- 'we'll see' -> missing:vague\n"
-                    "- '450' -> confused:focus\n"
-                    "- 'this week' -> confused:focus\n"
-                    "- 'what?' -> confused:meaning\n"
-                    "- 'I didn't understand what you mean' -> confused:meaning\n"
-                    "- 'what should I answer' -> confused:answer_type\n"
+                    "Examples:\n"
+                    "??? -> {\"status\":\"missing\",\"reason\":\"no_info\"}\n"
+                    "tomorrow -> {\"status\":\"confused\",\"reason\":\"focus\"}\n"
+                    "450 dollars -> {\"status\":\"confused\",\"reason\":\"focus\"}\n"
+                    "what do you mean -> {\"status\":\"confused\",\"reason\":\"meaning\"}\n"
+                    "we'll see -> {\"status\":\"missing\",\"reason\":\"vague\"}\n"
+                    "not sure yet -> {\"status\":\"missing\",\"reason\":\"avoid\"}\n"
+                    "I want more clients -> {\"status\":\"found\",\"value\":6}\n"
                 )
             },
             {
@@ -92,7 +75,6 @@ class ConversationBuilder:
                 "content": content
             }
         ]
-    
     
     
 
@@ -175,3 +157,42 @@ class ConversationBuilder:
                 "content": content
             }
         ]
+    
+
+
+
+
+
+
+
+
+    #def test_goal_prompt(self):
+        test_cases = [
+            "I want more clients",
+            "I want to scale my coaching business",
+            "tomorrow",
+            "450 dollars",
+            "we'll see",
+            "???",
+            "what do you mean",
+            "I want to lose weight",
+            "I want to grow my online business",
+            "not sure yet"
+        ]
+
+        for text in test_cases:
+            print("\n------------------")
+            print("INPUT:", text)
+
+            prompt = self.goal_analyze_prompt(text)
+
+            result = self.open_ai_client.ai_reply(messages=prompt)
+
+            print("OUTPUT:", result)
+
+
+
+
+#conve = ConversationBuilder()
+
+#print(conve.test_goal_prompt())
