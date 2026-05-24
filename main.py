@@ -122,8 +122,9 @@ def privacy():
 @app.get("/dev/create-demo-data")
 def create_demo_data():
     db = service_layer.booking_flow.db
-    booking_repo = service_layer.booking_flow.booking_slots
+    cursor = db.cursor()
 
+    booking_repo = service_layer.booking_flow.booking_slots
     booking_repo.create_booking_table()
 
     # open slots
@@ -149,7 +150,7 @@ def create_demo_data():
     created_leads = []
 
     for name, phone, goal, urgency, status, score in demo_leads:
-        db.execute("""
+        cursor.execute("""
             INSERT INTO leads (
                 name,
                 phone_number,
@@ -161,7 +162,7 @@ def create_demo_data():
             VALUES (?, ?, ?, ?, ?, ?)
         """, (name, phone, goal, urgency, status, score))
 
-        lead_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+        lead_id = cursor.lastrowid
         created_leads.append(lead_id)
 
     demo_appointments = [
@@ -171,7 +172,7 @@ def create_demo_data():
     ]
 
     for lead_id, slot_id, status in demo_appointments:
-        db.execute("""
+        cursor.execute("""
             INSERT INTO appointments (
                 lead_id,
                 slot_id,
