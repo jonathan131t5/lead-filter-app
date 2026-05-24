@@ -122,12 +122,11 @@ def privacy():
 @app.get("/dev/create-demo-data")
 def create_demo_data():
     db = service_layer.booking_flow.db
-    cursor = db.cursor()
+    cursor = db.cursor
 
     booking_repo = service_layer.booking_flow.booking_slots
     booking_repo.create_booking_table()
 
-    # open slots
     demo_slots = [
         "2026-05-25 10:00",
         "2026-05-25 14:00",
