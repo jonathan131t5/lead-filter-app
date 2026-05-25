@@ -8,5 +8,8 @@ class Connection:
     def commit(self):
         self.conn.commit()
 
+    def new_cursor(self):
+        return self.conn.cursor()
+
     def rollback(self):
         self.conn.rollback()

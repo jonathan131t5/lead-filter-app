@@ -16,14 +16,14 @@ from data_access.lead_booking_dashboard_repository import BookingDashDataReposit
 from data_base.connection import Connection
 
 class BookingFlow:
-    def __init__(self , db):
+    def __init__(self, db):
         self.db = db
-        self.booking_dash_data = BookingDashDataRepository(self.db.cursor)
-        self.messages = MessagesRepository(self.db.cursor)
-        self.leads_booking = LeadsBookingRepository(self.db.cursor)
-        self.booking_slots = BookingSlotRepository(self.db.cursor)
-        self.appointments = AppointmentRepository(self.db.cursor)
-        self.booking_context = LeadBookingContextRepository(self.db.cursor)
+        self.booking_dash_data = BookingDashDataRepository(self.db.new_cursor())
+        self.messages = MessagesRepository(self.db.new_cursor())
+        self.leads_booking = LeadsBookingRepository(self.db.new_cursor())
+        self.booking_slots = BookingSlotRepository(self.db.new_cursor())
+        self.appointments = AppointmentRepository(self.db.new_cursor())
+        self.booking_context = LeadBookingContextRepository(self.db.new_cursor())
 
 
     
