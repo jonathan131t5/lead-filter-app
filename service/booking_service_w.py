@@ -82,13 +82,29 @@ class BookingFlow:
     
     def process_booking_response_flow(self , response_info , lead_booking_data):
         print(f"BOOKING STAT: {lead_booking_data["booking_state"]}" , flush=True)
-        booking_interest = self.process_booking_interest_response(response_info=response_info , lead_booking_data=lead_booking_data)
+        pre_flow = self.process_pre_flow(response_info=response_info , lead_booking_data=lead_booking_data)
+        if pre_flow == False:
+            booking_interest = self.process_booking_interest_response(response_info=response_info , lead_booking_data=lead_booking_data)
         if booking_interest == False:
             booking_selection = self.process_booking_selection_response(response_info=response_info , lead_booking_data=lead_booking_data)
             if isinstance(booking_selection , dict):
                 return {"status" : booking_selection["status"] , "message" : booking_selection["message"]}
 
     
+
+    def process_pre_flow(self , response_info , lead_booking_data):
+        if isinstance(response_info , str):
+            return
+        
+        if lead_booking_data["booking_state"] == "pre_flow":
+            if response_info["id"] == "start":
+                self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , value="booking_interest")
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content="start")
+                lead_booking_data["booking_state"] = "booking_interest"
+
+            return True
+        return False
+
     
     def process_booking_interest_response(self , response_info , lead_booking_data):
         if isinstance(response_info , str):
@@ -141,10 +157,19 @@ class BookingFlow:
 
 
     
+    def generate_booking_intro(self):
+        button = [
+            {"id" : "approved" , "title" : "start"}
+        ]
+        qustion = "Hey, welcome. Hope you’re doing well.\n"
+        "I’ll ask a few quick questions.\n"
+        "Please send one message per answer so everything stays clear.\n"
+        
+        return {"buttons" : button , "body" : qustion}
     
 
 
-    def generate_booking_intro(self):
+    def generate_booking_interest(self):
         interest_questions = [
             {"id": "interest_yes", "title": "yes"},
             {"id": "interest_no", "title": "no"}
@@ -221,8 +246,11 @@ class BookingFlow:
         
         elif lead_data["booking_eligible"] == 1:
             
+            if lead_data["booking_state"] == "pre_flow":
+                return {"status" : "booking_flow" , "message" : self.generate_booking_intro()}
+
             if lead_data["booking_state"] == "booking_interest":
-                return {"status" : "booking_interest" , "message" : self.generate_booking_intro()}
+                return {"status" : "booking_interest" , "message" : self.generate_booking_interest()}
             
             elif lead_data["booking_state"] == "booking_selection":
                 return {"status" : "booking_selection" , "message" : self.generate_booking_options()}

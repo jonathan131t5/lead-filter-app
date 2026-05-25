@@ -124,14 +124,7 @@ def create_demo_data():
     db = service_layer.booking_flow.db
     cursor = db.cursor
 
-    # create tables
-    service_layer.leads_data.create_leads_data_table()
-    service_layer.leads_fields.create_leads_fields_data()
-    service_layer.leads_scores.create_leads_scores_table()
-    service_layer.leads_states.create_lead_conversation_states()
-    service_layer.leads_booking.create_leads_booking_table()
-    service_layer.booking_flow.booking_slots.create_booking_table()
-    service_layer.booking_flow.appointments.create_appointment_table()
+
 
     demo_slots = [
         "2026-05-25 10:00",
@@ -150,13 +143,156 @@ def create_demo_data():
         )
         created_slots.append(cursor.lastrowid)
 
+    
+
+
+VERIFY_TOKEN = "lead_filter_verify_123"
+
+
+
+@app.get("/webhook/whatsapp")
+async def verify_whatsapp_webhook(request: Request):
+    mode = request.query_params.get("hub.mode")
+    token = request.query_params.get("hub.verify_token")
+    challenge = request.query_params.get("hub.challenge")
+
+    if mode == "subscribe" and token == VERIFY_TOKEN:
+        return int(challenge)
+
+    return {"status": "verification_failed"}
+
+
+
+
+
+
+@app.post("/webhook/whatsapp")
+async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
+    try:
+        webhook_start = time.time()
+        body = await request.json()
+        
+        value = body["entry"][0]["changes"][0]["value"]
+
+        if "messages" not in value:
+            return {"status": "ignored"}
+        
+        logging.info(f"[WEBHOOK] received timestamp={body['entry'][0]['changes'][0]['value']['messages'][0].get('timestamp')}_server={int(time.time())}")
+        
+        if value["messages"][0].get("from") is None:
+            return {"status": "ignored"}
+
+        message = value["messages"][0]
+        phone = message["from"]
+
+        # 1. שליחה מיידית וסינכרונית (חובה שזה יקרה לפני ה-return)
+        # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
+        
+        typing_start = time.time()
+        await send_typing_indicator(message_id=message["id"], phone=phone)
+        logging.info(f"[TIMER] typing_send={time.time()-typing_start:.2f}s")
+        background_tasks.add_task(run_ai_logic, message)
+        
+        logging.info(f"[TIMER] webhook_total={time.time()-webhook_start:.2f}s")
+        return {"status": "ok"}
+        
+    except Exception:
+        logging.exception("WEBHOOK ERROR")
+        return {"status": "error"}
+
+
+processed_messages = set()
+
+async def run_ai_logic(message: dict):
+    try:
+
+        phone = message["from"]
+        message_id = message["id"]
+
+        if message_id in processed_messages:
+            return
+        processed_messages.add(message_id)
+
+
+
+        
+        
+        # עיבוד סוג ההודעה
+        if message.get("type") == "text":
+            text = message["text"]["body"]
+        elif message.get("type") == "interactive":
+            int_data = message["interactive"]
+            text = {"id": int_data.get("button_reply", {}).get("id") or int_data.get("list_reply", {}).get("id")}
+        else:
+            return
+        
+        if text == "testfast":
+            await send_whatsapp_message(phone, "test")
+            return
+
+        start = time.time()
+
+        result = await asyncio.to_thread(
+            service_layer.process_lead_message,
+            session_id=phone,
+            content=text,
+            external_message_id=message_id
+        )
+
+
+        logging.info(f"[TIMER] total={time.time()-start:.2f}s")
+        # שליחת התשובה
+        reply_text = result.get("message") or result.get("content")
+        reply_status = result.get("status")
+        
+        if reply_text:
+            send_start = time.time()
+            if reply_status in ["booking_flow" , "booking_interest", "booking_selection"]:
+                if len(reply_text.get("buttons", [])) < 3:
+                    await send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
+                else:
+                    await send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
+            else:
+               await send_whatsapp_message(phone, reply_text)
+            
+            logging.info(f"[TIMER] whatsapp_reply_send={time.time()-send_start:.2f}s")
+    except Exception:
+        logging.exception("AI PROCESSING ERROR")
+
+
+
+
+
+
+
+
+
+
+@app.get("/business")
+def home():
+    return FileResponse("business-web.html")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#def backup():
     demo_leads = [
-        ("Jake", "0521111111", "I want to be fit", "like 2 months", "Cold Lead", 3),
-        ("Brandon", "0525586823", "I want more clients", "In a few months", "Cold Lead", 4),
-        ("Michael", "0523687333", "I want to scale my online coaching business", "Next week", "Hot Lead", 6),
-        ("Emily", "0524423644", "I want better lead follow-up", "As soon as possible", "Hot Lead", 7),
-        ("Jason", "0525551255", "Still checking options", "Not sure yet", "pending", 2),
-    ]
+            ("Jake", "0521111111", "I want to be fit", "like 2 months", "Cold Lead", 3),
+            ("Brandon", "0525586823", "I want more clients", "In a few months", "Cold Lead", 4),
+            ("Michael", "0523687333", "I want to scale my online coaching business", "Next week", "Hot Lead", 6),
+            ("Emily", "0524423644", "I want better lead follow-up", "As soon as possible", "Hot Lead", 7),
+            ("Jason", "0525551255", "Still checking options", "Not sure yet", "pending", 2),
+        ]
 
     created_leads = []
 
@@ -289,131 +425,3 @@ def create_demo_data():
         "slots_created": len(created_slots),
         "appointments_created": len(demo_appointments)
     }
-
-
-
-VERIFY_TOKEN = "lead_filter_verify_123"
-
-
-
-@app.get("/webhook/whatsapp")
-async def verify_whatsapp_webhook(request: Request):
-    mode = request.query_params.get("hub.mode")
-    token = request.query_params.get("hub.verify_token")
-    challenge = request.query_params.get("hub.challenge")
-
-    if mode == "subscribe" and token == VERIFY_TOKEN:
-        return int(challenge)
-
-    return {"status": "verification_failed"}
-
-
-
-
-
-
-@app.post("/webhook/whatsapp")
-async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
-    try:
-        webhook_start = time.time()
-        body = await request.json()
-        
-        value = body["entry"][0]["changes"][0]["value"]
-
-        if "messages" not in value:
-            return {"status": "ignored"}
-        
-        logging.info(f"[WEBHOOK] received timestamp={body['entry'][0]['changes'][0]['value']['messages'][0].get('timestamp')}_server={int(time.time())}")
-        
-        if value["messages"][0].get("from") is None:
-            return {"status": "ignored"}
-
-        message = value["messages"][0]
-        phone = message["from"]
-
-        # 1. שליחה מיידית וסינכרונית (חובה שזה יקרה לפני ה-return)
-        # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
-        
-        typing_start = time.time()
-        await send_typing_indicator(message_id=message["id"], phone=phone)
-        logging.info(f"[TIMER] typing_send={time.time()-typing_start:.2f}s")
-        background_tasks.add_task(run_ai_logic, message)
-        
-        logging.info(f"[TIMER] webhook_total={time.time()-webhook_start:.2f}s")
-        return {"status": "ok"}
-        
-    except Exception:
-        logging.exception("WEBHOOK ERROR")
-        return {"status": "error"}
-
-
-processed_messages = set()
-
-async def run_ai_logic(message: dict):
-    try:
-
-        phone = message["from"]
-        message_id = message["id"]
-
-        if message_id in processed_messages:
-            return
-        processed_messages.add(message_id)
-
-
-
-        
-        
-        # עיבוד סוג ההודעה
-        if message.get("type") == "text":
-            text = message["text"]["body"]
-        elif message.get("type") == "interactive":
-            int_data = message["interactive"]
-            text = {"id": int_data.get("button_reply", {}).get("id") or int_data.get("list_reply", {}).get("id")}
-        else:
-            return
-        
-        if text == "testfast":
-            await send_whatsapp_message(phone, "test")
-            return
-
-        start = time.time()
-
-        result = await asyncio.to_thread(
-            service_layer.process_lead_message,
-            session_id=phone,
-            content=text,
-            external_message_id=message_id
-        )
-
-
-        logging.info(f"[TIMER] total={time.time()-start:.2f}s")
-        # שליחת התשובה
-        reply_text = result.get("message") or result.get("content")
-        reply_status = result.get("status")
-        
-        if reply_text:
-            send_start = time.time()
-            if reply_status in ["booking_interest", "booking_selection"]:
-                if len(reply_text.get("buttons", [])) < 3:
-                    await send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
-                else:
-                    await send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
-            else:
-               await send_whatsapp_message(phone, reply_text)
-            
-            logging.info(f"[TIMER] whatsapp_reply_send={time.time()-send_start:.2f}s")
-    except Exception:
-        logging.exception("AI PROCESSING ERROR")
-
-
-
-
-
-
-
-
-
-
-@app.get("/business")
-def home():
-    return FileResponse("business-web.html")
