@@ -336,7 +336,12 @@ class ServiceLayer:
             attempt_number=lead_info["regular_attempt_number"],
             ack_mode=ack_mode)
 
-        message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
+
+        if lead_info["current_field"] == "pre_flow":
+            message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question["body"])
+        else:
+            message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
+
         self.messages.add_external_message_id(message_id=message_id ,external_message_id=external_message_id)
         return question
     
