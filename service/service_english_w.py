@@ -229,7 +229,6 @@ class ServiceLayer:
         if check_lead is not None:
             return {"status" : "exists" , "lead_id" : check_lead["lead_id"] , "session_id" : session_id}
         
-
         
         lead_id = self.leads_data.create_new_lead(session_id=session_id)
 

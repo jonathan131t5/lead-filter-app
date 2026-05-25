@@ -27,10 +27,10 @@ class LeadsStatesRepository:
         )
 
     
-    def get_lead_is_processing_param(self , lead_id):
+    def get_lead_is_processing_param(self , session_id):
         self.cursor.execute(
-        "SELECT is_processing FROM lead_conversation_states WHERE lead_id = ?" ,
-        (lead_id , )
+        "SELECT is_processing FROM lead_conversation_states WHERE session_id = ?" ,
+        (session_id , )
         )
         result = self.cursor.fetchone()
         if result is None:
@@ -41,10 +41,10 @@ class LeadsStatesRepository:
         }
     
 
-    def update_lead_is_processing(self , lead_id , value):
+    def update_lead_is_processing(self , session_id , value):
         self.cursor.execute(
-        "UPDATE lead_conversation_states SET is_processing = ? WHERE lead_id = ?" , 
-        (value , lead_id)
+        "UPDATE lead_conversation_states SET is_processing = ? WHERE session_id = ?" , 
+        (value , session_id)
         )
 
 

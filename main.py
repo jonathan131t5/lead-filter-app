@@ -185,13 +185,13 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         message = value["messages"][0]
         phone = message["from"]
 
-        processing_check = service_layer.leads_states.get_lead_is_processing_param(lead_id=phone)
+        processing_check = service_layer.leads_states.get_lead_is_processing_param(session_id=phone)
         
         if processing_check == 1:
             return {"status" : "ok"}
         
         if processing_check is None or processing_check == 0:
-            service_layer.leads_states.update_lead_is_processing(lead_id=phone , value=1)
+            service_layer.leads_states.update_lead_is_processing(session_id=phone , value=1)
             typing_start = time.time()
             await send_typing_indicator(message_id=message["id"], phone=phone)
             logging.info(f"[TIMER] typing_send={time.time()-typing_start:.2f}s")
@@ -261,7 +261,7 @@ async def run_ai_logic(message: dict):
         logging.exception("AI PROCESSING ERROR")
     
     finally:
-        service_layer.leads_states.update_lead_is_processing(lead_id=phone , value=0)
+        service_layer.leads_states.update_lead_is_processing(session_id=phone , value=0)
 
 
 
