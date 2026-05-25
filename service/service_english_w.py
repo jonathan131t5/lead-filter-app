@@ -340,9 +340,11 @@ class ServiceLayer:
 
 
         if lead_info["current_field"] == "pre_flow":
-            message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question["body"])
+            text = question["body"]
         else:
-            message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
+            text = question[0]
+        
+        message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
 
         self.messages.add_external_message_id(message_id=message_id ,external_message_id=external_message_id)
         return question
