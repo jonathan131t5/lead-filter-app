@@ -43,7 +43,7 @@ class LeadsStatesRepository:
 
     def update_lead_is_processing(self , lead_id , value):
         self.cursor.execute(
-        "UPDATE lead_conversation_states SET lead_conversation_states = ? WHERE lead_id = ?" , 
+        "UPDATE lead_conversation_states SET is_processing = ? WHERE lead_id = ?" , 
         (value , lead_id)
         )
 
