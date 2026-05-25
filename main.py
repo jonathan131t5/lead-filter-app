@@ -175,6 +175,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         value = body["entry"][0]["changes"][0]["value"]
 
         if "messages" not in value:
+            logging.info(f"[WHATSAPP VALUE] {value}")
             return {"status": "ignored"}
         
         logging.info(f"[WEBHOOK] received timestamp={body['entry'][0]['changes'][0]['value']['messages'][0].get('timestamp')}_server={int(time.time())}")
