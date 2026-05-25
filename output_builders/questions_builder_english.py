@@ -27,11 +27,13 @@ class BaseQuestions:
         button = [
             {"id" : "approved" , "title" : "start"}
         ]
-        qustion = "Hey, welcome. Hope you’re doing well.\n"
-        "I’ll ask a few quick questions.\n"
-        "Please send one message per answer so everything stays clear.\n"
+        question = (
+            "Hey, welcome. Hope you’re doing well.\n"
+            "I’ll ask a few quick questions.\n"
+            "Please send one message per answer so everything stays clear."
+            )
         
-        return {"buttons" : button , "body" : qustion}
+        return {"buttons" : button , "body" : question}
 
     def process_base_question(self, field, ack_mode):
         print(f"PROCESS BASE QUESTION FIELD={repr(field)} ACK_MODE={repr(ack_mode)}", flush=True)
