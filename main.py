@@ -141,8 +141,8 @@ def create_demo_data():
             (slot_date, 0)
         )
         created_slots.append(cursor.lastrowid)
-        db.commit()
-        return {"status": "ok", "created_slots": created_slots}
+    db.commit()
+    return {"status": "ok", "created_slots": created_slots}
     
 
 
