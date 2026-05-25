@@ -235,7 +235,7 @@ class ServiceLayer:
 
         if lead_id is not None:
             self.leads_scores.create_new_lead_score(lead_id=lead_id)
-            self.leads_states.create_new_lead_conversation_states_data(lead_id=lead_id)
+            self.leads_states.create_new_lead_conversation_states_data(lead_id=lead_id , session_id=session_id)
             self.leads_fields.create_new_lead_fields_data(lead_id=lead_id)
             self.leads_booking.create_lead_booking(lead_id=lead_id)
 

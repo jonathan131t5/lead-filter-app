@@ -6,7 +6,8 @@ class LeadsStatesRepository:
     def create_lead_conversation_states(self):
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS lead_conversation_states(
-        lead_id INTEGER PRIMARY KEY , 
+        lead_id INTEGER PRIMARY KEY ,
+        session_id INTEGER 
         current_field TEXT DEFAULT NULL ,
         regular_attempt_number INTEGER DEFAULT 1 ,
         confuse_attempt_number INTGER DEFAULT 1 ,
@@ -20,10 +21,10 @@ class LeadsStatesRepository:
         """)
 
 
-    def create_new_lead_conversation_states_data(self , lead_id):
+    def create_new_lead_conversation_states_data(self , lead_id , session_id):
         self.cursor.execute(
-        "INSERT INTO lead_conversation_states (lead_id) VALUES (?)" , 
-        (lead_id , )
+        "INSERT INTO lead_conversation_states (lead_id , session_id) VALUES (? , ?)" , 
+        (lead_id , session_id)
         )
 
     
