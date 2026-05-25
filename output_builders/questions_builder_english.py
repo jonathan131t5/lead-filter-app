@@ -41,10 +41,10 @@ class BaseQuestions:
             questions = self.urgency_base_questions()
 
         elif field == "name":
-            question = self.name_base_question()
+            questions = self.name_base_question()
 
         elif field == "pre_flow":
-            question = self.pre_flow_base_question()
+            questions = self.pre_flow_base_question()
 
         else:
             raise TypeError("Invalid field")
