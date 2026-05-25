@@ -27,11 +27,7 @@ class BaseQuestions:
         button = [
             {"id" : "approved" , "title" : "start"}
         ]
-        question = (
-            "Hey, welcome. Hope you’re doing well.\n"
-            "I’ll ask a few quick questions.\n"
-            "Please send one message per answer so everything stays clear."
-            )
+        question = ("Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear.")
         
         return {"buttons" : button , "body" : question}
 
