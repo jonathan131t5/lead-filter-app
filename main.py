@@ -187,7 +187,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         phone = message["from"]
 
         processing_check = service_layer.leads_states.get_lead_is_processing_param(session_id=phone)
-        
+        logging.info(f"[PROCESSING CHECK] phone={phone} value={processing_check}")
         if processing_check == 1:
             return {"status" : "ok"}
         
