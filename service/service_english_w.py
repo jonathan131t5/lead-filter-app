@@ -141,11 +141,13 @@ class ServiceLayer:
         
         elif isinstance(booking_result , bool):
             if booking_result == False:
-                if prepare_lead_context['lead_conversation_states_data']['current_field'] == "pre_flow":
+                if prepare_lead_context['lead_conversation_states_data']['current_field'] is None:
+                    self.leads_states.update_lead_current_field(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , updated_field="pre_flow")
+                    prepare_lead_context['lead_conversation_states_data']['current_field'] = "pre_flow"
+                    
                     ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
                     question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode , external_message_id=external_message_id)
-                    self.leads_states.update_lead_current_field(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , updated_field="name")
-                    prepare_lead_context['lead_conversation_states_data']['current_field'] = "name"
+
                     return question
                     
                 
