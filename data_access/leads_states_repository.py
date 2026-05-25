@@ -26,6 +26,28 @@ class LeadsStatesRepository:
         (lead_id , )
         )
 
+    
+    def get_lead_is_processing_param(self , lead_id):
+        self.cursor.execute(
+        "SELECT is_processing FROM lead_conversation_states WHERE lead_id = ?" ,
+        (lead_id , )
+        )
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        
+        return {
+            "is_processing" : result
+        }
+    
+
+    def update_lead_is_processing(self , lead_id , value):
+        self.cursor.execute(
+        "UPDATE lead_conversation_states SET lead_conversation_states = ? WHERE lead_id = ?" , 
+        (value , lead_id)
+        )
+
+
 
     
     def get_lead_conversation_states(self , lead_id):

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, BackgroundTasks , Response
 from pydantic import BaseModel
 from service.service_english_w import ServiceLayer
-from data_access.slots_repository import BookingSlotRepository
+
 import time
 import asyncio
 
@@ -17,6 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 service_layer = ServiceLayer()
+
 
 app = FastAPI()
 
@@ -124,8 +125,6 @@ def create_demo_data():
     db = service_layer.booking_flow.db
     cursor = db.cursor
 
-
-
     demo_slots = [
         "2026-05-25 10:00",
         "2026-05-25 14:00",
@@ -142,7 +141,8 @@ def create_demo_data():
             (slot_date, 0)
         )
         created_slots.append(cursor.lastrowid)
-
+        db.commit()
+        return {"status": "ok", "created_slots": created_slots}
     
 
 
@@ -185,16 +185,20 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         message = value["messages"][0]
         phone = message["from"]
 
-        # 1. שליחה מיידית וסינכרונית (חובה שזה יקרה לפני ה-return)
-        # זה מבטיח שוואטסאפ תקבל את פקודת ההקלדה לפני שהחיבור נסגר
+        processing_check = service_layer.leads_states.get_lead_is_processing_param(lead_id=phone)
         
-        typing_start = time.time()
-        await send_typing_indicator(message_id=message["id"], phone=phone)
-        logging.info(f"[TIMER] typing_send={time.time()-typing_start:.2f}s")
-        background_tasks.add_task(run_ai_logic, message)
+        if processing_check == 1:
+            return {"status" : "ok"}
         
-        logging.info(f"[TIMER] webhook_total={time.time()-webhook_start:.2f}s")
-        return {"status": "ok"}
+        if processing_check is None or processing_check == 0:
+            service_layer.leads_states.update_lead_is_processing(lead_id=phone , value=1)
+            typing_start = time.time()
+            await send_typing_indicator(message_id=message["id"], phone=phone)
+            logging.info(f"[TIMER] typing_send={time.time()-typing_start:.2f}s")
+            background_tasks.add_task(run_ai_logic, message)
+            
+            logging.info(f"[TIMER] webhook_total={time.time()-webhook_start:.2f}s")
+            return {"status": "ok"}
         
     except Exception:
         logging.exception("WEBHOOK ERROR")
@@ -251,10 +255,13 @@ async def run_ai_logic(message: dict):
                     await send_whatsapp_list(body=reply_text["body"], button_label=reply_text["button_label"], sections=reply_text["buttons"], to=phone)
             else:
                await send_whatsapp_message(phone, reply_text)
-            
+
             logging.info(f"[TIMER] whatsapp_reply_send={time.time()-send_start:.2f}s")
     except Exception:
         logging.exception("AI PROCESSING ERROR")
+    
+    finally:
+        service_layer.leads_states.update_lead_is_processing(lead_id=phone , value=0)
 
 
 
