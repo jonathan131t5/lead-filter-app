@@ -214,9 +214,6 @@ async def run_ai_logic(message: dict):
         processed_messages.add(message_id)
 
 
-
-        
-        
         # עיבוד סוג ההודעה
         if message.get("type") == "text":
             text = message["text"]["body"]

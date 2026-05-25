@@ -357,6 +357,8 @@ class ServiceLayer:
 
         if ai_response["status"] == "found":
             if lead_info["current_field"] == "pre_flow":
+                if isinstance(content , str):
+                    return True
                 lead_info["current_field"] = "name"
                 self.leads_data.update_lead_name(lead_id=lead_info["lead_id"] , name=content)
 

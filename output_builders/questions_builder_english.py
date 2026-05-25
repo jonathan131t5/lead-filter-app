@@ -52,7 +52,7 @@ class BaseQuestions:
             raise TypeError("Invalid field")
 
 
-        question = questions
+        question = questions[0]
 
         if ack_mode == 1:
             return f"{self.build_ack_prefix()} {question}"
