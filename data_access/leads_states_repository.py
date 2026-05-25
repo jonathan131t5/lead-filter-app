@@ -12,7 +12,7 @@ class LeadsStatesRepository:
         confuse_attempt_number INTGER DEFAULT 1 ,
         question_state TEXT DEFAULT base ,
         question_reason TEXT DEFAULT base ,
-        is_processing INTEGER 0,
+        is_processing INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
         updated_at TIMESTAMP,
         last_interaction_at TIMESTAMP                 
