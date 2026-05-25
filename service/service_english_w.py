@@ -138,6 +138,9 @@ class ServiceLayer:
         
         elif isinstance(booking_result , bool):
             if booking_result == False:
+                if self.prepare_lead_context['lead_conversation_states_data']['current_field'] == "pre_flow":
+                    return self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode , external_message_id=external_message_id)
+                
                 try:
                     validate_str(value=content , name="content")
                     generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
@@ -347,8 +350,8 @@ class ServiceLayer:
                 lead_info["current_field"] = "name"
                 self.leads_data.update_lead_name(lead_id=lead_info["lead_id"] , name=content)
 
-        if ai_response["status"] == "found":
-            if lead_info["current_field"] == "name":
+
+            elif lead_info["current_field"] == "name":
                 lead_info["current_field"] = "goal"
                 self.leads_data.update_lead_name(lead_id=lead_info["lead_id"] , name=content)
 
