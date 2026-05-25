@@ -7,7 +7,7 @@ class LeadsStatesRepository:
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS lead_conversation_states(
         lead_id INTEGER PRIMARY KEY , 
-        current_field TEXT DEFAULT NULL ,
+        current_field TEXT DEFAULT 'pre_flow' ,
         regular_attempt_number INTEGER DEFAULT 1 ,
         confuse_attempt_number INTGER DEFAULT 1 ,
         question_state TEXT DEFAULT base ,

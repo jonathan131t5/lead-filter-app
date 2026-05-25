@@ -72,7 +72,7 @@ class BookingFlow:
             
             return {"status" : "has booking"}
         
-        elif lead_data["current_field"] is not None or lead_data["final_status"] == "pending":
+        elif lead_data["final_status"] == "pending":
             return {"status" : "invaild flow"}
         
         return {"status" : "not eligible"}
@@ -82,28 +82,13 @@ class BookingFlow:
     
     def process_booking_response_flow(self , response_info , lead_booking_data):
         print(f"BOOKING STAT: {lead_booking_data["booking_state"]}" , flush=True)
-        pre_flow = self.process_pre_flow(response_info=response_info , lead_booking_data=lead_booking_data)
-        if pre_flow == False:
-            booking_interest = self.process_booking_interest_response(response_info=response_info , lead_booking_data=lead_booking_data)
+        booking_interest = self.process_booking_interest_response(response_info=response_info , lead_booking_data=lead_booking_data)
         if booking_interest == False:
             booking_selection = self.process_booking_selection_response(response_info=response_info , lead_booking_data=lead_booking_data)
             if isinstance(booking_selection , dict):
                 return {"status" : booking_selection["status"] , "message" : booking_selection["message"]}
 
     
-
-    def process_pre_flow(self , response_info , lead_booking_data):
-        if isinstance(response_info , str):
-            return
-        
-        if lead_booking_data["booking_state"] == "pre_flow":
-            if response_info["id"] == "start":
-                self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , value="booking_interest")
-                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content="start")
-                lead_booking_data["booking_state"] = "booking_interest"
-
-            return True
-        return False
 
     
     def process_booking_interest_response(self , response_info , lead_booking_data):
@@ -245,10 +230,6 @@ class BookingFlow:
             return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data)}
         
         elif lead_data["booking_eligible"] == 1:
-            
-            if lead_data["booking_state"] == "pre_flow":
-                return {"status" : "booking_flow" , "message" : self.generate_booking_intro()}
-
             if lead_data["booking_state"] == "booking_interest":
                 return {"status" : "booking_interest" , "message" : self.generate_booking_interest()}
             

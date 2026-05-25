@@ -16,13 +16,36 @@ class BaseQuestions:
         return [
             "What's the best number to reach you?"
         ]
-#
+    
+    def name_base_question(self):
+        return [
+            "Hi 👋, before we start what’s your name?"
+        ]
+    
+
+    def pre_flow_base_question(self):
+        button = [
+            {"id" : "approved" , "title" : "start"}
+        ]
+        qustion = "Hey, welcome. Hope you’re doing well.\n"
+        "I’ll ask a few quick questions.\n"
+        "Please send one message per answer so everything stays clear.\n"
+        
+        return {"buttons" : button , "body" : qustion}
+
     def process_base_question(self, field, ack_mode):
         print(f"PROCESS BASE QUESTION FIELD={repr(field)} ACK_MODE={repr(ack_mode)}", flush=True)
         if field == "goal":
             questions = self.goal_base_questions()
         elif field == "urgency":
             questions = self.urgency_base_questions()
+
+        elif field == "name":
+            question = self.name_base_question()
+
+        elif field == "pre_flow":
+            question = self.pre_flow_base_question()
+
         else:
             raise TypeError("Invalid field")
 

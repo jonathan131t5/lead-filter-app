@@ -138,12 +138,6 @@ class ServiceLayer:
         
         elif isinstance(booking_result , bool):
             if booking_result == False:
-                if prepare_lead_context['lead_conversation_states_data']['current_field'] == None:
-                    self.leads_states.update_lead_current_field(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , updated_field="name")
-                    self.db.commit()
-                    return {"status" : "output" , "message" : "Hi 👋, before we start what’s your name?"}
-
-               
                 try:
                     validate_str(value=content , name="content")
                     generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
@@ -267,8 +261,10 @@ class ServiceLayer:
         question = self.generate_question(lead_info=lead_all_data["lead_conversation_states_data"] , ack_mode=ack_mode , final_status=lead_all_data["lead_base_data"]["final_status"] , external_message_id=external_message_id)
         if question is None:
             return {"status" : "booking"}
-            return {"status" : "DONE" , "message" : closing_message}
-            
+
+        elif lead_all_data["lead_conversation_states_data"]["current_field"] == "pre_flow":
+            return {"status" : "pre_flow" , "message" : question}
+
         return {"status" : "output" , "message" : question}
 
 
@@ -306,6 +302,9 @@ class ServiceLayer:
         if current_field == "name":
             return {"status" : "found" , "value" : content}
         
+        elif current_field == "pre_flow":
+            return {"status" : "found" , "value" : content}
+        
         ai_input = self.conversation_builder.build_prompt(current_field=current_field , content=content)
 
         before_ai = time.time()
@@ -339,12 +338,15 @@ class ServiceLayer:
     
     
 
-
-
     
     def advance_on_found(self , ai_response , lead_info , content):
         need_to_change = None
-        #print("found")
+
+        if ai_response["status"] == "found":
+            if lead_info["current_field"] == "pre_flow":
+                lead_info["current_field"] = "name"
+                self.leads_data.update_lead_name(lead_id=lead_info["lead_id"] , name=content)
+
         if ai_response["status"] == "found":
             if lead_info["current_field"] == "name":
                 lead_info["current_field"] = "goal"
@@ -454,6 +456,9 @@ class ServiceLayer:
     
     def apply_message_score(self , lead_info , current_field , ai_analyze_response , reason):
         if current_field == "name":
+            return
+        
+        if current_field == "pre_flow":
             return
         
         lead_message_score = self.message_scorer.score_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason)
