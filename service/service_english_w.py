@@ -449,15 +449,15 @@ class ServiceLayer:
         if ai_response["status"] == "missing" or ai_response["status"] == "confused":
             if lead_info["question_reason"] == "regular_fallback":
                 
-                if lead_info["current_field"] == "phone":
-                    return
+                #if lead_info["current_field"] == "phone":
+                    #return
                 
                 self.leads_states.update_lead_question_reason(lead_id=lead_info["lead_id"] , value="after_fallback")
                 lead_info["question_reason"] = "after_fallback"
                 
 
                 if lead_info["current_field"] == "goal":
-                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="phone")
+                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="urgency")
                     lead_info["current_field"] = "urgency"
 
 
