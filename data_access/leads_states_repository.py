@@ -37,9 +37,7 @@ class LeadsStatesRepository:
         if result is None:
             return None
         
-        return {
-            "is_processing" : result
-        }
+        return result[0]
     
 
     def update_lead_is_processing(self , session_id , value):
