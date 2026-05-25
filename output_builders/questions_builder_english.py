@@ -49,7 +49,8 @@ class BaseQuestions:
         else:
             raise TypeError("Invalid field")
 
-        question = random.choice(questions)
+
+        question = questions
 
         if ack_mode == 1:
             return f"{self.build_ack_prefix()} {question}"
