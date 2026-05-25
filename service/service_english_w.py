@@ -140,9 +140,11 @@ class ServiceLayer:
             if booking_result == False:
                 if prepare_lead_context['lead_conversation_states_data']['current_field'] == "pre_flow":
                     ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
+                    question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode , external_message_id=external_message_id)
                     self.leads_states.update_lead_current_field(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , updated_field="name")
                     prepare_lead_context['lead_conversation_states_data']['current_field'] = "name"
-                    return self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode , external_message_id=external_message_id)
+                    return question
+                    
                 
                 try:
                     validate_str(value=content , name="content")
@@ -341,10 +343,10 @@ class ServiceLayer:
 
         if lead_info["current_field"] == "pre_flow":
             text = question["body"]
-        else:
-            text = question[0]
+            message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
         
-        message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
+        else:
+            message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
 
         self.messages.add_external_message_id(message_id=message_id ,external_message_id=external_message_id)
         return question

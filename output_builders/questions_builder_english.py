@@ -51,8 +51,10 @@ class BaseQuestions:
         else:
             raise TypeError("Invalid field")
 
-
-        question = questions[0]
+        if field != "pre_flow":
+            question = questions[0]
+        else:
+            question = questions
 
         if ack_mode == 1:
             return f"{self.build_ack_prefix()} {question}"
