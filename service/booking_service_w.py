@@ -227,7 +227,7 @@ class BookingFlow:
             f"[BOOKING QUESTION] lead_data: {lead_data}"
         )
         if lead_data["booking_eligible"] == 0:
-            return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data)}
+            return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data , lead_data["lead_id"])}
         
         elif lead_data["booking_eligible"] == 1:
             if lead_data["booking_state"] == "booking_interest":
