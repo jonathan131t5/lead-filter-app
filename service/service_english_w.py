@@ -132,9 +132,12 @@ class ServiceLayer:
 
        
         booking_result = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
-
+        
+        ack_mode = 0
+        
         if isinstance(booking_result , dict):
             return booking_result
+        
         
         elif isinstance(booking_result , bool):
             if booking_result == False:
@@ -147,7 +150,7 @@ class ServiceLayer:
                     
                 
                 try:
-                    validate_str(value=content , name="content")
+                    #validate_str(value=content , name="content")
                     generate_ai_analysis = self.generate_analyze(lead_id=prepare_lead_context["lead_base_data"]["lead_id"] , content=content , current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"])
                     logging.info(f"Regular analysis lead_id={prepare_lead_context['lead_base_data']['lead_id']} | result={generate_ai_analysis}")
                 
@@ -329,7 +332,7 @@ class ServiceLayer:
     
     
     
-    def generate_question(self , lead_info , ack_mode , final_status , external_message_id):
+    def generate_question(self , lead_info , final_status , external_message_id , ack_mode):
         if final_status != "pending":
             return None
         
