@@ -139,6 +139,7 @@ class ServiceLayer:
         elif isinstance(booking_result , bool):
             if booking_result == False:
                 if prepare_lead_context['lead_conversation_states_data']['current_field'] == "pre_flow":
+                    ack_mode = self.is_new_session(lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
                     return self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode , external_message_id=external_message_id)
                 
                 try:
