@@ -158,7 +158,7 @@ def reset_session(session_id: str):
     cursor.execute("DELETE FROM appointment WHERE lead_id = %s", (lead_id,))
     cursor.execute("DELETE FROM leads_booking WHERE lead_id = %s", (lead_id,))
     cursor.execute("DELETE FROM leads_messages WHERE lead_id = %s", (lead_id,))
-    cursor.execute("DELETE FROM leads_fields WHERE lead_id = %s", (lead_id,))
+    cursor.execute("DELETE FROM leads_fields_data WHERE lead_id = %s", (lead_id,))
     cursor.execute("DELETE FROM leads_scores WHERE lead_id = %s", (lead_id,))
 
     cursor.execute("""
