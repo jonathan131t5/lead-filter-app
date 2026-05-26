@@ -204,7 +204,8 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
             logging.info(f"[TIMER] webhook_total={time.time()-webhook_start:.2f}s")
             return {"status": "ok"}
         
-    except Exception as e:  
+    except Exception as e:
+        service_layer.db.rollback() 
         logging.exception("WEBHOOK ERROR")
         
         send_telegram_alert(
@@ -214,7 +215,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         )
         
         if phone:
-            send_whatsapp_message(number=phone , text="Something went wrong. Please try again in a moment.")
+            await send_whatsapp_message(number=phone , text="Something went wrong. Please try again in a moment.")
         
         return {"status": "error"}
 
@@ -242,7 +243,9 @@ async def run_ai_logic(message: dict):
             return
         
         if text == "testfast":
+            send_start = time.time()
             await send_whatsapp_message(phone, "test")
+            logging.info(f"[TIMER] testfast_whatsapp_send={time.time()-send_start:.2f}s")
             return
 
         start = time.time()
