@@ -19,7 +19,7 @@ class BaseQuestions:
     
     def name_base_question(self):
         return [
-            "Hi 👋, before we start what’s your name?"
+            "Before we start what’s your name?"
         ]
     
 
