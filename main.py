@@ -126,6 +126,60 @@ def db_check():
     return {"db": service_layer.db.cursor.fetchone()[0]}
 
 
+
+@app.get("/dev/reset-session/{session_id}")
+def reset_session(session_id: str):
+    db = service_layer.db
+    cursor = db.cursor
+
+    cursor.execute("""
+        SELECT lead_id
+        FROM leads_data
+        WHERE session_id = %s
+    """, (session_id,))
+
+    result = cursor.fetchone()
+
+    if result is None:
+        cursor.execute("""
+            DELETE FROM lead_conversation_states
+            WHERE session_id = %s
+        """, (session_id,))
+
+        db.commit()
+
+        return {
+            "status": "no_lead_found_but_state_deleted",
+            "session_id": session_id
+        }
+
+    lead_id = result[0]
+
+    cursor.execute("DELETE FROM appointment WHERE lead_id = %s", (lead_id,))
+    cursor.execute("DELETE FROM leads_booking WHERE lead_id = %s", (lead_id,))
+    cursor.execute("DELETE FROM leads_messages WHERE lead_id = %s", (lead_id,))
+    cursor.execute("DELETE FROM leads_fields WHERE lead_id = %s", (lead_id,))
+    cursor.execute("DELETE FROM leads_scores WHERE lead_id = %s", (lead_id,))
+
+    cursor.execute("""
+        DELETE FROM lead_conversation_states
+        WHERE session_id = %s
+    """, (session_id,))
+
+    cursor.execute("""
+        DELETE FROM leads_data
+        WHERE session_id = %s
+    """, (session_id,))
+
+    db.commit()
+
+    return {
+        "status": "reset_done",
+        "session_id": session_id,
+        "lead_id": lead_id
+    }
+
+
 @app.get("/dev/create-demo-data")
 def create_demo_data():
     db = service_layer.booking_flow.db
