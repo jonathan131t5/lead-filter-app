@@ -8,7 +8,7 @@ class LeadsDataRepository:
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS leads_data (
                 lead_id SERIAL PRIMARY KEY,
-                session_id INTEGER,
+                session_id TEXT,
                 name TEXT,
                 phone_number TEXT UNIQUE,
                 final_status TEXT DEFAULT 'pending',
