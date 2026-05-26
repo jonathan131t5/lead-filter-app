@@ -380,7 +380,7 @@ class ServiceLayer:
             if lead_info["current_field"] == "pre_flow":
                 if isinstance(content , str):
                     return True
-                lead_info["current_field"] = "fhf"
+                lead_info["current_field"] = "name"
 
 
             elif lead_info["current_field"] == "name":
