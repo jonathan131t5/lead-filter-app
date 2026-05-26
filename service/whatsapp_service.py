@@ -29,6 +29,9 @@ async def send_whatsapp_message(number: str, text: str):
     async with httpx.AsyncClient() as client:
         response = await client.post(url, headers=headers, json=body)
 
+    if response.status_code >= 400:
+        raise Exception(f"WhatsApp API error {response.status_code}: {response.text}")
+
     print("WHATSAPP STATUS:", response.status_code)
     print("WHATSAPP RESPONSE:", response.text)
 
@@ -72,6 +75,8 @@ async def send_whatsapp_buttons(to, body, buttons):
     async with httpx.AsyncClient() as client:
         response = await client.post(url, headers=headers, json=payload)
 
+    if response.status_code >= 400:
+        raise Exception(f"WhatsApp API error {response.status_code}: {response.text}")
     print("WHATSAPP BUTTON STATUS:", response.status_code, flush=True)
     print("WHATSAPP BUTTON RESPONSE:", response.text, flush=True)
 
@@ -118,6 +123,9 @@ async def send_whatsapp_list(to, body, button_label, sections):
     
     async with httpx.AsyncClient() as client:
         response = await client.post(url, headers=headers, json=payload)
+
+    if response.status_code >= 400:
+        raise Exception(f"WhatsApp API error {response.status_code}: {response.text}")
 
     print("WHATSAPP LIST STATUS:", response.status_code, flush=True)
     print("WHATSAPP LIST RESPONSE:", response.text, flush=True)
