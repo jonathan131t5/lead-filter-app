@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from service.whatsapp_service import send_whatsapp_message , send_whatsapp_buttons , send_whatsapp_list , send_typing_indicator
 
+from integrations.telegram_bot import send_telegram_alert
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -169,6 +170,8 @@ async def verify_whatsapp_webhook(request: Request):
 @app.post("/webhook/whatsapp")
 async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
     try:
+        phone = None
+
         webhook_start = time.time()
         body = await request.json()
         
@@ -201,16 +204,26 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
             logging.info(f"[TIMER] webhook_total={time.time()-webhook_start:.2f}s")
             return {"status": "ok"}
         
-    except Exception:
+    except Exception as e:  
         logging.exception("WEBHOOK ERROR")
+        
+        send_telegram_alert(
+        f"🚨 WEBHOOK ERROR\n"
+        f"phone={phone}\n"
+        f"error={type(e).__name__}: {e}"
+        )
+        
+        if phone:
+            send_whatsapp_message(number=phone , text="Something went wrong. Please try again in a moment.")
+        
         return {"status": "error"}
 
 
 processed_messages = set()
 
 async def run_ai_logic(message: dict):
+    phone = None
     try:
-
         phone = message["from"]
         message_id = message["id"]
 
@@ -258,11 +271,18 @@ async def run_ai_logic(message: dict):
                await send_whatsapp_message(phone, reply_text)
 
             logging.info(f"[TIMER] whatsapp_reply_send={time.time()-send_start:.2f}s")
-    except Exception:
-        logging.exception("AI PROCESSING ERROR")
+    except Exception as e:
+        logging.exception(f"[WHATSAPP PROCESSING ERROR] phone={phone}")
+
+        send_telegram_alert(
+            f"🚨 WHATSAPP PROCESSING ERROR\n"
+            f"phone={phone}\n"
+            f"error={type(e).__name__}: {e}"
+            )
     
     finally:
-        service_layer.leads_states.update_lead_is_processing(session_id=phone , value=0)
+        if phone:
+            service_layer.leads_states.update_lead_is_processing(session_id=phone , value=0)
 
 
 

@@ -29,6 +29,8 @@ class BookingFlow:
     
     def process_booking_flow(self , lead_id , content):
         try:
+            logging.info(f"[BOOKING] lead_id={lead_id} step=start content={content}")
+
             lead_booking_data = self.booking_context.prepare_lead_booking_context(lead_id=lead_id)
             
             check_booking_result = self.check_lead_booking(lead_data=lead_booking_data)
@@ -48,7 +50,10 @@ class BookingFlow:
 
 
             elif check_booking_result["status"] == True:
-                print(f"CONTENT: {content}" , flush=True)
+                logging.info(
+                    f"[BOOKING] lead_id={lead_booking_data['lead_id']} "
+                    f"step=response_received content={content}"
+                    )
                 process_result = self.process_booking_response_flow(response_info=content , lead_booking_data=lead_booking_data)
                 if process_result and "status" in process_result:
                     self.db.commit()
@@ -58,6 +63,7 @@ class BookingFlow:
             return self.generate_booking_question(lead_data=lead_booking_data)
         
         except Exception:
+            logging.exception(f"[BOOKING ERROR] lead_id={lead_id} step=process_booking_flow")
             self.db.rollback()
             raise
                 
@@ -81,7 +87,10 @@ class BookingFlow:
 
     
     def process_booking_response_flow(self , response_info , lead_booking_data):
-        print(f"BOOKING STAT: {lead_booking_data["booking_state"]}" , flush=True)
+        logging.info(
+            f"[BOOKING] lead_id={lead_booking_data['lead_id']} "
+            f"step=process_booking booking_state={lead_booking_data['booking_state']}"
+            )
         booking_interest = self.process_booking_interest_response(response_info=response_info , lead_booking_data=lead_booking_data)
         if booking_interest == False:
             booking_selection = self.process_booking_selection_response(response_info=response_info , lead_booking_data=lead_booking_data)
@@ -95,8 +104,11 @@ class BookingFlow:
         if isinstance(response_info , str):
             return
         
-        print("BOOKING INTEREST RESPONSE:", response_info, flush=True)
-        print("BOOKING STATE:", lead_booking_data["booking_state"], flush=True)
+        logging.info(
+            f"[BOOKING] lead_id={lead_booking_data['lead_id']} "
+            f"step=process_booking_interest booking_state={lead_booking_data['booking_state']} "
+            f"response={response_info}"
+            )
         if lead_booking_data["booking_state"] == "booking_interest":
             if response_info["id"] == "interest_yes":
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="booking_selection")
@@ -224,8 +236,11 @@ class BookingFlow:
 
     def generate_booking_question(self , lead_data):
         logging.info(
-            f"[BOOKING QUESTION] lead_data: {lead_data}"
-        )
+            f"[BOOKING] lead_id={lead_data['lead_id']} "
+            f"step=generate_question eligible={lead_data['booking_eligible']} "
+            f"booking_state={lead_data['booking_state']}"
+            )
+        
         if lead_data["booking_eligible"] == 0:
             return {"status" : "DONE" , "message" : self.generate_closing_messages(lead_data , lead_data["lead_id"])}
         
