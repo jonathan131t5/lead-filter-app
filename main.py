@@ -120,6 +120,11 @@ def privacy():
     return FileResponse("privacy.html")
 
 
+@app.get("/dev/db-check")
+def db_check():
+    service_layer.db.cursor.execute("SELECT version()")
+    return {"db": service_layer.db.cursor.fetchone()[0]}
+
 
 @app.get("/dev/create-demo-data")
 def create_demo_data():
