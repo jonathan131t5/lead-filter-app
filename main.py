@@ -207,7 +207,7 @@ def create_demo_data():
 
 
 
-@app.delete("/dev/clear-slots")
+@app.get("/dev/clear-slots")
 def clear_slots():
     db = service_layer.booking_flow.db
     cursor = db.cursor
