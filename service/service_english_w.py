@@ -18,6 +18,7 @@ from data_access.appointment_context_dpdate_repository import AppointmentsContex
 from data_base.connection import Connection
 
 from integrations.mail_integration import send_email
+from integrations.telegram_bot import send_telegram_alert
 
 from service.booking_service_w import BookingFlow
 
@@ -101,6 +102,12 @@ class ServiceLayer:
         
         except Exception as e:
             logging.exception(f"[SERVICE ERROR] session_id={session_id} step=process_lead_message")
+        
+            send_telegram_alert(
+            f"🚨 PROCESS CHAT FLOW ERROR\n"
+            f"error={type(e).__name__}: {e}"
+            )
+        
             return {
                 "content": "Something went wrong. Please try again in a moment." ,
                 "status": "error"
