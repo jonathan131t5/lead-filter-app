@@ -603,6 +603,7 @@ service_layer.leads_fields.create_leads_fields_data()
 service_layer.messages.create_leads_messages_table()
 
 
-
+service_layer.db.commit()
+print("ALL TABLES CREATED", flush=True)
 
 
