@@ -189,7 +189,10 @@ class BookingFlow:
             if slot["is_taken"] == 0:
                 raw_datetime = slot["date"]
 
-                dt = datetime.fromisoformat(raw_datetime)
+                if isinstance(raw_datetime, datetime):
+                    dt = raw_datetime
+                else:
+                    dt = datetime.fromisoformat(raw_datetime)
 
                 available_slots.append({
                     "id": str(slot["slot_id"]),
