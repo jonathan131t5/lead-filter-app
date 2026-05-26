@@ -131,7 +131,7 @@ class ServiceLayer:
         check = self.ensure_lead_data(session_id=session_id)
         
         if check["status"] == "exists" or check["status"] == "created":
-            logging.info(f"User logged in / created. session_id={session_id} | lead_id={check["lead_id"]}")
+            logging.info(f"User logged in / created. session_id={session_id} | lead_id={check['lead_id']}")
             self.leads_data.update_lead_phone(lead_id=check["lead_id"] , phone=session_id)
             return self.prepare_lead_context(lead_id=check["lead_id"] , session_id=check["session_id"])
 
@@ -147,7 +147,7 @@ class ServiceLayer:
                 f"field={prepare_lead_context['lead_conversation_states_data']['current_field']}"
             )
             
-            logging.info(f"[FLOW] lead_id={prepare_lead_context["lead_base_data"]["lead_id"]} step=content_received content={content if content else None}")
+            logging.info(f"[FLOW] lead_id={prepare_lead_context['lead_base_data']['lead_id']} step=content_received content={content if content else None}")
             
         
             booking_result = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
@@ -190,7 +190,7 @@ class ServiceLayer:
                 logging.debug(prepare_lead_context['lead_conversation_states_data'])
                 
                 determine_final_status = self.determine_final_status(lead_all_data=prepare_lead_context)
-                logging.info(f"Lead finalize try, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | final_status={prepare_lead_context["lead_base_data"]["final_status"]} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
+                logging.info(f"Lead finalize try, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | final_status={prepare_lead_context['lead_base_data']['final_status']} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
                 logging.debug(prepare_lead_context)
                 if determine_final_status == True:
                     raw_summary_context = self.build_lead_summary(lead_all_data=prepare_lead_context)
@@ -318,7 +318,7 @@ class ServiceLayer:
     def determine_final_status(self , lead_all_data):
         finalize_lead_status = self.finalize_lead_status(lead_info=lead_all_data["lead_scores_data"])
         
-        logging.info(f"[SERVICE] lead_id={lead_all_data["lead_base_data"]['lead_id']} step=final_status result={finalize_lead_status}")
+        logging.info(f"[SERVICE] lead_id={lead_all_data['lead_base_data']['lead_id']} step=final_status result={finalize_lead_status}")
         
         if finalize_lead_status is not None:
             lead_all_data["lead_base_data"]["final_status"] = finalize_lead_status["final_status"]
@@ -594,16 +594,6 @@ class ServiceLayer:
 
 
 
-service_layer = ServiceLayer()
 
-service_layer.leads_data.create_leads_data_table()
-service_layer.leads_states.create_lead_conversation_states()
-service_layer.leads_scores.create_leads_scores_table()
-service_layer.leads_fields.create_leads_fields_data()
-service_layer.messages.create_leads_messages_table()
-
-
-service_layer.db.commit()
-print("ALL TABLES CREATED", flush=True)
 
 

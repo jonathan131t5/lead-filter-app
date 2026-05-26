@@ -257,9 +257,3 @@ class BookingFlow:
 
 
 
-db = Connection()
-bookingflow = BookingFlow(db=db)
-
-bookingflow.leads_booking.create_leads_booking_table()
-bookingflow.booking_slots.create_booking_table()
-bookingflow.appointments.create_appointment_table()
