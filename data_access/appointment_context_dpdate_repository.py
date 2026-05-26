@@ -26,7 +26,7 @@ class AppointmentsContextRepository:
 
         self.cursor.execute("""
             UPDATE appointment
-            status = ?
+            SET status = ?
             WHERE id = ?
         """, (booking_status, appointment_id))
 
