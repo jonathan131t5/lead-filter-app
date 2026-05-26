@@ -1,0 +1,125 @@
+class LeadsStatesRepository:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def create_lead_conversation_states(self):
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS lead_conversation_states (
+                lead_id INTEGER PRIMARY KEY,
+                session_id INTEGER,
+                current_field TEXT DEFAULT NULL,
+                regular_attempt_number INTEGER DEFAULT 1,
+                confuse_attempt_number INTEGER DEFAULT 1,
+                question_state TEXT DEFAULT 'base',
+                question_reason TEXT DEFAULT 'base',
+                is_processing INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP,
+                last_interaction_at TIMESTAMP
+            )
+        """)
+
+
+
+    def create_new_lead_conversation_states_data(self, lead_id, session_id):
+        self.cursor.execute("""
+            INSERT INTO lead_conversation_states (lead_id, session_id)
+            VALUES (%s, %s)
+        """, (lead_id, session_id))
+
+
+
+    def get_lead_is_processing_param(self, session_id):
+        self.cursor.execute("""
+            SELECT is_processing
+            FROM lead_conversation_states
+            WHERE session_id = %s
+        """, (session_id,))
+
+        result = self.cursor.fetchone()
+
+        if result is None:
+            return None
+
+        return result[0]
+
+
+
+    def update_lead_is_processing(self, session_id, value):
+        self.cursor.execute("""
+            UPDATE lead_conversation_states
+            SET is_processing = %s
+            WHERE session_id = %s
+        """, (value, session_id))
+
+
+
+    def get_lead_conversation_states(self, lead_id):
+        self.cursor.execute("""
+            SELECT current_field,
+                   regular_attempt_number,
+                   confuse_attempt_number,
+                   question_state,
+                   question_reason
+            FROM lead_conversation_states
+            WHERE lead_id = %s
+        """, (lead_id,))
+
+        result = self.cursor.fetchone()
+
+        if result is None:
+            return None
+
+        return {
+            "lead_id": lead_id,
+            "current_field": result[0],
+            "regular_attempt_number": result[1],
+            "confuse_attempt_number": result[2],
+            "question_state": result[3],
+            "question_reason": result[4]
+        }
+
+
+
+    def update_lead_current_field(self, lead_id, updated_field):
+        self.cursor.execute("""
+            UPDATE lead_conversation_states
+            SET current_field = %s
+            WHERE lead_id = %s
+        """, (updated_field, lead_id))
+
+
+
+    def update_lead_regular_attempt_number(self, lead_id, number):
+        self.cursor.execute("""
+            UPDATE lead_conversation_states
+            SET regular_attempt_number = %s
+            WHERE lead_id = %s
+        """, (number, lead_id))
+
+
+
+    def update_lead_confuse_attempt_number(self, lead_id, number):
+        self.cursor.execute("""
+            UPDATE lead_conversation_states
+            SET confuse_attempt_number = %s
+            WHERE lead_id = %s
+        """, (number, lead_id))
+
+
+
+    def update_lead_question_state(self, lead_id, value):
+        self.cursor.execute("""
+            UPDATE lead_conversation_states
+            SET question_state = %s
+            WHERE lead_id = %s
+        """, (value, lead_id))
+
+
+
+    def update_lead_question_reason(self, lead_id, value):
+        self.cursor.execute("""
+            UPDATE lead_conversation_states
+            SET question_reason = %s
+            WHERE lead_id = %s
+        """, (value, lead_id))

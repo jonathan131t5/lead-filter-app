@@ -1,0 +1,51 @@
+class LeadsBookingRepository:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def create_leads_booking_table(self):
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS leads_booking (
+                lead_id INTEGER PRIMARY KEY,
+                booking_eligible INTEGER DEFAULT 0,
+                has_booking INTEGER DEFAULT 0,
+                booking_state TEXT DEFAULT 'booking_interest'
+            )
+        """)
+
+    def create_lead_booking(self, lead_id):
+        self.cursor.execute("""
+            INSERT INTO leads_booking (lead_id)
+            VALUES (%s)
+        """, (lead_id,))
+
+    def get_leads_booking(self, lead_id):
+        self.cursor.execute("""
+            SELECT booking_eligible
+            FROM leads_booking
+            WHERE lead_id = %s
+        """, (lead_id,))
+
+        result = self.cursor.fetchone()
+
+        if result is None:
+            return None
+
+        return {
+            "lead_id": lead_id,
+            "booking_eligible": result[0]
+        }
+
+    def set_booking_param(self, lead_id, param, value):
+        allowed_params = {
+            "booking_eligible",
+            "has_booking",
+            "booking_state"
+        }
+
+        if param not in allowed_params:
+            raise ValueError("Invalid booking param")
+
+        self.cursor.execute(
+            f"UPDATE leads_booking SET {param} = %s WHERE lead_id = %s",
+            (value, lead_id)
+        )
