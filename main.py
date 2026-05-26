@@ -275,6 +275,7 @@ async def run_ai_logic(message: dict):
 
             logging.info(f"[TIMER] whatsapp_reply_send={time.time()-send_start:.2f}s")
     except Exception as e:
+        service_layer.db.rollback()
         logging.exception(f"[WHATSAPP PROCESSING ERROR] phone={phone}")
 
         send_telegram_alert(
