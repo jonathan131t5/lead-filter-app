@@ -4,16 +4,16 @@ import logging
 
 from output_builders.booking_questions_english import BookingQuestion
 
-from data_access.lead_booking_repository import LeadsBookingRepository
-from data_access.slots_repository import BookingSlotRepository
-from data_access.appointment_repository import AppointmentRepository
-from data_access.lead_booking_context_repository import LeadBookingContextRepository
-from data_access.leads_messages_repository import MessagesRepository
-from data_access.lead_booking_dashboard_repository import BookingDashDataRepository
+from data_access.postgres.lead_booking_repository import LeadsBookingRepository
+from data_access.postgres.slots_repository import BookingSlotRepository
+from data_access.postgres.appointment_repository import AppointmentRepository
+from data_access.postgres.lead_booking_context_repository import LeadBookingContextRepository
+from data_access.postgres.leads_messages_repository import MessagesRepository
+from data_access.postgres.lead_booking_dashboard_repository import BookingDashDataRepository
 
 
 
-from data_base.connection import Connection
+from data_base.connection2 import Connection
 
 class BookingFlow:
     def __init__(self, db):

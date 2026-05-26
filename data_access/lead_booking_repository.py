@@ -25,7 +25,7 @@ class LeadsBookingRepository:
     
     def get_leads_booking(self , lead_id):
         self.cursor.execute(
-        "SELECT booking_eligible , booking_completed FROM leads_booking WHERE lead_id = ?" , 
+        "SELECT booking_eligible FROM leads_booking WHERE lead_id = ?" , 
         (lead_id , )
         )
 
@@ -35,8 +35,7 @@ class LeadsBookingRepository:
         
         return {
             "lead_id" : lead_id , 
-            "booking_eligible" : result[0] , 
-            "booking_completed" : result[1]
+            "booking_eligible" : result[0]
         }
     
     
