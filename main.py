@@ -138,10 +138,10 @@ def create_demo_data():
 
     for slot_date in demo_slots:
         cursor.execute(
-            "INSERT INTO booking_slot (date, is_taken) VALUES (?, ?)",
+            "INSERT INTO booking_slot (date, is_taken) VALUES (%s , %s) RETURNING slot_id",
             (slot_date, 0)
         )
-        created_slots.append(cursor.lastrowid)
+        created_slots.append(cursor.fetchone()[0])
     db.commit()
     return {"status": "ok", "created_slots": created_slots}
     
