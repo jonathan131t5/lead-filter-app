@@ -203,6 +203,19 @@ def create_demo_data():
         created_slots.append(cursor.fetchone()[0])
     db.commit()
     return {"status": "ok", "created_slots": created_slots}
+
+
+
+
+@app.delete("/dev/clear-slots")
+def clear_slots():
+    db = service_layer.booking_flow.db
+    cursor = db.cursor
+
+    cursor.execute("DELETE FROM booking_slot")
+    db.commit()
+
+    return {"status": "ok", "message": "all slots deleted"}
     
 
 
