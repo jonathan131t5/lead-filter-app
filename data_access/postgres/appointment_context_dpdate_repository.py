@@ -3,7 +3,7 @@ class AppointmentsContextRepository:
         self.cursor = cursor
 
 
-    def update_appointment(self, appointment_id, name, phone, slot_date, booking_status):
+    def update_appointment(self, appointment_id, name, phone, booking_status):
         self.cursor.execute("""
             SELECT lead_id, slot_id
             FROM appointment
@@ -29,11 +29,5 @@ class AppointmentsContextRepository:
             SET status = %s
             WHERE id = %s
         """, (booking_status, appointment_id))
-
-        self.cursor.execute("""
-            UPDATE booking_slot
-            SET date = %s
-            WHERE slot_id = %s
-        """, (slot_date, slot_id))
 
         return {"status": True , "message": "updated successfully"}
