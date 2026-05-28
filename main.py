@@ -180,28 +180,32 @@ def reset_session(session_id: str):
 
 @app.get("/dev/create-demo-data")
 def create_demo_data():
-    db = service_layer.booking_flow.db
-    cursor = db.cursor
+    try:
+        db = service_layer.booking_flow.db
+        cursor = db.cursor
 
-    demo_slots = [
-        "2026-12-28 10:00",
-        "2026-07-15 14:00",
-        "2026-05-21 11:00",
-        "2026-06-27 16:00",
-        "2026-08-28 09:30",
-    ]
+        demo_slots = [
+            "2026-12-28 10:00",
+            "2026-07-15 14:00",
+            "2026-05-21 11:00",
+            "2026-06-27 16:00",
+            "2026-08-28 09:30",
+        ]
 
-    created_slots = []
+        created_slots = []
 
-    for slot_date in demo_slots:
-        cursor.execute(
-            "INSERT INTO booking_slot (date, is_taken) VALUES (%s , %s) RETURNING slot_id",
-            (slot_date, 0)
-        )
-        created_slots.append(cursor.fetchone()[0])
-    db.commit()
-    return {"status": "ok", "created_slots": created_slots}
+        for slot_date in demo_slots:
+            cursor.execute(
+                "INSERT INTO booking_slot (date, is_taken) VALUES (%s , %s) RETURNING slot_id",
+                (slot_date, 0)
+            )
+            created_slots.append(cursor.fetchone()[0])
+        db.commit()
+        return {"status": "ok", "created_slots": created_slots}
 
+    except Exception:
+        service_layer.db.rollback()
+        raise
 
 
 
