@@ -10,7 +10,7 @@ class AppointmentRepository:
         id SERIAL PRIMARY KEY , 
         slot_id INTEGER , 
         lead_id INTEGER , 
-        status TEXT DEFAULT 'pending'
+        status TEXT DEFAULT 'booked'
         )
         """)
 

@@ -726,17 +726,9 @@
       <input id="editPhone" class="modal-input" type="text" />
     </div>
     <div class="modal-field">
-      <label class="modal-label">EMAIL</label>
-      <input id="editEmail" class="modal-input" type="email" />
-    </div>
-    <div class="modal-field">
-      <label class="modal-label">DATE & TIME</label>
-      <input id="editDate" class="modal-input" type="datetime-local" />
-    </div>
-    <div class="modal-field">
       <label class="modal-label">BOOKING STATUS</label>
       <select id="editStatus" class="modal-select">
-        <option value="confirmed">Confirmed</option>
+        <option value="booked">Confirmed</option>
         <option value="completed">Completed</option>
         <option value="cancelled">Cancelled</option>
       </select>
@@ -936,7 +928,9 @@
     const q = document.getElementById("apptSearch").value.trim().toLowerCase();
     const s = document.getElementById("apptFilter").value;
     return appointments.filter(a => {
-      const mq = !q || (a.name||"").toLowerCase().includes(q) || (a.phone_number||"").includes(q) || (a.email||"").toLowerCase().includes(q);
+      const mq = !q || 
+      (a.name || "").toLowerCase().includes(q) || 
+      (a.phone_number || "").includes(q);
       const ms = !s || a.booking_status === s;
       return mq && ms;
     });
@@ -957,8 +951,6 @@
     editingId = id;
     document.getElementById("editName").value   = a.name;
     document.getElementById("editPhone").value  = a.phone_number;
-    document.getElementById("editEmail").value  = a.email || "";
-    document.getElementById("editDate").value   = a.slot_date?.slice(0,16) || "";
     document.getElementById("editStatus").value = a.booking_status;
     document.getElementById("editModal").classList.add("open");
   }
@@ -975,7 +967,6 @@
       body: JSON.stringify({
         name: document.getElementById("editName").value,
         phone: document.getElementById("editPhone").value,
-        slot_date: document.getElementById("editDate").value,
         booking_status: document.getElementById("editStatus").value
       })
     });
