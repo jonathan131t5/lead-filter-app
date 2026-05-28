@@ -96,7 +96,6 @@ def get_dashboard_appointments():
 class AppointmentUpdateRequest(BaseModel):
     name: str
     phone: str
-    slot_date: str
     booking_status: str
 
 @app.put("/api/dashboard/appointments/{appointment_id}")
@@ -105,7 +104,6 @@ def update_dashboard_appointment(appointment_id: int, data: AppointmentUpdateReq
         appointment_id=appointment_id,
         name=data.name,
         phone=data.phone,
-        slot_date=data.slot_date,
         booking_status=data.booking_status
     )
 
@@ -186,11 +184,11 @@ def create_demo_data():
     cursor = db.cursor
 
     demo_slots = [
-        "2026-05-25 10:00",
-        "2026-05-25 14:00",
-        "2026-05-26 11:00",
-        "2026-05-27 16:00",
-        "2026-05-28 09:30",
+        "2026-012-28 10:00",
+        "2026-07-15 14:00",
+        "2026-05-21 11:00",
+        "2026-06-27 16:00",
+        "2026-08-28 09:30",
     ]
 
     created_slots = []
