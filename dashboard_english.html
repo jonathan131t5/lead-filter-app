@@ -687,7 +687,7 @@
       <input id="apptSearch" class="appt-search" type="text" placeholder="Search name, phone…" />
       <select id="apptFilter" class="filter-select">
         <option value="">All statuses</option>
-        <option value="confirmed">Confirmed</option>
+        <option value="confirmed">Booked</option>
         <option value="completed">Completed</option>
         <option value="cancelled">Cancelled</option>
       </select>
@@ -890,7 +890,7 @@
 
   function bookingPill(s) {
     const map = {
-      confirmed: `<span class="pill pill-confirmed">Confirmed</span>`,
+      booked: `<span class="pill pill-confirmed">Confirmed</span>`,
       cancelled:  `<span class="pill pill-cancelled">Cancelled</span>`,
       completed:  `<span class="pill pill-completed">Completed</span>`,
     };
