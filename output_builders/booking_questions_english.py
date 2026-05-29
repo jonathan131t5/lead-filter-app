@@ -14,7 +14,7 @@ class BookingQuestion:
             "Do you want to schedule your first session now?"
         ]
         return random.choice(questions)
-    
+#    
 
     def generate_booking_options(self):
         available_slots = []
