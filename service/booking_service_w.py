@@ -41,7 +41,7 @@ class BookingFlow:
             if check_booking_result["status"] == "has booking":
                 self.db.commit()
                 question = self.generate_booking_question(lead_data=lead_booking_data)
-                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=question["message"])
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question["message"])
                 return question
 
             
@@ -50,7 +50,7 @@ class BookingFlow:
                 lead_booking_data["booking_state"] = "not eligible"
                 self.db.commit()
                 question = self.generate_booking_question(lead_data=lead_booking_data)
-                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=question["message"])
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question["message"])
                 return question
                 
 
@@ -66,7 +66,10 @@ class BookingFlow:
 
             self.db.commit()
             question = self.generate_booking_question(lead_data=lead_booking_data)
-            self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=question["message"]["body"])
+            if isinstance(question , dict):
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question["message"]["body"])
+            else:
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question)
             return question
         
         except Exception:
