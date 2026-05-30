@@ -66,7 +66,7 @@ class BookingFlow:
 
             self.db.commit()
             question = self.generate_booking_question(lead_data=lead_booking_data)
-            if isinstance(question , dict):
+            if isinstance(question["message"], dict):
                 self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question["message"]["body"])
             else:
                 self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question["message"])
