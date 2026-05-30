@@ -69,7 +69,7 @@ class BookingFlow:
             if isinstance(question , dict):
                 self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question["message"]["body"])
             else:
-                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question)
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=question["message"])
             return question
         
         except Exception:
