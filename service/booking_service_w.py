@@ -67,7 +67,7 @@ class BookingFlow:
             self.db.commit()
             question = self.generate_booking_question(lead_data=lead_booking_data)
             self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=question["message"]["body"])
-
+            return question
         
         except Exception:
             logging.exception(f"[BOOKING ERROR] lead_id={lead_id} step=process_booking_flow")
