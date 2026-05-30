@@ -336,6 +336,7 @@ class ServiceLayer:
 
     
     def generate_analyze(self , lead_id , current_field , content):
+        print("CURRENT_FIELD RESULT:", current_field, flush=True)
         if current_field == "name":
             self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content)
             return {"status" : "found" , "value" : content}
