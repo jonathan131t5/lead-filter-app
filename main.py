@@ -387,7 +387,7 @@ async def run_ai_logic(message: dict):
             return
 
         start = time.time()
-
+        print("TEXT RESULT:", text, flush=True)
         result = await asyncio.to_thread(
             service_layer.process_lead_message,
             session_id=phone,
