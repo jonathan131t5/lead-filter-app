@@ -203,8 +203,9 @@ class ServiceLayer:
                 question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=ack_mode , external_message_id=external_message_id)
                 if question["status"] == "booking":
                     self.db.commit()
-                    print("BOOKING TRANSITION RESULT:", booking_result, type(booking_result), flush=True)
-                    return self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
+                    booking_r = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
+                    print("BOOKING TRANSITION RESULT:",booking_r , flush=True)
+                    return booking_r
                 self.db.commit()
                 return question
             
