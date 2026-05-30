@@ -37,7 +37,7 @@ def serve_chat():
 
 @app.get("/dashboard")
 def serve_dashboard():
-    return FileResponse("dashboard_english.html")
+    return FileResponse("dashboard-v2.html")
 
 class MessageRequirements(BaseModel):
     name: str | None = None
@@ -92,6 +92,66 @@ def get_dasboard_messages(lead_id: int):
 def get_dashboard_appointments():
     return service_layer.booking_dashboard.get_all_appointments()
 
+@app.get("/api/dashboard/slots")
+def get_dashboard_slots():
+    return service_layer.booking_flow.booking_slots.get_all_slots()
+
+
+@app.put("/api/dashboard/slots/{slot_id}/cancel")
+def cancel_slot(slot_id: int):
+    service_layer.booking_flow.booking_slots.cancel_booking_slot(slot_id=slot_id)
+
+
+@app.put("/api/dashboard/slots/{slot_id}/restore")
+def restore_slot(slot_id: int):
+    service_layer.booking_flow.booking_slots.restore_slot(slot_id=slot_id)
+
+
+class SlotRequest(BaseModel):
+    date: str
+
+@app.put("/api/dashboard/slots/create")
+def create_dashboard_slot(data: SlotRequest):
+    result = service_layer.booking_flow.booking_slots.create_booking_slot(
+        date=data.date
+        )
+    
+    return {
+        "message" : result.get("message") , 
+        "status" : result.get("status" , "error")
+    }
+
+
+@app.put("/api/dashboard/slots/{slot_id}/update")
+def update_dashboard_slot(slot_id: int, data: SlotRequest):
+    result = service_layer.booking_flow.booking_slots.update_slot_date(
+        slot_id=slot_id,
+        date=data.date
+    )
+
+    return {
+        "message" : result.get("message") , 
+        "status" : result.get("status" , "error")
+    }
+
+
+class SlotWeeklyCreateRequest(BaseModel):
+    slots_data: list[dict]
+    weeks_num: int
+
+@app.put("/api/dashboard/slots/weeklycreate")
+def create_weekly_slots(data: SlotWeeklyCreateRequest):
+    result = service_layer.booking_flow.booking_slots.create_weekly_booking_slots(
+        weeks_num=data.weeks_num , 
+        slots_data=data.slots_data
+    )
+
+    
+    return {
+        "message" : result.get("message") , 
+        "status" : result.get("status" , "error")
+    }
+
 
 class AppointmentUpdateRequest(BaseModel):
     name: str
@@ -111,6 +171,10 @@ def update_dashboard_appointment(appointment_id: int, data: AppointmentUpdateReq
         "message": result.get("message"),
         "status": result.get("status", "error")
     }
+
+
+
+
 
 
 @app.get("/privacy")
@@ -363,14 +427,6 @@ async def run_ai_logic(message: dict):
             service_layer.leads_states.update_lead_is_processing(session_id=phone , value=0)
 
 
-
-
-
-
-
-
-
-
 @app.get("/business")
 def home():
     return FileResponse("business-web.html")
@@ -381,150 +437,3 @@ def home():
 
 
 
-
-
-
-
-
-
-
-#def backup():
-    demo_leads = [
-            ("Jake", "0521111111", "I want to be fit", "like 2 months", "Cold Lead", 3),
-            ("Brandon", "0525586823", "I want more clients", "In a few months", "Cold Lead", 4),
-            ("Michael", "0523687333", "I want to scale my online coaching business", "Next week", "Hot Lead", 6),
-            ("Emily", "0524423644", "I want better lead follow-up", "As soon as possible", "Hot Lead", 7),
-            ("Jason", "0525551255", "Still checking options", "Not sure yet", "pending", 2),
-        ]
-
-    created_leads = []
-
-    for name, phone, goal, urgency, final_status, total_score in demo_leads:
-        cursor.execute("""
-            INSERT INTO leads_data (
-                session_id,
-                name,
-                phone_number,
-                final_status,
-                summary,
-                last_interaction_at
-            )
-            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        """, (
-            None,
-            name,
-            phone,
-            final_status,
-            f"{name} — {final_status}\n\nGoal: {goal}\nTimeline: {urgency}\n\nScore: {total_score}\nPhone: {phone}"
-        ))
-
-        lead_id = cursor.lastrowid
-        created_leads.append(lead_id)
-
-        cursor.execute("""
-            INSERT INTO leads_fields_data (
-                lead_id,
-                goal_user,
-                urgency_user,
-                phone_user,
-                updated_at
-            )
-            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-        """, (
-            lead_id,
-            goal,
-            urgency,
-            phone
-        ))
-
-        cursor.execute("""
-            INSERT INTO leads_scores (
-                lead_id,
-                goal_score,
-                phone_score,
-                urgency_score,
-                goal_status,
-                urgency_status,
-                score_count,
-                total_score
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            lead_id,
-            0,
-            1,
-            0,
-            "found",
-            "found",
-            2,
-            total_score
-        ))
-
-        cursor.execute("""
-            INSERT INTO lead_conversation_states (
-                lead_id,
-                current_field,
-                last_interaction_at
-            )
-            VALUES (?, ?, CURRENT_TIMESTAMP)
-        """, (
-            lead_id,
-            "done"
-        ))
-
-        cursor.execute("""
-            INSERT INTO leads_booking (
-                lead_id,
-                booking_eligible,
-                has_booking,
-                booking_state
-            )
-            VALUES (?, ?, ?, ?)
-        """, (
-            lead_id,
-            1 if final_status == "Hot Lead" else 0,
-            0,
-            "booking_interest"
-        ))
-
-    demo_appointments = [
-        (created_leads[2], created_slots[0], "confirmed"),
-        (created_leads[3], created_slots[1], "completed"),
-        (created_leads[0], created_slots[2], "cancelled"),
-    ]
-
-    for lead_id, slot_id, status in demo_appointments:
-        cursor.execute("""
-            INSERT INTO appointment (
-                lead_id,
-                slot_id,
-                status
-            )
-            VALUES (?, ?, ?)
-        """, (
-            lead_id,
-            slot_id,
-            status
-        ))
-
-        cursor.execute("""
-            UPDATE booking_slot
-            SET is_taken = 1
-            WHERE slot_id = ?
-        """, (slot_id,))
-
-        cursor.execute("""
-            UPDATE leads_booking
-            SET has_booking = 1
-            WHERE lead_id = ?
-        """, (lead_id,))
-
-    db.commit()
-
-    return {
-        "status": "ok",
-        "message": "demo data created",
-        "leads_created": len(created_leads),
-        "slots_created": len(created_slots),
-        "appointments_created": len(demo_appointments)
-    }

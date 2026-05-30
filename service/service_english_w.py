@@ -336,10 +336,8 @@ class ServiceLayer:
 
     
     def generate_analyze(self , lead_id , current_field , content):
-        if current_field == "name":
-            return {"status" : "found" , "value" : content}
-        
-        elif current_field == "pre_flow":
+        if current_field == "name" or current_field == "pre_flow":
+            self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content)
             return {"status" : "found" , "value" : content}
         
         ai_input = self.conversation_builder.build_prompt(current_field=current_field , content=content)

@@ -40,14 +40,19 @@ class BookingFlow:
             
             if check_booking_result["status"] == "has booking":
                 self.db.commit()
-                return self.generate_booking_question(lead_data=lead_booking_data)
+                question = self.generate_booking_question(lead_data=lead_booking_data)
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=question["message"])
+                return question
+
             
             elif check_booking_result["status"] == "not eligible":
                 self.leads_booking.set_booking_param(lead_id=lead_booking_data["lead_id"] , param="booking_state" , value="not eligible")
                 lead_booking_data["booking_state"] = "not eligible"
                 self.db.commit()
-                return self.generate_booking_question(lead_data=lead_booking_data)
-
+                question = self.generate_booking_question(lead_data=lead_booking_data)
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=question["message"])
+                return question
+                
 
             elif check_booking_result["status"] == True:
                 logging.info(
@@ -60,7 +65,9 @@ class BookingFlow:
                     return {"status" : process_result["status"] , "message" : process_result["message"]} 
 
             self.db.commit()
-            return self.generate_booking_question(lead_data=lead_booking_data)
+            question = self.generate_booking_question(lead_data=lead_booking_data)
+            self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="user" , content=question["message"]["body"])
+
         
         except Exception:
             logging.exception(f"[BOOKING ERROR] lead_id={lead_id} step=process_booking_flow")
@@ -95,6 +102,7 @@ class BookingFlow:
         if booking_interest == False:
             booking_selection = self.process_booking_selection_response(response_info=response_info , lead_booking_data=lead_booking_data)
             if isinstance(booking_selection , dict):
+                self.messages.add_lead_message(lead_id=lead_booking_data["lead_id"] , role="assistant" , content=booking_selection["message"])
                 return {"status" : booking_selection["status"] , "message" : booking_selection["message"]}
 
     
@@ -153,17 +161,7 @@ class BookingFlow:
     
 
 
-    
-    def generate_booking_intro(self):
-        button = [
-            {"id" : "approved" , "title" : "start"}
-        ]
-        qustion = "Hey, welcome. Hope you’re doing well.\n"
-        "I’ll ask a few quick questions.\n"
-        "Please send one message per answer so everything stays clear.\n"
-        
-        return {"buttons" : button , "body" : qustion}
-    
+
 
 
     def generate_booking_interest(self):

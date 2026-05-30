@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>FitLead Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<html dir="ltr" lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+  <title>
+   FitLead Dashboard
+  </title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+   *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
   :root {
     --bg: #0d0d0f;
@@ -26,10 +31,14 @@
     --pending: #ffcc66;
     --bot-bubble: #111114;
     --user-bubble: rgba(200,255,87,0.13);
+    --available: #c8ff57;
+    --taken: #57c8ff;
+    --cancelled: #ff7474;
   }
 
   html, body {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     background: var(--bg);
   }
@@ -44,19 +53,21 @@
     text-rendering: optimizeLegibility;
   }
 
-  button { font-family: inherit; }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
 
-  /* ── TABS ── */
   .tabs-bar {
     display: flex;
-    gap: 4px;
+    width: 100%;
     padding: 14px 16px 0;
     max-width: 1280px;
     margin: 0 auto;
-    width: 100%;
   }
 
   .tab-btn {
+    flex: 1;
     padding: 10px 20px;
     border-radius: 14px 14px 0 0;
     font-size: 14px;
@@ -67,9 +78,12 @@
     border-bottom: none;
     background: transparent;
     transition: color 0.15s, background 0.15s;
+    text-align: center;
   }
 
-  .tab-btn:hover { color: var(--text); }
+  .tab-btn:hover {
+    color: var(--text);
+  }
 
   .tab-btn.active {
     color: var(--accent);
@@ -80,11 +94,17 @@
     z-index: 1;
   }
 
-  /* ── PAGES ── */
-  .page { display: none; width: 100%; height: calc(100dvh - 49px); }
-  .page.active { display: flex; }
+  .page {
+    display: none;
+    width: 100%;
+    height: calc(100dvh - 49px);
+  }
 
-  /* ── LEADS PAGE (original layout) ── */
+  .page.active {
+    display: flex;
+  }
+
+
   #page-leads {
     max-width: 1280px;
     margin: 0 auto;
@@ -103,7 +123,10 @@
     box-shadow: 0 24px 60px rgba(0,0,0,0.34);
   }
 
-  .leads-panel { display: flex; flex-direction: column; }
+  .leads-panel {
+    display: flex;
+    flex-direction: column;
+  }
 
   .panel-header {
     padding: 18px;
@@ -111,8 +134,18 @@
     flex-shrink: 0;
   }
 
-  .dashboard-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
-  .dashboard-subtitle { margin-top: 4px; color: var(--muted); font-size: 13px; font-weight: 300; }
+  .dashboard-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+  }
+
+  .dashboard-subtitle {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 300;
+  }
 
   .search-wrap {
     padding: 14px 16px;
@@ -133,8 +166,13 @@
     font-family: inherit;
   }
 
-  .search-input:focus { border-color: rgba(200,255,87,0.45); }
-  .search-input::placeholder { color: var(--muted2); }
+  .search-input:focus {
+    border-color: rgba(200,255,87,0.45);
+  }
+
+  .search-input::placeholder {
+    color: var(--muted2);
+  }
 
   .leads-list {
     flex: 1;
@@ -158,88 +196,216 @@
     transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
   }
 
-  .lead-card:hover { background: rgba(255,255,255,0.035); }
-  .lead-card:active { transform: scale(0.99); }
-  .lead-card.active { background: var(--accent-dim); border-color: rgba(200,255,87,0.22); }
+  .lead-card:hover {
+    background: rgba(255,255,255,0.035);
+  }
 
-  .lead-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .lead-card:active {
+    transform: scale(0.99);
+  }
+
+  .lead-card.active {
+    background: var(--accent-dim);
+    border-color: rgba(200,255,87,0.22);
+  }
+
+  .lead-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
 
   .lead-name {
-    font-size: 15px; font-weight: 650;
-    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    font-size: 15px;
+    font-weight: 650;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .status-pill {
-    flex-shrink: 0; font-size: 12px; font-weight: 700;
-    padding: 5px 9px; border-radius: 999px;
-    border: 1px solid transparent; line-height: 1;
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 9px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    line-height: 1;
   }
 
-  .status-hot    { color: var(--hot);     background: rgba(200,255,87,0.11);  border-color: rgba(200,255,87,0.22);  }
-  .status-cold   { color: var(--cold);    background: rgba(255,116,116,0.09); border-color: rgba(255,116,116,0.18); }
-  .status-pending{ color: var(--pending); background: rgba(255,204,102,0.09); border-color: rgba(255,204,102,0.18); }
+  .status-hot {
+    color: var(--hot);
+    background: rgba(200,255,87,0.11);
+    border-color: rgba(200,255,87,0.22);
+  }
 
-  .lead-phone { color: var(--muted); font-size: 13px; direction: ltr; text-align: left; }
+  .status-cold {
+    color: var(--cold);
+    background: rgba(255,116,116,0.09);
+    border-color: rgba(255,116,116,0.18);
+  }
 
-  .detail-panel { display: flex; flex-direction: column; min-width: 0; }
+  .status-pending {
+    color: var(--pending);
+    background: rgba(255,204,102,0.09);
+    border-color: rgba(255,204,102,0.18);
+  }
+
+  .lead-phone {
+    color: var(--muted);
+    font-size: 13px;
+    direction: ltr;
+    text-align: left;
+  }
+
+  .detail-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
 
   .detail-empty {
-    flex: 1; display: grid; place-items: center;
-    padding: 24px; color: var(--muted); text-align: center;
+    flex: 1;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    color: var(--muted);
+    text-align: center;
   }
 
   .empty-card {
-    max-width: 360px; padding: 24px;
+    max-width: 360px;
+    padding: 24px;
     border: 1px dashed var(--border);
-    border-radius: 22px; background: rgba(255,255,255,0.02);
+    border-radius: 22px;
+    background: rgba(255,255,255,0.02);
   }
 
-  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  .empty-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
 
-  .lead-detail { display: none; flex: 1; min-height: 0; flex-direction: column; }
+  .lead-detail {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+  }
 
   .detail-topbar {
-    padding: 16px 18px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
   }
 
   .back-btn {
-    display: none; border: 1px solid var(--border);
-    background: var(--surface2); color: var(--text);
-    border-radius: 12px; padding: 9px 12px; font-size: 14px; cursor: pointer;
+    display: none;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 9px 12px;
+    font-size: 14px;
+    cursor: pointer;
   }
 
-  .detail-person { min-width: 0; flex: 1; }
+  .detail-person {
+    min-width: 0;
+    flex: 1;
+  }
 
-  .detail-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .detail-name { font-size: 20px; font-weight: 750; letter-spacing: -0.4px; }
-  .detail-phone { margin-top: 3px; color: var(--muted); font-size: 14px; direction: ltr; text-align: left; }
+  .detail-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .detail-name {
+    font-size: 20px;
+    font-weight: 750;
+    letter-spacing: -0.4px;
+  }
+
+  .detail-phone {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 14px;
+    direction: ltr;
+    text-align: left;
+  }
 
   .detail-scroll {
-    flex: 1; min-height: 0; overflow-y: auto;
-    -webkit-overflow-scrolling: touch; padding: 16px 18px 20px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 18px 20px;
   }
 
   .summary-box {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 20px; padding: 16px; margin-bottom: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 16px;
   }
 
-  .section-title { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 8px; }
-  .summary-text { font-size: 15px; line-height: 1.7; white-space: pre-wrap; }
-  .messages-title { margin: 4px 0 12px; font-size: 14px; color: var(--muted); font-weight: 700; }
+  .section-title {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+  }
 
-  .chat-history { display: flex; flex-direction: column; gap: 10px; }
+  .summary-text {
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
 
-  .chat-msg { max-width: min(78%, 620px); display: flex; flex-direction: column; }
-  .chat-msg.user  { align-self: flex-start; align-items: flex-start; }
-  .chat-msg.bot,
-  .chat-msg.assistant { align-self: flex-end; align-items: flex-end; }
+  .messages-title {
+    margin: 4px 0 12px;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .chat-history {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .chat-msg {
+    max-width: min(78%, 620px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chat-msg.user {
+    align-self: flex-start;
+    align-items: flex-start;
+  }
+
+  .chat-msg.bot, .chat-msg.assistant {
+    align-self: flex-end;
+    align-items: flex-end;
+  }
 
   .chat-bubble {
-    padding: 11px 14px; border-radius: 18px;
-    font-size: 14px; line-height: 1.55;
-    white-space: pre-wrap; word-break: break-word;
+    padding: 11px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   .chat-msg.user .chat-bubble {
@@ -248,31 +414,52 @@
     border-bottom-left-radius: 6px;
   }
 
-  .chat-msg.bot .chat-bubble,
-  .chat-msg.assistant .chat-bubble {
+  .chat-msg.bot .chat-bubble, .chat-msg.assistant .chat-bubble {
     background: var(--bot-bubble);
     border: 1px solid var(--border);
     border-bottom-right-radius: 6px;
   }
 
-  .msg-time { margin-top: 4px; padding: 0 5px; font-size: 11px; color: var(--muted2); }
+  .msg-time {
+    margin-top: 4px;
+    padding: 0 5px;
+    font-size: 11px;
+    color: var(--muted2);
+  }
 
-  .loading, .error { padding: 18px; color: var(--muted); font-size: 14px; }
-  .error { color: #ff8b8b; }
+  .loading, .error {
+    padding: 18px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .error {
+    color: #ff8b8b;
+  }
 
   .whatsapp-btn {
-    margin-top: 8px; background: #25D366; color: white;
-    border: none; padding: 8px 12px; border-radius: 10px;
-    cursor: pointer; font-size: 13px; font-weight: 600;
+    margin-top: 8px;
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
   }
-  .whatsapp-btn:hover { background: #1ebe5d; }
 
-  /* ── APPOINTMENTS PAGE ── */
+  .whatsapp-btn:hover {
+    background: #1ebe5d;
+  }
+
+
   #page-appointments {
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 16px 16px;
     flex-direction: column;
+    width: 100%;
   }
 
   .appt-panel {
@@ -297,140 +484,567 @@
     flex-wrap: wrap;
   }
 
-  .appt-toolbar-left { flex: 1; min-width: 160px; }
+  .appt-toolbar-left {
+    flex: 1;
+    min-width: 160px;
+  }
 
   .filter-select {
-    height: 40px; border-radius: 12px;
+    height: 40px;
+    border-radius: 12px;
     border: 1px solid var(--border);
-    background: var(--surface2); color: var(--text);
-    padding: 0 12px; outline: none;
-    font-size: 14px; font-family: inherit; cursor: pointer;
+    background: var(--surface2);
+    color: var(--text);
+    padding: 0 12px;
+    outline: none;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
   }
 
   .appt-search {
-    height: 40px; border-radius: 12px;
+    height: 40px;
+    border-radius: 12px;
     border: 1px solid var(--border);
-    background: var(--surface2); color: var(--text);
-    padding: 0 14px; outline: none;
-    font-size: 14px; width: 200px; font-family: inherit;
+    background: var(--surface2);
+    color: var(--text);
+    padding: 0 14px;
+    outline: none;
+    font-size: 14px;
+    width: 200px;
+    font-family: inherit;
   }
 
-  .appt-search:focus { border-color: rgba(200,255,87,0.45); }
-  .appt-search::placeholder { color: var(--muted2); }
+  .appt-search:focus {
+    border-color: rgba(200,255,87,0.45);
+  }
 
-  .table-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+  .appt-search::placeholder {
+    color: var(--muted2);
+  }
 
-  table { width: 100%; border-collapse: collapse; }
+  .table-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
 
   thead th {
-    position: sticky; top: 0;
+    position: sticky;
+    top: 0;
     background: var(--surface);
     padding: 12px 20px;
-    text-align: left; font-size: 11px; font-weight: 700;
-    letter-spacing: 0.5px; color: var(--muted);
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--muted);
     border-bottom: 1px solid var(--border);
-    white-space: nowrap; z-index: 2;
+    white-space: nowrap;
+    z-index: 2;
   }
 
-  tbody tr { border-bottom: 1px solid var(--border-soft); transition: background 0.12s; }
-  tbody tr:hover { background: rgba(255,255,255,0.025); }
+  tbody tr {
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 0.12s;
+  }
 
-  tbody td { padding: 14px 20px; font-size: 14px; vertical-align: middle; }
+  tbody tr:hover {
+    background: rgba(255,255,255,0.025);
+  }
 
-  .td-name  { font-weight: 600; }
-  .td-phone { color: var(--muted); direction: ltr; }
-  .td-email { color: var(--muted); }
-  .td-date  { white-space: nowrap; }
+  tbody td {
+    padding: 14px 20px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  .td-name {
+    font-weight: 600;
+  }
+
+  .td-phone {
+    color: var(--muted);
+    direction: ltr;
+  }
+
+  .td-date {
+    white-space: nowrap;
+  }
 
   .pill {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 12px; font-weight: 700;
-    padding: 4px 10px; border-radius: 999px;
-    border: 1px solid transparent; line-height: 1; white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    line-height: 1;
+    white-space: nowrap;
   }
 
-  .pill-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
 
-  .pill-hot       { color: var(--hot);     background: rgba(200,255,87,0.11);  border-color: rgba(200,255,87,0.22);  }
-  .pill-cold      { color: var(--cold);    background: rgba(255,116,116,0.09); border-color: rgba(255,116,116,0.18); }
-  .pill-confirmed { color: #57c8ff;        background: rgba(87,200,255,0.09);  border-color: rgba(87,200,255,0.2);   }
-  .pill-cancelled { color: var(--cold);    background: rgba(255,116,116,0.09); border-color: rgba(255,116,116,0.18); }
-  .pill-completed { color: var(--hot);     background: rgba(200,255,87,0.11);  border-color: rgba(200,255,87,0.22);  }
+  .pill-hot {
+    color: var(--hot);
+    background: rgba(200,255,87,0.11);
+    border-color: rgba(200,255,87,0.22);
+  }
 
-  .actions-cell { display: flex; gap: 8px; align-items: center; }
+  .pill-cold {
+    color: var(--cold);
+    background: rgba(255,116,116,0.09);
+    border-color: rgba(255,116,116,0.18);
+  }
+
+  .pill-confirmed {
+    color: #57c8ff;
+    background: rgba(87,200,255,0.09);
+    border-color: rgba(87,200,255,0.2);
+  }
+
+  .pill-cancelled {
+    color: var(--cold);
+    background: rgba(255,116,116,0.09);
+    border-color: rgba(255,116,116,0.18);
+  }
+
+  .pill-completed {
+    color: var(--hot);
+    background: rgba(200,255,87,0.11);
+    border-color: rgba(200,255,87,0.22);
+  }
+
+  .pill-available {
+    color: var(--available);
+    background: rgba(200,255,87,0.11);
+    border-color: rgba(200,255,87,0.22);
+  }
+
+  .pill-taken {
+    color: var(--taken);
+    background: rgba(87,200,255,0.09);
+    border-color: rgba(87,200,255,0.2);
+  }
+
+  .actions-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
 
   .action-btn {
-    height: 32px; padding: 0 12px;
-    border-radius: 10px; border: 1px solid var(--border);
-    background: var(--surface2); color: var(--text);
-    font-size: 12px; font-weight: 600; cursor: pointer;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
     font-family: inherit;
     transition: background 0.12s, border-color 0.12s;
     white-space: nowrap;
   }
 
-  .action-btn:hover { background: var(--surface3); border-color: rgba(255,255,255,0.15); }
-  .action-btn.danger { color: var(--cold); border-color: rgba(255,116,116,0.25); }
-  .action-btn.danger:hover { background: rgba(255,116,116,0.08); }
-  .action-btn.wa { color: #25D366; border-color: rgba(37,211,102,0.25); }
-  .action-btn.wa:hover { background: rgba(37,211,102,0.08); }
-
-  .state-msg { padding: 60px 20px; text-align: center; color: var(--muted); font-size: 14px; }
-
-  /* ── EDIT MODAL ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-    z-index: 100; place-items: center;
+  .action-btn:hover {
+    background: var(--surface3);
+    border-color: rgba(255,255,255,0.15);
   }
-  .modal-overlay.open { display: grid; }
+
+  .action-btn.danger {
+    color: var(--cold);
+    border-color: rgba(255,116,116,0.25);
+  }
+
+  .action-btn.danger:hover {
+    background: rgba(255,116,116,0.08);
+  }
+
+  .action-btn.restore {
+    color: var(--available);
+    border-color: rgba(200,255,87,0.25);
+  }
+
+  .action-btn.restore:hover {
+    background: rgba(200,255,87,0.07);
+  }
+
+  .action-btn.wa {
+    color: #25D366;
+    border-color: rgba(37,211,102,0.25);
+  }
+
+  .action-btn.wa:hover {
+    background: rgba(37,211,102,0.08);
+  }
+
+  .state-msg {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    place-items: center;
+  }
+
+  .modal-overlay.open {
+    display: grid;
+  }
 
   .modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 24px; padding: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px;
     width: min(480px, 94vw);
     box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+    max-height: 90dvh;
+    overflow-y: auto;
   }
 
-  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.3px; }
-  .modal-field { margin-bottom: 14px; }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
+  }
 
-  .modal-label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.3px; }
+  .modal-field {
+    margin-bottom: 14px;
+  }
+
+  .modal-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
 
   .modal-input, .modal-select {
-    width: 100%; height: 44px; border-radius: 14px;
-    border: 1px solid var(--border); background: var(--surface2);
-    color: var(--text); padding: 0 14px; outline: none;
-    font-size: 15px; font-family: inherit;
+    width: 100%;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    padding: 0 14px;
+    outline: none;
+    font-size: 15px;
+    font-family: inherit;
   }
 
-  .modal-input:focus, .modal-select:focus { border-color: rgba(200,255,87,0.45); }
+  .modal-input:focus, .modal-select:focus {
+    border-color: rgba(200,255,87,0.45);
+  }
 
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+  .modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 22px;
+  }
 
   .btn-primary {
-    height: 42px; padding: 0 20px; border-radius: 14px;
-    border: none; background: var(--accent); color: #0d0d0f;
-    font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+    height: 42px;
+    padding: 0 20px;
+    border-radius: 14px;
+    border: none;
+    background: var(--accent);
+    color: #0d0d0f;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
     transition: opacity 0.15s;
   }
-  .btn-primary:hover { opacity: 0.88; }
 
-  .btn-secondary {
-    height: 42px; padding: 0 20px; border-radius: 14px;
-    border: 1px solid var(--border); background: transparent;
-    color: var(--text); font-size: 14px; font-weight: 600;
-    cursor: pointer; font-family: inherit;
+  .btn-primary:hover {
+    opacity: 0.88;
   }
 
-  ::-webkit-scrollbar { width: 0; background: transparent; }
+  .btn-secondary {
+    height: 42px;
+    padding: 0 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
 
-  /* ── MOBILE ── */
+
+  #page-slots {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px 16px;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .slots-panel {
+    background: rgba(21,21,25,0.96);
+    border: 1px solid var(--border);
+    border-radius: 0 24px 24px 24px;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.34);
+  }
+
+  .toolbar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-left {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .slots-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .slot-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .slot-card:hover {
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .slot-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .slot-datetime {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .slot-date {
+    font-size: 15px;
+    font-weight: 650;
+  }
+
+  .slot-time {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .slot-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .day-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .day-toggle.active {
+    border-color: rgba(200,255,87,0.4);
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  .day-time-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .day-time-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 80px;
+  }
+
+  .day-time-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .day-time-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .time-input {
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    padding: 0 12px;
+    outline: none;
+    font-size: 14px;
+    font-family: inherit;
+    flex: 1;
+  }
+
+  .time-input:focus {
+    border-color: rgba(200,255,87,0.45);
+  }
+
+  .remove-time-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--cancelled);
+    font-size: 14px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .remove-time-btn:hover {
+    background: rgba(255,116,116,0.08);
+  }
+
+  .add-time-btn {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color 0.12s, border-color 0.12s;
+  }
+
+  .add-time-btn:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .weekly-days-section {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border-soft);
+    margin: 4px 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+
+
   @media (max-width: 760px) {
-    .tabs-bar {
-      padding: 10px 12px 0;
+    html, body {
+      overflow: hidden;
+      height: 100%;
       width: 100%;
-      gap: 8px;
+    }
+
+    .tabs-bar {
+      padding: 10px 0 0;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      gap: 0;
     }
 
     .tab-btn {
@@ -438,276 +1052,567 @@
       padding: 12px 0;
       font-size: 15px;
       text-align: center;
+      border-radius: 0;
     }
 
-    #page-leads,
-    #page-appointments {
+    .tab-btn.active {
+      border-radius: 0;
+    }
+
+    .page {
+      height: calc(100dvh - 43px);
       width: 100vw;
       max-width: 100vw;
-      padding: 0;
-      margin: 0;
     }
 
     #page-leads {
-      display: block;
+      display: block !important;
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+    }
+
+    #page-leads.active {
+      display: block !important;
+    }
+
+    #page-appointments, #page-slots {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      max-width: 100vw;
+    }
+
+    #page-appointments.active, #page-slots.active {
+      display: flex !important;
+    }
+
+    .panel, .appt-panel, .slots-panel {
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      width: 100%;
+    }
+
+    .leads-panel {
+      width: 100%;
+      height: calc(100dvh - 43px);
+      display: flex;
+    }
+
+    .detail-panel {
+      display: none;
+      width: 100%;
       height: calc(100dvh - 43px);
     }
 
-    .panel, .appt-panel { border-radius: 0; border: none; box-shadow: none; }
+    body.detail-open .leads-panel {
+      display: none;
+    }
 
-    .leads-panel, .detail-panel { width: 100%; height: calc(100dvh - 43px); }
-    .detail-panel { display: none; }
+    body.detail-open .detail-panel {
+      display: flex;
+    }
 
-    body.detail-open .leads-panel { display: none; }
-    body.detail-open .detail-panel { display: flex; }
+    .panel-header {
+      padding-top: max(18px, env(safe-area-inset-top));
+    }
 
-    .panel-header { padding-top: max(18px, env(safe-area-inset-top)); }
-    .detail-topbar { padding-top: max(14px, env(safe-area-inset-top)); }
-    .back-btn { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .chat-msg { max-width: 86%; }
-    .detail-scroll { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+    .detail-topbar {
+      padding-top: max(14px, env(safe-area-inset-top));
+    }
 
-    thead th:nth-child(3),
-    tbody td:nth-child(3) {
-  display: none !important;
-}
-    .appt-search { width: 100%; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .chat-msg {
+      max-width: 86%;
+    }
+
+    .detail-scroll {
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    .appt-toolbar, .toolbar {
+      padding: 12px;
+      gap: 8px;
+    }
+
+    .appt-search {
+      width: 100%;
+      flex: 1;
+    }
+
+    .filter-select {
+      width: 100%;
+    }
+
     .table-wrap {
-  overflow: visible;
-  padding: 12px;
-}
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px;
+      height: 100%;
+    }
 
-table,
-thead,
-tbody,
-tr,
-td {
-  display: block;
-  width: 100%;
-}
+    table {
+      display: block;
+    }
 
-thead {
-  display: none;
-}
+    thead {
+      display: none;
+    }
 
-tbody {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+    tbody {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-tbody tr {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 14px;
-}
+    tbody tr {
+      display: block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+    }
 
-tbody td {
-  padding: 6px 0;
-  border: none;
-}
+    tbody td {
+      display: flex;
+      align-items: flex-start;
+      padding: 5px 0;
+      border: none;
+      font-size: 14px;
+      gap: 8px;
+    }
 
-.actions-cell {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
+    tbody td::before {
+      content: attr(data-label);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      min-width: 72px;
+      padding-top: 2px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
 
-.actions-cell .action-btn {
-  width: 100%;
-  height: 40px;
-}
+    tbody td.td-actions {
+      display: block;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    tbody td.td-actions::before {
+      display: none;
+    }
+
+    .actions-cell {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .actions-cell .action-btn {
+      width: 100%;
+      height: 40px;
+      font-size: 13px;
+    }
+
+    .slots-scroll {
+      padding: 12px;
+    }
+
+    .slots-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .toolbar-actions {
+      width: 100%;
+    }
+
+    .days-grid {
+      gap: 4px;
+    }
+
+    .day-toggle {
+      padding: 6px 2px;
+      font-size: 10px;
+    }
+
   }
-  
 
-
-
-  #page-leads:not(.active),
-  #page-appointments:not(.active) {
-    display: none;
+  #page-leads:not(.active), #page-appointments:not(.active), #page-slots:not(.active) {
+    display: none !important;
   }
-
-
-
-
 
   #page-leads.active {
     display: grid;
   }
 
-  #page-appointments.active {
+  #page-appointments.active, #page-slots.active {
     display: flex;
   }
-
-</style>
-</head>
-
-<body>
-
-<!-- TABS -->
-<div class="tabs-bar">
-  <button class="tab-btn active" onclick="switchTab('leads')">Leads</button>
-  <button class="tab-btn" onclick="switchTab('appointments')">Appointments</button>
-</div>
-
-<!-- ══ LEADS PAGE ══ -->
-<div id="page-leads" class="page active">
-  <section class="panel leads-panel">
+  </style>
+ </head>
+ <body>
+  <div class="tabs-bar">
+   <button class="tab-btn active" onclick="switchTab('leads')">
+    Leads
+   </button>
+   <button class="tab-btn" onclick="switchTab('appointments')">
+    Appointments
+   </button>
+   <button class="tab-btn" onclick="switchTab('slots')">
+    Slots
+   </button>
+  </div>
+  <!-- LEADS PAGE -->
+  <div class="page active" id="page-leads">
+   <section class="panel leads-panel">
     <header class="panel-header">
-      <h1 class="dashboard-title">Leads</h1>
-      <p class="dashboard-subtitle">Review and follow up with new leads</p>
+     <h1 class="dashboard-title">
+      Leads
+     </h1>
+     <p class="dashboard-subtitle">
+      Review and follow up with new leads
+     </p>
     </header>
     <div class="search-wrap">
-      <input id="searchInput" class="search-input" type="text" placeholder="Search by name or phone..." />
+     <input class="search-input" id="searchInput" placeholder="Search by name or phone..." type="text"/>
     </div>
-    <div id="leadsList" class="leads-list">
-      <div class="loading">Loading leads...</div>
+    <div class="leads-list" id="leadsList">
+     <div class="loading">
+      Loading leads...
+     </div>
     </div>
-  </section>
-
-  <section class="panel detail-panel">
-    <div id="detailEmpty" class="detail-empty">
-      <div class="empty-card">
-        <div class="empty-icon">👈</div>
-        <div>Select a lead to view the details and conversation</div>
+   </section>
+   <section class="panel detail-panel">
+    <div class="detail-empty" id="detailEmpty">
+     <div class="empty-card">
+      <div class="empty-icon">
+       👈
       </div>
+      <div>
+       Select a lead to view the details and conversation
+      </div>
+     </div>
     </div>
-
-    <div id="leadDetail" class="lead-detail">
-      <div class="detail-topbar">
-        <button class="back-btn" onclick="closeLeadDetail()">Back</button>
-        <div class="detail-person">
-          <div class="detail-name-row">
-            <div id="detailName" class="detail-name"></div>
-            <div id="detailStatus"></div>
-          </div>
-          <div id="detailPhone" class="detail-phone"></div>
-          <button id="whatsappBtn" class="whatsapp-btn" type="button">Open in WhatsApp</button>
+    <div class="lead-detail" id="leadDetail">
+     <div class="detail-topbar">
+      <button class="back-btn" onclick="closeLeadDetail()">
+       Back
+      </button>
+      <div class="detail-person">
+       <div class="detail-name-row">
+        <div class="detail-name" id="detailName">
         </div>
+        <div id="detailStatus">
+        </div>
+       </div>
+       <div class="detail-phone" id="detailPhone">
+       </div>
+       <button class="whatsapp-btn" id="whatsappBtn" type="button">
+        Open in WhatsApp
+       </button>
       </div>
-      <div class="detail-scroll">
-        <section class="summary-box">
-          <div class="section-title">Lead Summary</div>
-          <div id="detailSummary" class="summary-text"></div>
-        </section>
-        <div class="messages-title">Conversation History</div>
-        <div id="chatHistory" class="chat-history"></div>
+     </div>
+     <div class="detail-scroll">
+      <section class="summary-box">
+       <div class="section-title">
+        Lead Summary
+       </div>
+       <div class="summary-text" id="detailSummary">
+       </div>
+      </section>
+      <div class="messages-title">
+       Conversation History
       </div>
-    </div>
-  </section>
-</div>
-
-<!-- ══ APPOINTMENTS PAGE ══ -->
-<div id="page-appointments" class="page">
-  <div class="appt-panel">
-    <div class="appt-toolbar">
-      <div class="appt-toolbar-left">
-        <div class="dashboard-title">Appointments</div>
-        <div class="dashboard-subtitle">Manage scheduled meetings with your leads</div>
+      <div class="chat-history" id="chatHistory">
       </div>
-      <input id="apptSearch" class="appt-search" type="text" placeholder="Search name, phone…" />
-      <select id="apptFilter" class="filter-select">
-        <option value="">All statuses</option>
-        <option value="confirmed">Confirmed</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
+     </div>
     </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>NAME</th>
-            <th>PHONE</th>
-            <th>DATE & TIME</th>
-            <th>LEAD SCORE</th>
-            <th>STATUS</th>
-            <th>ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody id="apptTableBody">
-          <tr><td colspan="7" class="state-msg">Loading appointments…</td></tr>
-        </tbody>
-      </table>
-    </div>
+   </section>
   </div>
-</div>
-
-<!-- EDIT MODAL -->
-<div id="editModal" class="modal-overlay">
-  <div class="modal">
-    <div class="modal-title">Edit Appointment</div>
-    <div class="modal-field">
-      <label class="modal-label">NAME</label>
-      <input id="editName" class="modal-input" type="text" />
+  <!-- APPOINTMENTS PAGE -->
+  <div class="page" id="page-appointments">
+   <div class="appt-panel">
+    <div class="appt-toolbar">
+     <div class="appt-toolbar-left">
+      <div class="dashboard-title">
+       Appointments
+      </div>
+      <div class="dashboard-subtitle">
+       Manage scheduled meetings with your leads
+      </div>
+     </div>
+     <input class="appt-search" id="apptSearch" placeholder="Search name, phone…" type="text"/>
+     <select class="filter-select" id="apptFilter">
+      <option value="">
+       All statuses
+      </option>
+      <option value="booked">
+       Booked
+      </option>
+      <option value="completed">
+       Completed
+      </option>
+      <option value="cancelled">
+       Cancelled
+      </option>
+     </select>
     </div>
-    <div class="modal-field">
-      <label class="modal-label">PHONE</label>
-      <input id="editPhone" class="modal-input" type="text" />
+    <div class="table-wrap">
+     <table>
+      <thead>
+       <tr>
+        <th>
+         NAME
+        </th>
+        <th>
+         PHONE
+        </th>
+        <th>
+         DATE & TIME
+        </th>
+        <th>
+         LEAD SCORE
+        </th>
+        <th>
+         STATUS
+        </th>
+        <th>
+         ACTIONS
+        </th>
+       </tr>
+      </thead>
+      <tbody id="apptTableBody">
+       <tr>
+        <td class="state-msg" colspan="6">
+         Loading appointments…
+        </td>
+       </tr>
+      </tbody>
+     </table>
     </div>
-    <div class="modal-field">
-      <label class="modal-label">EMAIL</label>
-      <input id="editEmail" class="modal-input" type="email" />
-    </div>
-    <div class="modal-field">
-      <label class="modal-label">DATE & TIME</label>
-      <input id="editDate" class="modal-input" type="datetime-local" />
-    </div>
-    <div class="modal-field">
-      <label class="modal-label">BOOKING STATUS</label>
-      <select id="editStatus" class="modal-select">
-        <option value="confirmed">Confirmed</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
+   </div>
+  </div>
+  <!-- SLOTS PAGE -->
+  <div class="page" id="page-slots">
+   <div class="slots-panel">
+    <div class="toolbar">
+     <div class="toolbar-left">
+      <div class="dashboard-title">
+       Slots
+      </div>
+      <div class="dashboard-subtitle">
+       Manage available booking times
+      </div>
+     </div>
+     <div class="toolbar-actions">
+      <select class="filter-select" id="filterSelect" onchange="applyFilter()">
+       <option value="">
+        All statuses
+       </option>
+       <option value="0">
+        Available
+       </option>
+       <option value="1">
+        Taken
+       </option>
+       <option value="2">
+        Cancelled
+       </option>
       </select>
+      <button class="btn-secondary" onclick="openWeeklyModal()">
+       + Weekly Slots
+      </button>
+      <button class="btn-primary" onclick="openCreateModal()">
+       + Create Slot
+      </button>
+     </div>
+    </div>
+    <div class="slots-scroll">
+     <div class="slots-grid" id="slotsGrid">
+      <div class="state-msg">
+       Loading slots…
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <!-- EDIT APPOINTMENT MODAL -->
+  <div class="modal-overlay" id="editModal">
+   <div class="modal">
+    <div class="modal-title">
+     Edit Appointment
+    </div>
+    <div class="modal-field">
+     <label class="modal-label">
+      NAME
+     </label>
+     <input class="modal-input" id="editName" type="text"/>
+    </div>
+    <div class="modal-field">
+     <label class="modal-label">
+      PHONE
+     </label>
+     <input class="modal-input" id="editPhone" type="text"/>
+    </div>
+    <div class="modal-field">
+     <label class="modal-label">
+      BOOKING STATUS
+     </label>
+     <select class="modal-select" id="editStatus">
+      <option value="booked">
+       Booked
+      </option>
+      <option value="completed">
+       Completed
+      </option>
+      <option value="cancelled">
+       Cancelled
+      </option>
+     </select>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveEdit()">Save Changes</button>
+     <button class="btn-secondary" onclick="closeApptModal()">
+      Cancel
+     </button>
+     <button class="btn-primary" onclick="saveEdit()">
+      Save Changes
+     </button>
     </div>
+   </div>
   </div>
-</div>
+  <!-- CREATE SLOT MODAL -->
+  <div class="modal-overlay" id="createModal">
+   <div class="modal">
+    <div class="modal-title">
+     Create Slot
+    </div>
+    <div class="modal-field">
+     <label class="modal-label">
+      DATE & TIME
+     </label>
+     <input class="modal-input" id="createDate" type="datetime-local"/>
+    </div>
+    <div class="modal-footer">
+     <button class="btn-secondary" onclick="closeSlotModal('createModal')">
+      Cancel
+     </button>
+     <button class="btn-primary" onclick="submitCreateSlot()">
+      Create
+     </button>
+    </div>
+   </div>
+  </div>
+  <!-- EDIT SLOT MODAL -->
+  <div class="modal-overlay" id="editSlotModal">
+   <div class="modal">
+    <div class="modal-title">
+     Edit Slot
+    </div>
+    <div class="modal-field">
+     <label class="modal-label">
+      NEW DATE & TIME
+     </label>
+     <input class="modal-input" id="editDate" type="datetime-local"/>
+    </div>
+    <div class="modal-footer">
+     <button class="btn-secondary" onclick="closeSlotModal('editSlotModal')">
+      Cancel
+     </button>
+     <button class="btn-primary" onclick="submitEditSlot()">
+      Save Changes
+     </button>
+    </div>
+   </div>
+  </div>
+  <!-- WEEKLY SLOTS MODAL -->
+  <div class="modal-overlay" id="weeklyModal">
+   <div class="modal">
+    <div class="modal-title">
+     Create Weekly Slots
+    </div>
+    <div class="modal-label">
+     SELECT DAYS
+    </div>
+    <div class="days-grid" id="daysGrid">
+    </div>
+    <div class="weekly-days-section" id="dayTimesSection" style="display:none;">
+    </div>
+    <div class="modal-field">
+     <label class="modal-label">
+      NUMBER OF WEEKS
+     </label>
+     <input class="modal-input" id="weeksNum" max="52" min="1" type="number"/>
+    </div>
+    <div class="modal-footer">
+     <button class="btn-secondary" onclick="closeSlotModal('weeklyModal')">
+      Cancel
+     </button>
+     <button class="btn-primary" onclick="submitWeeklySlots()">
+      Create Slots
+     </button>
+    </div>
+   </div>
+  </div>
+  <script>
+   const API = window.location.origin;
 
-<script>
-  const API = window.location.origin;
+  // ══ TABS ══
 
-  // ══ TAB SWITCHING ══
   function switchTab(tab) {
     document.querySelectorAll(".tab-btn").forEach((b, i) => {
-      b.classList.toggle("active", (i === 0 && tab === "leads") || (i === 1 && tab === "appointments"));
+      b.classList.toggle("active",
+        (i === 0 && tab === "leads") ||
+        (i === 1 && tab === "appointments") ||
+        (i === 2 && tab === "slots"));
     });
     document.getElementById("page-leads").classList.toggle("active", tab === "leads");
     document.getElementById("page-appointments").classList.toggle("active", tab === "appointments");
+    document.getElementById("page-slots").classList.toggle("active", tab === "slots");
   }
 
   // ══ LEADS ══
-  const leadsListEl   = document.getElementById("leadsList");
-  const leadDetailEl  = document.getElementById("leadDetail");
-  const detailEmptyEl = document.getElementById("detailEmpty");
-  const detailNameEl  = document.getElementById("detailName");
-  const detailPhoneEl = document.getElementById("detailPhone");
-  const detailStatusEl= document.getElementById("detailStatus");
+  const leadsListEl    = document.getElementById("leadsList");
+  const leadDetailEl   = document.getElementById("leadDetail");
+  const detailEmptyEl  = document.getElementById("detailEmpty");
+  const detailNameEl   = document.getElementById("detailName");
+  const detailPhoneEl  = document.getElementById("detailPhone");
+  const detailStatusEl = document.getElementById("detailStatus");
   const detailSummaryEl = document.getElementById("detailSummary");
-  const chatHistoryEl = document.getElementById("chatHistory");
-  const whatsappBtn   = document.getElementById("whatsappBtn");
-  const searchInput   = document.getElementById("searchInput");
+  const chatHistoryEl  = document.getElementById("chatHistory");
+  const whatsappBtn    = document.getElementById("whatsappBtn");
+  const searchInput    = document.getElementById("searchInput");
 
   let allLeads = [];
   let selectedLeadId = null;
 
   function statusToLabel(s) {
-    if (s === "Hot Lead") return "Hot Lead";
-    if (s === "Cold Lead") return "Cold Lead";
+    if (s === "Hot Lead") {
+      return "Hot Lead";
+    }
+    if (s === "Cold Lead") {
+      return "Cold Lead";
+    }
     return "Pending";
   }
 
   function statusClass(s) {
-    if (s === "Hot Lead") return "status-hot";
-    if (s === "Cold Lead") return "status-cold";
+    if (s === "Hot Lead") {
+      return "status-hot";
+    }
+    if (s === "Cold Lead") {
+      return "status-cold";
+    }
     return "status-pending";
   }
 
@@ -716,19 +1621,24 @@ tbody td {
   }
 
   function formatDate(value) {
-    if (!value) return "";
+    if (!value) {
+      return "";
+    }
     const d = new Date(value);
-    if (isNaN(d)) return String(value);
+    if (isNaN(d)) {
+      return String(value);
+    }
     return d.toLocaleString("en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   }
 
   function esc(v) {
-    return String(v ?? "")
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
 
-  function getLeadStatus(l) { return l.final_status || l.status || "pending"; }
+  function getLeadStatus(l) {
+    return l.final_status || l.status || "pending";
+  }
+
   function getLeadPhone(l)  { return l.phone || l.phone_number || "No phone"; }
 
   function renderLeads(leads) {
@@ -737,12 +1647,7 @@ tbody td {
     leads.forEach(lead => {
       const btn = document.createElement("button");
       btn.className = "lead-card" + (lead.lead_id === selectedLeadId ? " active" : "");
-      btn.innerHTML = `
-        <div class="lead-top">
-          <div class="lead-name">${esc(lead.name || "No name")}</div>
-          ${statusPill(getLeadStatus(lead))}
-        </div>
-        <div class="lead-phone">${esc(getLeadPhone(lead))}</div>`;
+      btn.innerHTML = `<div class="lead-top"><div class="lead-name">${esc(lead.name || "No name")}</div>${statusPill(getLeadStatus(lead))}</div><div class="lead-phone">${esc(getLeadPhone(lead))}</div>`;
       btn.onclick = () => openLead(lead);
       leadsListEl.appendChild(btn);
     });
@@ -755,8 +1660,8 @@ tbody td {
       allLeads = await res.json();
       renderLeads(allLeads);
     } catch {
-      leadsListEl.innerHTML = `<div class="error">Failed to load leads</div>`;
-    }
+    leadsListEl.innerHTML = `<div class="error">Failed to load leads</div>`;
+  }
   }
 
   async function openLead(lead) {
@@ -780,8 +1685,8 @@ tbody td {
       if (!res.ok) throw new Error();
       renderMessages(await res.json());
     } catch {
-      chatHistoryEl.innerHTML = `<div class="error">Failed to load conversation</div>`;
-    }
+    chatHistoryEl.innerHTML = `<div class="error">Failed to load conversation</div>`;
+  }
   }
 
   function renderMessages(messages) {
@@ -796,62 +1701,64 @@ tbody td {
     });
   }
 
-  function closeLeadDetail() { document.body.classList.remove("detail-open"); }
+  function closeLeadDetail() {
+    document.body.classList.remove("detail-open");
+  }
 
   function getFilteredLeads() {
     const q = searchInput.value.trim().toLowerCase();
-    if (!q) return allLeads;
-    return allLeads.filter(l => {
-      return String(l.name||"").toLowerCase().includes(q) ||
-             String(getLeadPhone(l)).toLowerCase().includes(q) ||
-             statusToLabel(getLeadStatus(l)).toLowerCase().includes(q);
-    });
+    if (!q) {
+      return allLeads;
+    }
+    return allLeads.filter(l =>
+      String(l.name||"").toLowerCase().includes(q) ||
+      String(getLeadPhone(l)).toLowerCase().includes(q) ||
+      statusToLabel(getLeadStatus(l)).toLowerCase().includes(q));
   }
-
   searchInput.addEventListener("input", () => renderLeads(getFilteredLeads()));
 
   // ══ APPOINTMENTS ══
-  
-
   let appointments = [];
-  let editingId = null;
+  let editingApptId = null;
 
   function leadScorePill(s) {
     if (s === "Hot Lead")  return `<span class="pill pill-hot"><span class="pill-dot" style="background:var(--hot)"></span>Hot</span>`;
-    if (s === "Cold Lead") return `<span class="pill pill-cold"><span class="pill-dot" style="background:var(--cold)"></span>Cold</span>`;
+    if (s === "Cold Lead") {
+      return `<span class="pill pill-cold"><span class="pill-dot" style="background:var(--cold)"></span>Cold</span>`;
+    }
     return "—";
   }
 
   function bookingPill(s) {
-    const map = {
-      confirmed: `<span class="pill pill-confirmed">Confirmed</span>`,
-      cancelled:  `<span class="pill pill-cancelled">Cancelled</span>`,
-      completed:  `<span class="pill pill-completed">Completed</span>`,
-    };
+    const map = { booked: `<span class="pill pill-confirmed">Booked</span>`, cancelled: `<span class="pill pill-cancelled">Cancelled</span>`, completed: `<span class="pill pill-completed">Completed</span>` };
     return map[s] || `<span class="pill">${s}</span>`;
   }
 
   function formatApptDate(val) {
-    if (!val) return "—";
+    if (!val) {
+      return "—";
+    }
     const d = new Date(val);
-    if (isNaN(d)) return val;
+    if (isNaN(d)) {
+      return val;
+    }
     return d.toLocaleString("en-GB", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
   }
 
   function renderApptTable(data) {
     const tbody = document.getElementById("apptTableBody");
-    if (!data.length) { tbody.innerHTML = `<tr><td colspan="7" class="state-msg">No appointments found</td></tr>`; return; }
+    if (!data.length) { tbody.innerHTML = `<tr><td colspan="6" class="state-msg">No appointments found</td></tr>`; return; }
     tbody.innerHTML = data.map(a => `
       <tr>
-        <td class="td-name">${esc(a.name)}</td>
-        <td class="td-phone">${esc(a.phone_number)}</td>
-        <td class="td-date">${formatApptDate(a.slot_date)}</td>
-        <td>${leadScorePill(a.final_status)}</td>
-        <td>${bookingPill(a.booking_status)}</td>
-        <td>
+        <td class="td-name" data-label="Name">${esc(a.name)}</td>
+        <td class="td-phone" data-label="Phone">${esc(a.phone_number)}</td>
+        <td class="td-date" data-label="Date">${formatApptDate(a.slot_date)}</td>
+        <td data-label="Score">${leadScorePill(a.final_status)}</td>
+        <td data-label="Status">${bookingPill(a.booking_status)}</td>
+        <td class="td-actions">
           <div class="actions-cell">
-            <button class="action-btn wa"     onclick="openWA('${esc(a.phone_number)}','${esc(a.name)}')">WhatsApp</button>
-            <button class="action-btn"        onclick="openEdit(${a.booking_id})">Edit</button>
+            <button class="action-btn wa" onclick="openWA('${esc(a.phone_number)}','${esc(a.name)}')">WhatsApp</button>
+            <button class="action-btn" onclick="openEdit(${a.booking_id})">Edit</button>
             <button class="action-btn danger" onclick="deleteAppt(${a.booking_id})">Delete</button>
           </div>
         </td>
@@ -862,7 +1769,7 @@ tbody td {
     const q = document.getElementById("apptSearch").value.trim().toLowerCase();
     const s = document.getElementById("apptFilter").value;
     return appointments.filter(a => {
-      const mq = !q || a.name.toLowerCase().includes(q) || a.phone.includes(q) || a.email.toLowerCase().includes(q);
+      const mq = !q || (a.name||"").toLowerCase().includes(q) || (a.phone_number||"").includes(q);
       const ms = !s || a.booking_status === s;
       return mq && ms;
     });
@@ -880,47 +1787,36 @@ tbody td {
   function openEdit(id) {
     const a = appointments.find(x => x.booking_id === id);
     if (!a) return;
-    editingId = id;
+    editingApptId = id;
     document.getElementById("editName").value   = a.name;
     document.getElementById("editPhone").value  = a.phone_number;
-    document.getElementById("editEmail").value  = a.email;
-    document.getElementById("editDate").value   = a.slot_date?.slice(0,16) || "";
     document.getElementById("editStatus").value = a.booking_status;
     document.getElementById("editModal").classList.add("open");
   }
 
-  function closeModal() {
+  function closeApptModal() {
     document.getElementById("editModal").classList.remove("open");
-    editingId = null;
+    editingApptId = null;
   }
 
   async function saveEdit() {
-    const res = await fetch(`${API}/api/dashboard/appointments/${editingId}`, {
+    const res = await fetch(`${API}/api/dashboard/appointments/${editingApptId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: document.getElementById("editName").value,
         phone: document.getElementById("editPhone").value,
-        slot_date: document.getElementById("editDate").value,
         booking_status: document.getElementById("editStatus").value
       })
     });
-
-    if (!res.ok) {
-      alert("Failed to update appointment");
-      return;
-    }
-
-    closeModal();
+    if (!res.ok) { alert("Failed to update appointment"); return; }
+    closeApptModal();
     loadAppointments();
   }
 
   function deleteAppt(id) {
     if (!confirm("Delete this appointment?")) return;
     appointments = appointments.filter(x => x.booking_id !== id);
-    // TODO: DELETE /api/dashboard/appointments/${id}
     renderApptTable(getFilteredAppts());
   }
 
@@ -930,12 +1826,225 @@ tbody td {
       appointments = await res.json();
       renderApptTable(appointments);
     } catch {
-      document.getElementById("apptTableBody").innerHTML =
-        `<tr><td colspan="7" class="state-msg" style="color:#ff8b8b">Failed to load appointments</td></tr>`;
+      document.getElementById("apptTableBody").innerHTML = `<tr><td colspan="6" class="state-msg" style="color:#ff8b8b">Failed to load appointments</td></tr>`;
     }
   }
 
-  document.getElementById("editModal").addEventListener("click", e => { if (e.target === e.currentTarget) closeModal(); });
+  document.getElementById("editModal").addEventListener("click", e => { if (e.target === e.currentTarget) closeApptModal(); });
+
+  // ══ SLOTS ══
+  const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  let allSlots = [];
+  let editingSlotId = null;
+  let weeklyDays = {};
+
+  function slotStatus(is_taken) {
+    if (is_taken === 0) {
+      return { label: "Available", cls: "pill-available" };
+    }
+    if (is_taken === 1) {
+      return { label: "Taken",     cls: "pill-taken"     };
+    }
+    if (is_taken === 2) {
+      return { label: "Cancelled", cls: "pill-cancelled" };
+    }
+    return { label: "Unknown", cls: "" };
+  }
+
+  function formatSlotDate(raw) {
+    if (!raw) {
+      return { date: "—", time: "" };
+    }
+    const d = new Date(raw);
+    if (isNaN(d)) {
+      return { date: String(raw), time: "" };
+    }
+    return {
+      date: d.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }),
+      time: d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+    };
+  }
+
+  function toDatetimeLocal(raw) {
+    if (!raw) {
+      return "";
+    }
+    const d = new Date(raw);
+    if (isNaN(d)) {
+      return "";
+    }
+    const pad = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function applyFilter() {
+    const val = document.getElementById("filterSelect").value;
+    const filtered = val === "" ? allSlots : allSlots.filter(s => String(s.is_taken) === val);
+    renderSlots(filtered);
+  }
+
+  function renderSlots(slots) {
+    const grid = document.getElementById("slotsGrid");
+    if (!slots.length) { grid.innerHTML = `<div class="state-msg">No slots found</div>`; return; }
+    grid.innerHTML = slots.map(slot => {
+      const { label, cls } = slotStatus(slot.is_taken);
+      const { date, time } = formatSlotDate(slot.date);
+      const isAvailable = slot.is_taken === 0;
+      const isCancelled = slot.is_taken === 2;
+      const actions = isAvailable
+        ? `<button class="action-btn" onclick="openEditSlotModal(${slot.slot_id}, '${slot.date}')">Edit</button>
+           <button class="action-btn danger" onclick="cancelSlot(${slot.slot_id})">Cancel</button>`
+        : isCancelled
+          ? `<button class="action-btn restore" onclick="restoreSlot(${slot.slot_id})">Restore</button>`
+          : "";
+      return `
+        <div class="slot-card">
+          <div class="slot-card-top">
+            <div class="slot-datetime">
+              <div class="slot-date">${date}</div>
+              <div class="slot-time">${time}</div>
+            </div>
+            <span class="pill ${cls}"><span class="pill-dot" style="background:currentColor"></span>${label}</span>
+          </div>
+          ${actions ? `<div class="slot-actions">${actions}</div>` : ""}
+        </div>`;
+    }).join("");
+  }
+
+  async function loadSlots() {
+    try {
+      const res = await fetch(`${API}/api/dashboard/slots`);
+      allSlots = await res.json();
+      applyFilter();
+    } catch {
+      document.getElementById("slotsGrid").innerHTML = `<div class="state-msg" style="color:#ff8b8b">Failed to load slots</div>`;
+    }
+  }
+
+  function openCreateModal() {
+    document.getElementById("createDate").value = "";
+    document.getElementById("createModal").classList.add("open");
+  }
+
+  async function submitCreateSlot() {
+    const date = document.getElementById("createDate").value;
+    if (!date) return;
+    await fetch(`${API}/api/dashboard/slots/create`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date })
+    });
+    closeSlotModal("createModal");
+    loadSlots();
+  }
+
+  function openEditSlotModal(slot_id, current_date) {
+    editingSlotId = slot_id;
+    document.getElementById("editDate").value = toDatetimeLocal(current_date);
+    document.getElementById("editSlotModal").classList.add("open");
+  }
+
+  async function submitEditSlot() {
+    const date = document.getElementById("editDate").value;
+    if (!date) return;
+    await fetch(`${API}/api/dashboard/slots/${editingSlotId}/update`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date })
+    });
+    closeSlotModal("editSlotModal");
+    loadSlots();
+  }
+
+  async function cancelSlot(slot_id) {
+    await fetch(`${API}/api/dashboard/slots/${slot_id}/cancel`, { method: "PUT" });
+    loadSlots();
+  }
+
+  async function restoreSlot(slot_id) {
+    await fetch(`${API}/api/dashboard/slots/${slot_id}/restore`, { method: "PUT" });
+    loadSlots();
+  }
+
+  function closeSlotModal(id) {
+    document.getElementById(id).classList.remove("open");
+  }
+
+  function buildDaysGrid() {
+    document.getElementById("daysGrid").innerHTML = DAY_NAMES.map((name, i) => `
+      <button class="day-toggle ${weeklyDays[i] ? 'active' : ''}" onclick="toggleDay(${i})" type="button">${name}</button>`).join("");
+  }
+
+  function toggleDay(i) {
+    if (weeklyDays[i]) delete weeklyDays[i];
+    else weeklyDays[i] = ["09:00"];
+    buildDaysGrid();
+    buildDayTimesSection();
+  }
+
+  function buildDayTimesSection() {
+    const section = document.getElementById("dayTimesSection");
+    const activeDays = Object.keys(weeklyDays).map(Number).sort((a,b)=>a-b);
+    if (!activeDays.length) { section.style.display = "none"; return; }
+    section.style.display = "flex";
+    section.innerHTML = activeDays.map(i => `
+      <div>
+        <div class="day-time-row">
+          <div class="day-time-label">${DAY_NAMES[i]}</div>
+          <div class="day-time-inputs">
+            ${(weeklyDays[i]||[]).map((t, ti) => `
+              <div class="day-time-entry">
+                <input class="time-input" type="time" value="${t}" onchange="updateTime(${i}, ${ti}, this.value)" />
+                ${weeklyDays[i].length > 1 ? `<button class="remove-time-btn" onclick="removeTime(${i}, ${ti})">✕</button>` : ""}
+              </div>`).join("")}
+            <button class="add-time-btn" onclick="addTime(${i})">+ Add time</button>
+          </div>
+        </div>
+      </div>`).join(`<div class="divider"></div>`);
+  }
+
+  function updateTime(dayI, timeI, val) {
+    if (weeklyDays[dayI]) weeklyDays[dayI][timeI] = val;
+  }
+
+  function addTime(dayI) { if (!weeklyDays[dayI]) return; weeklyDays[dayI].push("09:00"); buildDayTimesSection(); }
+
+  function removeTime(dayI, timeI) {
+    if (!weeklyDays[dayI]) return;
+    weeklyDays[dayI].splice(timeI, 1);
+    if (!weeklyDays[dayI].length) weeklyDays[dayI] = ["09:00"];
+    buildDayTimesSection();
+  }
+
+  function openWeeklyModal() {
+    weeklyDays = {};
+    buildDaysGrid();
+    buildDayTimesSection();
+    document.getElementById("weeksNum").value = "";
+    document.getElementById("weeklyModal").classList.add("open");
+  }
+
+  async function submitWeeklySlots() {
+    const activeDays = Object.keys(weeklyDays).map(Number);
+    if (!activeDays.length) { alert("Please select at least one day."); return; }
+    const weeks_num = parseInt(document.getElementById("weeksNum").value) || 1;
+    const slots_data = [];
+    activeDays.forEach(dayI => {
+      (weeklyDays[dayI]||[]).forEach(t => slots_data.push({ day: dayI, time: t }));
+    });
+    await fetch(`${API}/api/dashboard/slots/create-weekly`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slots_data, weeks_num })
+    });
+    closeSlotModal("weeklyModal");
+    loadSlots();
+  }
+
+  document.querySelectorAll(".modal-overlay").forEach(el => {
+    el.addEventListener("click", e => {
+      if (e.target !== el) return;
+      if (el.id === "editModal") closeApptModal();
+      else closeSlotModal(el.id);
+    });
+  });
 
   // ══ INIT ══
   loadLeads().then(() => {
@@ -945,8 +2054,8 @@ tbody td {
       if (lead) openLead(lead);
     }
   });
-
   loadAppointments();
-</script>
-</body>
+  loadSlots();
+  </script>
+ </body>
 </html>
