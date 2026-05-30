@@ -153,7 +153,7 @@ class ServiceLayer:
             booking_result = self.booking_flow.process_booking_flow(lead_id=prepare_lead_context['lead_base_data']['lead_id'] , content=content)
             
             ack_mode = 0
-            
+            print("BOOKING RESULT:", booking_result, type(booking_result), flush=True)
             if isinstance(booking_result , dict):
                 return booking_result
             
