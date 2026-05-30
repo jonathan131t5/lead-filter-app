@@ -110,7 +110,7 @@ def restore_slot(slot_id: int):
 class SlotRequest(BaseModel):
     date: str
 
-@app.put("/api/dashboard/slots/create")
+@app.post("/api/dashboard/slots/create")
 def create_dashboard_slot(data: SlotRequest):
     result = service_layer.booking_flow.booking_slots.create_booking_slot(
         date=data.date
@@ -139,7 +139,7 @@ class SlotWeeklyCreateRequest(BaseModel):
     slots_data: list[dict]
     weeks_num: int
 
-@app.put("/api/dashboard/slots/weeklycreate")
+@app.post("/api/dashboard/slots/weeklycreate")
 def create_weekly_slots(data: SlotWeeklyCreateRequest):
     result = service_layer.booking_flow.booking_slots.create_weekly_booking_slots(
         weeks_num=data.weeks_num , 
