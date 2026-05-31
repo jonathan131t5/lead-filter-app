@@ -139,7 +139,7 @@ class SlotWeeklyCreateRequest(BaseModel):
     slots_data: list[dict]
     weeks_num: int
 
-@app.post("/api/dashboard/slots/weeklycreate")
+@app.post("/api/dashboard/slots/create-weekly")
 def create_weekly_slots(data: SlotWeeklyCreateRequest):
     result = service_layer.booking_flow.booking_slots.create_weekly_booking_slots(
         weeks_num=data.weeks_num , 
@@ -285,8 +285,8 @@ def clear_slots():
     
 
 
-VERIFY_TOKEN = "lead_filter_verify_123"
 
+VERIFY_TOKEN = "lead_filter_verify_123"
 
 
 @app.get("/webhook/whatsapp")
@@ -299,8 +299,6 @@ async def verify_whatsapp_webhook(request: Request):
         return int(challenge)
 
     return {"status": "verification_failed"}
-
-
 
 
 
