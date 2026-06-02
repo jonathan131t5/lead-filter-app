@@ -4,6 +4,16 @@ class AppointmentsContextRepository:
 
 
     def update_appointment(self, appointment_id, name, phone, booking_status):
+        if booking_status not in ["booked", "completed", "cancelled"]:
+            return {"status": False, "message": "invalid_status"}
+        
+        elif booking_status == "cancelled":
+            slot_status = 0
+        
+        else:
+            slot_status = 1
+
+
         self.cursor.execute("""
             SELECT lead_id, slot_id
             FROM appointment
@@ -29,5 +39,12 @@ class AppointmentsContextRepository:
             SET status = %s
             WHERE id = %s
         """, (booking_status, appointment_id))
+
+
+        self.cursor.execute("""
+            UPDATE booking_slot
+            SET is_taken = %s
+            WHERE slot_id = %s
+        """, (slot_status , slot_id))
 
         return {"status": True , "message": "updated successfully"}
