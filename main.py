@@ -488,7 +488,7 @@ def create_demo_video_data():
 
             db.commit()
 
-            return {"status": True}
+        return {"status": True}
 
     except Exception as e:
         db.rollback()
