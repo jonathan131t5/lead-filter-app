@@ -242,7 +242,7 @@ def reset_session(session_id: str):
     }
 
 
-@app.get("/dev/create-demo-data")
+@app.get("/dev/create-demo-data3")
 def create_demo_data():
     try:
         db = service_layer.booking_flow.db
@@ -435,3 +435,59 @@ def home():
 
 
 
+@app.post("/dev/create-demo-data")
+def create_demo_video_data():
+    db = service_layer.db
+    cursor = db.cursor
+
+    try:
+        demo_data = [
+           ("John", "972501111111", "Hot Lead", "booked", "2026-07-10 10:00"),
+           ("Michael", "972502222222", "Hot Lead", "completed", "2026-07-11 14:00"),
+           ("Emily", "972503333333", "Cold Lead", "cancelled", "2026-07-12 09:30"),
+           ("Sarah", "972504444444", "Cold Lead", "booked", "2026-07-13 16:00"),
+           ("David", "972505555555", "pending", "booked", "2026-07-14 11:00"),
+           ]
+
+        for name, phone, final_status, appointment_status, slot_date in demo_data:
+
+            cursor.execute("""
+                INSERT INTO leads_data (session_id, phone_number, final_status)
+                VALUES (%s, %s, %s)
+                RETURNING lead_id
+            """, (
+                phone,
+                phone,
+                final_status
+            ))
+
+            lead_id = cursor.fetchone()[0]
+
+            is_taken = 1
+            if appointment_status == "cancelled":
+                is_taken = 0
+            
+            cursor.execute("""
+                INSERT INTO booking_slot (date, is_taken)
+                VALUES (%s, %s)
+                RETURNING slot_id
+            """, (is_taken , slot_date))
+
+            slot_id = cursor.fetchone()[0]
+
+            cursor.execute("""
+                INSERT INTO appointment (slot_id, lead_id, status)
+                VALUES (%s, %s, %s)
+            """, (
+                slot_id,
+                lead_id,
+                appointment_status
+            ))
+
+        db.commit()
+
+        return {"status": True}
+
+    except Exception as e:
+        db.rollback()
+        return {"status": False, "message": str(e)}
