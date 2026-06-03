@@ -471,7 +471,7 @@ def create_demo_video_data():
                 INSERT INTO booking_slot (date, is_taken)
                 VALUES (%s, %s)
                 RETURNING slot_id
-            """, (is_taken , slot_date))
+            """, (slot_date , is_taken))
 
             slot_id = cursor.fetchone()[0]
 
