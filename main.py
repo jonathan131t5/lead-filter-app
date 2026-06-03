@@ -435,7 +435,7 @@ def home():
 
 
 
-@app.post("/dev/create-demo-data")
+@app.get("/api/dashboard/demo-create")
 def create_demo_video_data():
     db = service_layer.db
     cursor = db.cursor
