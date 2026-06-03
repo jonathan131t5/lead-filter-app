@@ -452,13 +452,14 @@ def create_demo_video_data():
         for name, phone, final_status, appointment_status, slot_date in demo_data:
 
             cursor.execute("""
-                INSERT INTO leads_data (session_id, phone_number, final_status)
-                VALUES (%s, %s, %s)
+                INSERT INTO leads_data (session_id, phone_number, final_status , name)
+                VALUES (%s, %s, %s, %s)
                 RETURNING lead_id
             """, (
                 phone,
                 phone,
-                final_status
+                final_status,
+                name
             ))
 
             lead_id = cursor.fetchone()[0]
