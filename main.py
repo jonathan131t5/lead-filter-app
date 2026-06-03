@@ -476,18 +476,19 @@ def create_demo_video_data():
 
             slot_id = cursor.fetchone()[0]
 
-            cursor.execute("""
-                INSERT INTO appointment (slot_id, lead_id, status)
-                VALUES (%s, %s, %s)
-            """, (
-                slot_id,
-                lead_id,
-                appointment_status
-            ))
+            if name != "John":
+                cursor.execute("""
+                    INSERT INTO appointment (slot_id, lead_id, status)
+                    VALUES (%s, %s, %s)
+                """, (
+                    slot_id,
+                    lead_id,
+                    appointment_status
+                ))
 
-        db.commit()
+            db.commit()
 
-        return {"status": True}
+            return {"status": True}
 
     except Exception as e:
         db.rollback()
