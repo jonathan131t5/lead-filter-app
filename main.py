@@ -30,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/j")
 def serve_chat():
     return FileResponse("chat_english.html")
 
@@ -429,6 +429,9 @@ async def run_ai_logic(message: dict):
 def home():
     return FileResponse("business-web.html")
 
+@app.get("/")
+def landing_page():
+    return FileResponse("landing_page.html")
 
 
 
