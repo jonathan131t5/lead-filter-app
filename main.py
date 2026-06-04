@@ -429,11 +429,13 @@ async def run_ai_logic(message: dict):
 def home():
     return FileResponse("business-web.html")
 
+
+from fastapi.staticfiles import StaticFiles
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 @app.get("/")
 def landing_page():
     return FileResponse("landing_page.html")
-
-
 
 
 
