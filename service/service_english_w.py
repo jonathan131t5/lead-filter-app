@@ -329,6 +329,8 @@ class ServiceLayer:
         return False
 
 
+
+
     def build_lead_summary(self , lead_all_data):
         summary_context = self.summary_context.prepare_lead_summary_context(lead_id=lead_all_data["lead_base_data"]["lead_id"])
         self.process_lead_summary(summary_info=summary_context)
