@@ -228,7 +228,7 @@ class LeadsDataRepository:
         }
         
         for field in uncompleted_fields:
-            if field["current field"] == "pre_flow":
+            if field["current_field"] == "pre_flow":
                 fields["pre_flow"] += 1
             
             elif field["current_field"] == "name":
@@ -243,7 +243,7 @@ class LeadsDataRepository:
             else:
                 fields["booking_flow"] += 1
 
-        if len(set(field.get)) == 1:
+        if len(set(fields.get)) == 1:
             return "No clear drop-off"
         
         return max(fields, key=fields.get)
