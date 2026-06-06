@@ -209,11 +209,13 @@ class LeadsDataRepository:
         """)
 
         rows = self.cursor.fetchall()
-
+        uncompleted_fields = []
+        
         for row in rows:
-            return [
-                {"current_field" : row[0]}
-            ]
+            uncompleted_fields.append({"current_field" : row[0]})
+
+        return uncompleted_fields
+
 
 
     def get_biggest_dropoff_step_last_30_days(self , uncompleted_fields):
