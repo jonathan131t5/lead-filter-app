@@ -250,7 +250,7 @@ class LeadsDataRepository:
 
 
     def get_completion_rate_last_30_days(self , started_number , completed_number):
-        return (completed_number / started_number)  * 100
+        return round((completed_number / started_number) * 100)
 
 
     
