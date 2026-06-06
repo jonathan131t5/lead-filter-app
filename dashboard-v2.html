@@ -147,22 +147,31 @@
     font-weight: 300;
   }
 
-  .analytics-grid {
+.analytics-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .analytics-card {
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 14px;
-  min-height: 80px;
+  border-radius: 10px;
+  padding: 10px 12px;
 }
 #biggestDropoffCard {
   grid-column: span 2;
+}
+.analytics-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.analytics-value {
+  font-size: 20px;
+  font-weight: 500;
 }
 
 
