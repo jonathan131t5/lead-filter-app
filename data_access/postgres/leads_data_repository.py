@@ -243,7 +243,7 @@ class LeadsDataRepository:
             else:
                 fields["booking_flow"] += 1
 
-        if len(set(fields.get)) == 1:
+        if len(set(fields.values())) == 1:
             return "No clear drop-off"
         
         return max(fields, key=fields.get)
