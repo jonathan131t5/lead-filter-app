@@ -159,3 +159,112 @@ class LeadsDataRepository:
             })
 
         return leads
+    
+
+
+    def get_started_leads_last_30_days(self):
+        self.cursor.execute("""
+        SELECT *
+        FROM leads_data 
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+        """)
+        
+        return len(self.cursor.fetchall())
+    
+    
+
+    def get_completed_leads_last_30_days(self):
+        self.cursor.execute("""
+        SELECT *
+        FROM leads_data
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+        AND final_status <> 'pending'
+        """)
+
+        return len(self.cursor.fetchall())
+    
+    
+    
+    def get_hot_leads_last_30_days(self):
+        self.cursor.execute("""
+        SELECT *
+        FROM leads_data
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+        AND final_status = 'Hot Lead'
+        """)
+
+        return len(self.cursor.fetchall())
+    
+
+
+
+    def get_uncompleted_lead_fields_last_30_days(self):
+        self.cursor.execute("""
+        SELECT lead_conversation_states.current_field 
+        FROM leads_data
+        JOIN lead_conversation_states
+        ON leads_data.lead_id = lead_conversation_states.lead_id
+        WHERE leads_data.created_at >= NOW() - INTERVAL '30 days'
+        AND leads_data.final_status = 'pending'
+        """)
+
+        rows = self.cursor.fetchall()
+
+        for row in rows:
+            return [
+                {"current_field" : row[0]}
+            ]
+
+
+    def get_biggest_dropoff_step_last_30_days(self , uncompleted_fields):
+        fields = {
+            "pre_flow" :  0 , 
+            "name" : 0 , 
+            "goal" : 0 , 
+            "urgency" : 0 , 
+            "booking_flow" : 0
+        }
+        
+        for field in uncompleted_fields:
+            if field["current field"] == "pre_flow":
+                fields["pre_flow"] += 1
+            
+            elif field["current_field"] == "name":
+                fields["name"] += 1
+            
+            elif field["current_field"] == "goal":
+                fields["goal"] += 1
+            
+            elif field["current_field"] == "urgency":
+                fields["urgency"] += 1
+            
+            else:
+                fields["booking_flow"] += 1
+
+        if len(set(field.get)) == 1:
+            return "No clear drop-off"
+        
+        return max(fields, key=fields.get)
+
+
+    def get_completion_rate_last_30_days(self , started_number , completed_number):
+        return (completed_number / started_number)  * 100
+
+
+    
+    def get_all_analytics(self):
+        started_number = self.get_started_leads_last_30_days()
+        completed_number = self.get_completed_leads_last_30_days()
+        hots_number = self.get_hot_leads_last_30_days()
+        completion_rate = self.get_completion_rate_last_30_days(started_number=started_number , completed_number=completed_number)
+        uncompleted_fields = self.get_uncompleted_lead_fields_last_30_days()
+        biggest_dropoff_field = self.get_biggest_dropoff_step_last_30_days(uncompleted_fields=uncompleted_fields)
+
+        return {
+            "entered" :  started_number ,
+            "completed" : completed_number , 
+            "hot_leads" : hots_number , 
+            "complete_rate" : completion_rate , 
+            "biggestDropoffValue" : biggest_dropoff_field
+        }
+

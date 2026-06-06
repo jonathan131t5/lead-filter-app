@@ -88,6 +88,11 @@ def get_dasboard_messages(lead_id: int):
     return service_layer.messages.get_lead_messages(lead_id=lead_id)
 
 
+@app.get("/api/dashboard/leads/analytics")
+def get_dashboard_analytics():
+    return service_layer.leads_data.get_all_analytics()
+
+
 @app.get("/api/dashboard/appointments")
 def get_dashboard_appointments():
     return service_layer.booking_dashboard.get_all_appointments()

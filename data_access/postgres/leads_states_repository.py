@@ -123,3 +123,5 @@ class LeadsStatesRepository:
             SET question_reason = %s
             WHERE lead_id = %s
         """, (value, lead_id))
+
+
