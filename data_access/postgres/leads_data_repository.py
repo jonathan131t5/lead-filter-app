@@ -262,6 +262,7 @@ class LeadsDataRepository:
         uncompleted_fields = self.get_uncompleted_lead_fields_last_30_days()
         biggest_dropoff_field = self.get_biggest_dropoff_step_last_30_days(uncompleted_fields=uncompleted_fields)
 
+        print(biggest_dropoff_field , flush=True)
         return {
             "entered" :  started_number ,
             "completed" : completed_number , 
