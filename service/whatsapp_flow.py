@@ -19,6 +19,7 @@ from service.summary_flow import SummaryFlow
 from logic.message_scorer import MessageScorer
 from logic.lead_score_manager import LeadScoreManager
 from logic.ai_result_handler import OpenAIClient
+from logic.lead_classifier import LeadClassifier
 
 from output_builders.analyze_prompt_builder_english import ConversationBuilder
 from output_builders.questions_builder_english import (
@@ -41,8 +42,9 @@ class WhatsappFlow:
         self.messages = MessagesRepository(self.db.new_cursor())
         self.leads_fields = LeadsFieldsRepository(self.db.new_cursor())
         self.message_scorer = MessageScorer()
-        self.openai_client = OpenAIClient()
         self.lead_score_manager = LeadScoreManager()
+        self.openai_client = OpenAIClient()
+        self.lead_classifier = LeadClassifier()
         self.conversation_builder = ConversationBuilder()
         self.process_question = ProcessQuestion(base_questions=BaseQuestions() , missing_questions=MissingQuestions() , confuse_questions=ConfuseQuestions() , fallback_questions=FallBackQuestions())
 
