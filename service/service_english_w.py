@@ -73,7 +73,7 @@ class ServiceLayer:
         self.booking_dashboard = BookingDashDataRepository(self.db.new_cursor())
         self.appointments = AppointmentsContextRepository(self.db.new_cursor())
         self.leads_booking = LeadsBookingRepository(self.db.new_cursor())
-        self.leads_data = LeadsDataRepository(self.db.new_cursor())
+        self.leads_data = LeadsDataRepository(self.db)
         self.leads_states = LeadsStatesRepository(self.db.new_cursor())
         self.leads_scores = LeadsScoresRepository(self.db.new_cursor())
         self.leads_fields = LeadsFieldsRepository(self.db.new_cursor())

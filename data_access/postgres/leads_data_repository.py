@@ -1,11 +1,12 @@
 class LeadsDataRepository:
-    def __init__(self, cursor):
-        self.cursor = cursor
+    def __init__(self, db):
+        self.db = db
 
 
 
     def create_leads_data_table(self):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS leads_data (
                 lead_id SERIAL PRIMARY KEY,
                 session_id TEXT,
@@ -22,24 +23,26 @@ class LeadsDataRepository:
 
 
     def create_new_lead(self, session_id):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             INSERT INTO leads_data (session_id)
             VALUES (%s)
             RETURNING lead_id
         """, (session_id,))
 
-        return self.cursor.fetchone()[0]
+        return cursor.fetchone()[0]
 
 
 
     def get_lead_base_data(self, session_id):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             SELECT lead_id, name, final_status, summary
             FROM leads_data
             WHERE session_id = %s
         """, (session_id,))
 
-        result = self.cursor.fetchone()
+        result = cursor.fetchone()
 
         if result is None:
             return None
@@ -54,13 +57,14 @@ class LeadsDataRepository:
 
 
     def get_lead_final_status(self, lead_id):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             SELECT final_status
             FROM leads_data
             WHERE lead_id = %s
         """, (lead_id,))
 
-        result = self.cursor.fetchone()
+        result = cursor.fetchone()
 
         if result is None:
             return None
@@ -70,7 +74,8 @@ class LeadsDataRepository:
 
 
     def set_lead_final_status(self, lead_id, status):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             UPDATE leads_data
             SET final_status = %s
             WHERE lead_id = %s
@@ -79,7 +84,8 @@ class LeadsDataRepository:
 
 
     def upload_summary(self, lead_summary, lead_id):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             UPDATE leads_data
             SET summary = %s
             WHERE lead_id = %s
@@ -88,7 +94,8 @@ class LeadsDataRepository:
 
 
     def update_lead_last_interaction(self, last_interaction, lead_id):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             UPDATE leads_data
             SET last_interaction_at = %s
             WHERE lead_id = %s
@@ -97,13 +104,14 @@ class LeadsDataRepository:
 
 
     def get_lead_last_interaction(self, lead_id):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             SELECT last_interaction_at
             FROM leads_data
             WHERE lead_id = %s
         """, (lead_id,))
 
-        result = self.cursor.fetchone()
+        result = cursor.fetchone()
 
         if result is None:
             return None
@@ -113,7 +121,8 @@ class LeadsDataRepository:
 
 
     def update_lead_phone(self, phone, lead_id):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             UPDATE leads_data
             SET phone_number = %s
             WHERE lead_id = %s
@@ -122,7 +131,8 @@ class LeadsDataRepository:
 
 
     def update_lead_name(self, name, lead_id):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             UPDATE leads_data
             SET name = %s
             WHERE lead_id = %s
@@ -131,7 +141,8 @@ class LeadsDataRepository:
 
 
     def get_all_leads_data(self):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
             SELECT lead_id, name, phone_number, final_status, summary, last_interaction_at
             FROM leads_data
             ORDER BY 
@@ -144,7 +155,7 @@ class LeadsDataRepository:
                 last_interaction_at DESC
         """)
 
-        rows = self.cursor.fetchall()
+        rows = cursor.fetchall()
 
         leads = []
 
@@ -163,43 +174,47 @@ class LeadsDataRepository:
 
 
     def get_started_leads_last_30_days(self):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
         SELECT *
         FROM leads_data 
         WHERE created_at >= NOW() - INTERVAL '30 days'
         """)
         
-        return len(self.cursor.fetchall())
+        return len(cursor.fetchall())
     
     
 
     def get_completed_leads_last_30_days(self):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
         SELECT *
         FROM leads_data
         WHERE created_at >= NOW() - INTERVAL '30 days'
         AND final_status <> 'pending'
         """)
 
-        return len(self.cursor.fetchall())
+        return len(cursor.fetchall())
     
     
     
     def get_hot_leads_last_30_days(self):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
         SELECT *
         FROM leads_data
         WHERE created_at >= NOW() - INTERVAL '30 days'
         AND final_status = 'Hot Lead'
         """)
 
-        return len(self.cursor.fetchall())
+        return len(cursor.fetchall())
     
 
 
 
     def get_uncompleted_lead_fields_last_30_days(self):
-        self.cursor.execute("""
+        cursor = self.db.new_cursor()
+        cursor.execute("""
         SELECT lead_conversation_states.current_field 
         FROM leads_data
         JOIN lead_conversation_states
@@ -208,7 +223,7 @@ class LeadsDataRepository:
         AND leads_data.final_status = 'pending'
         """)
 
-        rows = self.cursor.fetchall()
+        rows = cursor.fetchall()
         uncompleted_fields = []
         
         for row in rows:
