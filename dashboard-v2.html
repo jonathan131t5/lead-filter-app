@@ -147,46 +147,105 @@
     font-weight: 300;
   }
 
-.analytics-grid {
+
+
+
+css#page-analytics {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px 16px;
+  flex-direction: column;
+  width: 100%;
+}
+
+.analytics-panel {
+  background: rgba(21,21,25,0.96);
+  border: 1px solid var(--border);
+  border-radius: 0 24px 24px 24px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 20px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.34);
+}
+
+.analytics-top-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .analytics-card {
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-#biggestDropoffCard {
-  grid-column: span 2;
+  border-radius: 14px;
+  padding: 14px 16px;
 }
 
 .analytics-label {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
-  margin-bottom: 1px;
+  margin-bottom: 4px;
 }
 
 .analytics-value {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 26px;
+  font-weight: 700;
   color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 #hotLeadsCard .analytics-value { color: #b8f04a; }
 #completedCard .analytics-value { color: #5ab8f0; }
 #completeRateCard .analytics-value { color: #7dd3fc; }
-#biggestDropoffCard .analytics-value { color: #e05a5a; }
+
+.dropoff-section {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.dropoff-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.dropoff-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.dropoff-label {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 70px;
+}
+
+.dropoff-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dropoff-bar-fill {
+  height: 100%;
+  background: #e05a5a;
+  border-radius: 999px;
+}
+
+.dropoff-count {
+  font-size: 13px;
+  color: var(--muted);
+  min-width: 16px;
+  text-align: right;
+}
 
 
   .search-wrap {
@@ -1314,6 +1373,9 @@
    <button class="tab-btn" onclick="switchTab('slots')">
     Slots
    </button>
+   <button class="tab-btn" onclick="switchTab('analytics')">
+    Analytics
+   </button>
   </div>
   <!-- LEADS PAGE -->
   <div class="page active" id="page-leads">
@@ -1325,32 +1387,7 @@
      <p class="dashboard-subtitle">
       Review and follow up with new leads
      </p>
-     <div class="analytics-grid" id="analytics-grid">
-
-  <div class="analytics-card" id="enteredCard">
-    <div class="analytics-label">Entered</div>
-    <div class="analytics-value" id="enteredValue">0</div>
-  </div>
-
-  <div class="analytics-card" id="completedCard">
-    <div class="analytics-label">Completed</div>
-    <div class="analytics-value" id="completedValue">0</div>
-  </div>
-
-  <div class="analytics-card" id="hotLeadsCard">
-    <div class="analytics-label">Hot Leads</div>
-    <div class="analytics-value" id="hotLeadsValue">0</div>
-  </div>
-
-  <div class="analytics-card" id="completeRateCard">
-    <div class="analytics-label">Complete Rate</div>
-    <div class="analytics-value" id="completeRateValue">0%</div>
-  </div>
-
-  <div class="analytics-card" id="biggestDropoffCard">
-    <div class="analytics-label">Biggest Drop-off</div>
-    <div class="analytics-value" id="biggestDropoffValue">—</div>
-  </div>
+     
 
   </div>
     </header>
@@ -1517,6 +1554,39 @@
     </div>
    </div>
   </div>
+  <!-- ANALYTICS PAGE -->
+  <div class="page" id="page-analytics">
+    <div class="analytics-grid" id="analytics-grid">
+
+    <div class="analytics-card" id="enteredCard">
+      <div class="analytics-label">Entered</div>
+      <div class="analytics-value" id="enteredValue">0</div>
+    </div>
+
+    <div class="analytics-card" id="completedCard">
+      <div class="analytics-label">Completed</div>
+      <div class="analytics-value" id="completedValue">0</div>
+    </div>
+
+    <div class="analytics-card" id="hotLeadsCard">
+      <div class="analytics-label">Hot Leads</div>
+      <div class="analytics-value" id="hotLeadsValue">0</div>
+    </div>
+
+    <div class="analytics-card" id="completeRateCard">
+      <div class="analytics-label">Complete Rate</div>
+      <div class="analytics-value" id="completeRateValue">0%</div>
+    </div>
+    </div>
+
+
+    <div class="analytics-section">
+      <h2 class="analytics-title">Drop-off by step</h2>
+      <div id="dropoffRows"></div>
+  </div>
+</div>
+
+
   <!-- EDIT APPOINTMENT MODAL -->
   <div class="modal-overlay" id="editModal">
    <div class="modal">
@@ -1645,10 +1715,12 @@
         (i === 0 && tab === "leads") ||
         (i === 1 && tab === "appointments") ||
         (i === 2 && tab === "slots"));
+        (i === 3 && tab === "analytics")
     });
     document.getElementById("page-leads").classList.toggle("active", tab === "leads");
     document.getElementById("page-appointments").classList.toggle("active", tab === "appointments");
     document.getElementById("page-slots").classList.toggle("active", tab === "slots");
+    document.getElementById("page-analytics").classList.toggle("active", tab === "analytics");
   }
 
   // ══ LEADS ══
@@ -1667,7 +1739,7 @@
   const completedValue = document.getElementById("completedValue");
   const hotLeadsValue = document.getElementById("hotLeadsValue");
   const completeRateValue = document.getElementById("completeRateValue");
-  const biggestDropoffValue = document.getElementById("biggestDropoffValue");
+
 
   let allLeads = [];
   let selectedLeadId = null;
@@ -1734,8 +1806,27 @@
     completedValue.textContent = analytics.completed;
     hotLeadsValue.textContent = analytics.hot_leads;
     completeRateValue.textContent = `${analytics.complete_rate}%`;
-    biggestDropoffValue.textContent = analytics.biggest_dropoff;
+
+    const steps = [
+      { label: "Name", val: analytics.fields_dropoffs.fields.name },
+      { label: "Goal", val: analytics.fields_dropoffs.fields.goal },
+      { label: "Timeline", val: analytics.fields_dropoffs.fields.urgency },
+      { label: "Booking", val: analytics.fields_dropoffs.fields.booking_flow },
+    ];
+    const max = Math.max(...steps.map(s => s.val));
+    document.getElementById("dropoffRows").innerHTML = steps.map(s => `
+      <div class="dropoff-row">
+        <div class="dropoff-label">${s.label}</div>
+        <div class="dropoff-bar-wrap">
+          <div class="dropoff-bar-fill" style="width:${max ? (s.val/max*100) : 0}%"></div>
+        </div>
+        <div class="dropoff-count">${s.val}</div>
+      </div>
+    `).join("");
   }
+
+
+  
 
   async function loadLeads() {
     try {
