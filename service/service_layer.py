@@ -9,6 +9,12 @@ from data_base.connection2 import Connection
 from utils.validators import validate_int, validate_str, extract_phone
 from utils.validators import UserError
 
+from data_access.postgres.leads_data_repository import LeadsDataRepository
+from data_access.postgres.leads_states_repository import LeadsStatesRepository
+from data_access.postgres.lead_booking_repository import LeadsBookingRepository
+from data_access.postgres.leads_fields_repository import LeadsFieldsRepository
+from data_access.postgres.leads_scores_repository import LeadsScoresRepository
+
 
 class ServiceLayer:
     def __init__(self):
@@ -16,6 +22,11 @@ class ServiceLayer:
         self.whatsapp_flow = WhatsappFlow(self.db)
         self.summary_flow = SummaryFlow(self.db)
         self.booking_flow = BookingFlow(self.db)
+        self.leads_data = LeadsDataRepository(self.db)
+        self.leads_states = LeadsStatesRepository(self.db.cursor())
+        self.leads_booking = LeadsBookingRepository(self.db.cursor())
+        self.leads_scores = LeadsScoresRepository(self.db.cursor())
+        self.leads_fields = LeadsFieldsRepository(self.db.cursor())
 
 
     def handle_flow_result(self , session_id , external_message_id , content=None):
