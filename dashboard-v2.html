@@ -1713,8 +1713,9 @@
       b.classList.toggle("active",
         (i === 0 && tab === "leads") ||
         (i === 1 && tab === "appointments") ||
-        (i === 2 && tab === "slots")) || 
+        (i === 2 && tab === "slots") || 
         (i === 3 && tab === "analytics")
+        );
     });
     document.getElementById("page-leads").classList.toggle("active", tab === "leads");
     document.getElementById("page-appointments").classList.toggle("active", tab === "appointments");
@@ -1807,10 +1808,11 @@
     completeRateValue.textContent = `${analytics.complete_rate}%`;
 
     const steps = [
-      { label: "Name", val: analytics.fields_dropoffs.fields.name },
-      { label: "Goal", val: analytics.fields_dropoffs.fields.goal },
-      { label: "Timeline", val: analytics.fields_dropoffs.fields.urgency },
-      { label: "Booking", val: analytics.fields_dropoffs.fields.booking_flow },
+      { label: "Started Chat", val: analytics.fields_dropoffs.pre_flow },
+      { label: "Name", val: analytics.fields_dropoffs.name },
+      { label: "Goal", val: analytics.fields_dropoffs.goal },
+      { label: "Timeline", val: analytics.fields_dropoffs.urgency },
+      { label: "Booking", val: analytics.fields_dropoffs.booking_flow },
     ];
     const max = Math.max(...steps.map(s => s.val));
     document.getElementById("dropoffRows").innerHTML = steps.map(s => `
