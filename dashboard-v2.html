@@ -150,7 +150,7 @@
 
 
 
-css#page-analytics {
+#page-analytics {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 16px 16px;
@@ -1349,7 +1349,8 @@ css#page-analytics {
 
   }
 
-  #page-leads:not(.active), #page-appointments:not(.active), #page-slots:not(.active) {
+  #page-leads:not(.active), #page-appointments:not(.active), #page-slots:not(.active), #page-analytics:not(.active) {
+    
     display: none !important;
   }
 
@@ -1357,7 +1358,7 @@ css#page-analytics {
     display: grid;
   }
 
-  #page-appointments.active, #page-slots.active {
+  #page-appointments.active, #page-slots.active, #page-analytics.active {
     display: flex;
   }
   </style>
@@ -1388,8 +1389,6 @@ css#page-analytics {
       Review and follow up with new leads
      </p>
      
-
-  </div>
     </header>
     <div class="search-wrap">
      <input class="search-input" id="searchInput" placeholder="Search by name or phone..." type="text"/>
@@ -1714,7 +1713,7 @@ css#page-analytics {
       b.classList.toggle("active",
         (i === 0 && tab === "leads") ||
         (i === 1 && tab === "appointments") ||
-        (i === 2 && tab === "slots"));
+        (i === 2 && tab === "slots")) || 
         (i === 3 && tab === "analytics")
     });
     document.getElementById("page-leads").classList.toggle("active", tab === "leads");
