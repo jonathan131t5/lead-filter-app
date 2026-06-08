@@ -50,6 +50,7 @@ class WhatsappFlow:
         prepare_lead_context['lead_conversation_states_data']['current_field'] = "pre_flow"
         question = self.generate_lead_question(lead_all_data=prepare_lead_context, ack_mode=0 , external_message_id=external_message_id)
         self.db.commit()
+        print(f"QUESTION-PRE: {question}" ,flush=True)
         return question
 
 
@@ -90,6 +91,7 @@ class WhatsappFlow:
                 return {"status" : "booking_flow"}
             
             self.db.commit()
+            print(f"QUESTION: {question}" ,flush=True)
             return question
 
 
