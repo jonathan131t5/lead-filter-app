@@ -16,6 +16,18 @@ from service.booking_service_w import BookingFlow
 from service.summary_flow import SummaryFlow
 
 
+from logic.message_scorer import MessageScorer
+from logic.lead_score_manager import LeadScoreManager
+
+from output_builders.questions_builder_english import (
+    ProcessQuestion,
+    BaseQuestions,
+    MissingQuestions,
+    ConfuseQuestions,
+    FallBackQuestions
+)
+
+
 class WhatsappFlow:
     def __init__(self , db):
         self.db = db
@@ -26,6 +38,9 @@ class WhatsappFlow:
         self.leads_scores = LeadsScoresRepository(self.db.new_cursor())
         self.messages = MessagesRepository(self.db.new_cursor())
         self.leads_fields = LeadsFieldsRepository(self.db.new_cursor())
+        self.message_scorer = MessageScorer()
+        self.lead_score_manager = LeadScoreManager()
+        self.process_question = ProcessQuestion(base_questions=BaseQuestions() , missing_questions=MissingQuestions() , confuse_questions=ConfuseQuestions() , fallback_questions=FallBackQuestions())
 
 
 
