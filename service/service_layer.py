@@ -23,10 +23,10 @@ class ServiceLayer:
         self.summary_flow = SummaryFlow(self.db)
         self.booking_flow = BookingFlow(self.db)
         self.leads_data = LeadsDataRepository(self.db)
-        self.leads_states = LeadsStatesRepository(self.db.cursor())
-        self.leads_booking = LeadsBookingRepository(self.db.cursor())
-        self.leads_scores = LeadsScoresRepository(self.db.cursor())
-        self.leads_fields = LeadsFieldsRepository(self.db.cursor())
+        self.leads_states = LeadsStatesRepository(self.db.new_cursor())
+        self.leads_booking = LeadsBookingRepository(self.db.new_cursor())
+        self.leads_scores = LeadsScoresRepository(self.db.new_cursor())
+        self.leads_fields = LeadsFieldsRepository(self.db.new_cursor())
 
 
     def handle_flow_result(self , session_id , external_message_id , content=None):
