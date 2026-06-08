@@ -97,6 +97,7 @@ class WhatsappFlow:
 
 
     def process_whatsapp_flow(self , prepare_lead_context , external_message_id , content=None):
+        print(f"CURRENTFIELD {prepare_lead_context['lead_conversation_states_data']['current_field']}", flush=True)
         if prepare_lead_context['lead_conversation_states_data']['current_field'] is None:
             return self.handle_pre_flow(prepare_lead_context=prepare_lead_context , external_message_id=external_message_id)
         
