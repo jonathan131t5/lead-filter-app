@@ -22,7 +22,7 @@ class WhatsappFlow:
         self.summary_flow = SummaryFlow(self.db)
         self.booking_flow = BookingFlow(self.db)
         self.leads_data = LeadsDataRepository(self.db)
-        self.leads_stats = LeadsStatesRepository(self.db.new_cursor())
+        self.leads_states = LeadsStatesRepository(self.db.new_cursor())
         self.leads_scores = LeadsScoresRepository(self.db.new_cursor())
         self.messages = MessagesRepository(self.db.new_cursor())
         self.leads_fields = LeadsFieldsRepository(self.db.new_cursor())
