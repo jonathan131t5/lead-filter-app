@@ -264,7 +264,7 @@ class WhatsappFlow:
             
                 elif lead_info["current_field"] == "urgency":
                     need_to_change = True
-                    lead_info["current_field"] = None
+                    lead_info["current_field"] = "booking_flow"
                     self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="urgency_user" , value=content)
 
                 self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field=lead_info["current_field"])
@@ -343,14 +343,13 @@ class WhatsappFlow:
                 
 
                 if lead_info["current_field"] == "goal":
-                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field="urgency")
                     lead_info["current_field"] = "urgency"
 
 
                 elif lead_info["current_field"] == "urgency":
-                    self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field=None)
-                    lead_info["current_field"] = None
+                    lead_info["current_field"] = "booking_flow"
 
+                self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field=lead_info["current_field"])
                 self.leads_states.update_lead_regular_attempt_number(lead_id=lead_info["lead_id"] , number=1)
                 self.leads_states.update_lead_confuse_attempt_number(lead_id=lead_info["lead_id"] , number=1)
 
