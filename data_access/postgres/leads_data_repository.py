@@ -218,7 +218,7 @@ class LeadsDataRepository:
 
 
 
-    def get_biggest_dropoff_step_last_30_days(self , uncompleted_fields):
+    def get_dropoff_stats_last_30_days(self , uncompleted_fields):
         fields = {
             "pre_flow" :  0 , 
             "name" : 0 , 
@@ -243,10 +243,7 @@ class LeadsDataRepository:
             else:
                 fields["booking_flow"] += 1
 
-        if len(set(fields.values())) == 1:
-            return "No clear drop-off"
-        
-        return max(fields, key=fields.get)
+        return fields
 
 
     def get_completion_rate_last_30_days(self , started_number , completed_number):
@@ -260,14 +257,14 @@ class LeadsDataRepository:
         hots_number = self.get_hot_leads_last_30_days()
         completion_rate = self.get_completion_rate_last_30_days(started_number=started_number , completed_number=completed_number)
         uncompleted_fields = self.get_uncompleted_lead_fields_last_30_days()
-        biggest_dropoff_field = self.get_biggest_dropoff_step_last_30_days(uncompleted_fields=uncompleted_fields)
+        fields_dropoffs = self.get_dropoff_stats_last_30_days(uncompleted_fields=uncompleted_fields)
 
-        print(biggest_dropoff_field , flush=True)
+        print(fields_dropoffs , flush=True)
         return {
             "entered" :  started_number ,
             "completed" : completed_number , 
             "hot_leads" : hots_number , 
             "complete_rate" : completion_rate , 
-            "biggestDropoffValue" : biggest_dropoff_field
+            "fields_dropoffs" : fields_dropoffs
         }
 
