@@ -6,7 +6,7 @@ class SummaryFlow:
     def __init__(self , db):
         self.db = db
         self.summary_context = LeadSummaryContextRepository(self.db.new_cursor())
-        self.leads_data = LeadsDataRepository(self.db.new_cursor())
+        self.leads_data = LeadsDataRepository(self.db)
 
 
 
