@@ -54,7 +54,7 @@ class BaseQuestions:
         else:
             raise TypeError("Invalid field")
 
-        if field != "pre_flow" and field != "budget":
+        if field != "pre_flow" and field != "goal":
             question = questions[0]
         else:
             question = questions
