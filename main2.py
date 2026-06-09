@@ -600,7 +600,7 @@ def create_demo_video_data():
     
 
 
-@app.delete("/api/dashboard/clear-leads")
+@app.get("/api/dashboard/clear-leads")
 def clear_leads_data():
     db = service_layer.db
     cursor = db.cursor
