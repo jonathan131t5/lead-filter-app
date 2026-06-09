@@ -483,12 +483,11 @@ def create_demo_video_data():
 
             demo_conversations = {
                 "John": {
-                    "summary": """John — Hot lead 🔥
-                    Goal: I want to lose weight and be more healthy
-                    Timeline: As soon as possible
-
-                    Score: 6
-                    Phone: 4458392016""",
+                    "summary": "John — Hot lead 🔥\n"
+                                "Goal: I want to lose weight and be more healthy\n"
+                                "Timeline: As soon as possible\n\n"
+                                "Score: 6\n"
+                                "Phone: 4458392016",
                     "messages": [
                         ("bot", "Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear."),
                         ("user", "Lead selected: Start"),
@@ -507,13 +506,11 @@ def create_demo_video_data():
                         },
                         
                 "Robert": {
-                    "summary": """Robert — Cold lead 🧊
-
-                    Goal: Maybe get a bit fitter
-                    Timeline: In around 6 months
-
-                    Score: 2
-                    Phone: 4490638172""",
+                    "summary": "Robert — Cold lead 🧊\n"
+                                "Goal: Maybe get a bit fitter\n"
+                                "Timeline: In around 6 months\n\n"
+                                "Score: 2\n"
+                                "Phone: 4490638172",
                     "messages": [
                         ("bot", "Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear."),
                         ("user", "Lead selected: Start"),
@@ -522,18 +519,18 @@ def create_demo_video_data():
                         ("bot", "What are you looking for help with?"),
                         ("user", "Maybe get a bit fitter"),
                         ("bot", "Awesome. When are you looking to get started?"),
-                        ("user", "In around 6 months")
+                        ("user", "In around 6 months"),
+                        ("bot" , "Thanks for taking the time to answer the questions.\n"
+                        "Your information has been received successfully.")
                         ]
                         },
 
                 "William": {
-                    "summary": """William — Cold lead 🧊
-
-                    Goal: Just thinking about getting back in shape
-                    Timeline: Maybe in 4 months
-
-                    Score: 3
-                    Phone: 4435019286""",
+                    "summary": "William — Cold lead 🧊\n"
+                                "Goal: Just thinking about getting back in shape\n"
+                                "Timeline: Maybe in 4 months\n\n"
+                                "Score: 3\n"
+                                "Phone: 4435019286",
                     "messages": [
                         ("bot", "Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear."),
                         ("user", "Lead selected: Start"),
@@ -542,7 +539,9 @@ def create_demo_video_data():
                         ("bot", "What are you looking for help with?"),
                         ("user", "Just thinking about getting back in shape"),
                         ("bot", "Awesome. When are you looking to get started?"),
-                        ("user", "Maybe in 4 months")
+                        ("user", "Maybe in 4 months"),
+                        ("bot" , "Thanks for taking the time to answer the questions.\n"
+                        "Your information has been received successfully.")
                         ]
                         }
                         }
