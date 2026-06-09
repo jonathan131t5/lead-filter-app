@@ -261,10 +261,11 @@ class LeadsDataRepository:
         return fields
 
 
-    def get_completion_rate_last_30_days(self , started_number , completed_number):
+    def get_completion_rate_last_30_days(self, started_number, completed_number):
+        if started_number == 0:
+            return 0
+
         return round((completed_number / started_number) * 100)
-
-
     
     def get_all_analytics(self):
         started_number = self.get_started_leads_last_30_days()
