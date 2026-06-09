@@ -427,7 +427,7 @@ async def run_ai_logic(message: dict):
     
     finally:
         if phone:
-            service_layer.wha.leads_states.update_lead_is_processing(session_id=phone , value=0)
+            service_layer.whatsapp_flow.leads_states.update_lead_is_processing(session_id=phone , value=0)
 
 
 @app.get("/business")
