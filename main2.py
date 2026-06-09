@@ -357,7 +357,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         
         if phone:
             await send_whatsapp_message(number=phone , text="Something went wrong. Please try again in a moment.")
-        
+            service_layer.db.commit()
         return {"status": "error"}
 
 
