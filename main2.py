@@ -445,7 +445,7 @@ def landing_page():
 
 
 
-@app.get("/api/dashboard/demo-create")
+@app.get("/api/dashboard/demo-createe")
 def create_demo_video_data():
     db = service_layer.db
     cursor = db.cursor
@@ -505,7 +505,7 @@ def create_demo_video_data():
 
             db.commit()
 
-        return {"status": True}
+        return {"status": "APPROVED"}
 
     except Exception as e:
         db.rollback()
