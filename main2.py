@@ -457,6 +457,13 @@ def create_demo_video_data():
            ("Robert", "4490638172", "Cold Lead", "cancelled", "2026-07-12 09:30"),
            ("William", "4435019286", "Cold Lead", "booked", "2026-07-13 16:00"),
            ("James", "4472946501", "pending", "booked", "2026-07-14 11:00"),
+           ("David", "4471839205", "Hot Lead", "booked", "2026-07-15 13:30"),
+           ("Daniel", "4429501837", "Cold Lead", "completed", "2026-07-16 09:00"),
+           ("Matthew", "4463728194", "pending", "booked", "2026-07-17 15:45"),
+           ("Andrew", "4481059372", "Cold Lead", "completed", "2026-07-18 12:15"),
+           ("Joseph", "4436847209", "Cold Lead", "cancelled", "2026-07-19 17:00"),
+           ("Thomas", "4479204816", "Hot Lead", "booked", "2026-07-20 10:30"),
+           ("Chris", "4437619052", "Hot Lead", "completed", "2026-07-21 15:00")
            ]
 
         for name, phone, final_status, appointment_status, slot_date in demo_data:
