@@ -481,6 +481,93 @@ def create_demo_video_data():
 
             lead_id = cursor.fetchone()[0]
 
+            demo_conversations = {
+                "John": {
+                    "summary": """John — Hot lead 🔥
+                    Goal: I want to lose weight and be more healthy
+                    Timeline: As soon as possible
+
+                    Score: 6
+                    Phone: 4458392016""",
+                    "messages": [
+                        ("bot", "Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear."),
+                        ("user", "Lead selected: Start"),
+                        ("bot", "Got it. Before we start what’s your name?"),
+                        ("user", "John"),
+                        ("bot", "What are you looking for help with?"),
+                        ("user", "I want to lose weight and be more healthy"),
+                        ("bot", "Awesome. When are you looking to get started?"),
+                        ("user", "As soon as possible"),
+                        ("bot", "Awesome, sounds like you're ready to get started!\nWould you like to schedule your first session?"),
+                        ("user", "yes"),
+                        ("bot", "Great — please choose a time that works for you:"),
+                        ("user", "2026-07-10 10:00"),
+                        ("bot", "✅ You're all set, John!\nYour session is confirmed for 2026-07-10 10:00:00.\nSee you then!")
+                        ]
+                        },
+                        
+                "Robert": {
+                    "summary": """Robert — Cold lead 🧊
+
+                    Goal: Maybe get a bit fitter
+                    Timeline: In around 6 months
+
+                    Score: 2
+                    Phone: 4490638172""",
+                    "messages": [
+                        ("bot", "Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear."),
+                        ("user", "Lead selected: Start"),
+                        ("bot", "Got it. Before we start what’s your name?"),
+                        ("user", "Robert"),
+                        ("bot", "What are you looking for help with?"),
+                        ("user", "Maybe get a bit fitter"),
+                        ("bot", "Awesome. When are you looking to get started?"),
+                        ("user", "In around 6 months")
+                        ]
+                        },
+
+                "William": {
+                    "summary": """William — Cold lead 🧊
+
+                    Goal: Just thinking about getting back in shape
+                    Timeline: Maybe in 4 months
+
+                    Score: 3
+                    Phone: 4435019286""",
+                    "messages": [
+                        ("bot", "Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear."),
+                        ("user", "Lead selected: Start"),
+                        ("bot", "Got it. Before we start what’s your name?"),
+                        ("user", "William"),
+                        ("bot", "What are you looking for help with?"),
+                        ("user", "Just thinking about getting back in shape"),
+                        ("bot", "Awesome. When are you looking to get started?"),
+                        ("user", "Maybe in 4 months")
+                        ]
+                        }
+                        }
+
+            if name in demo_conversations:
+                cursor.execute("""
+                    UPDATE leads_data
+                    SET summary = %s
+                    WHERE lead_id = %s
+                """, (
+                    demo_conversations[name]["summary"],
+                    lead_id
+                ))
+
+                for role, content in demo_conversations[name]["messages"]:
+                    cursor.execute("""
+                        INSERT INTO leads_messages (lead_id, role, content)
+                        VALUES (%s, %s, %s)
+                    """, (
+                        lead_id,
+                        role,
+                        content
+                    ))
+
+
             is_taken = 1
             if appointment_status == "cancelled":
                 is_taken = 0
@@ -511,3 +598,22 @@ def create_demo_video_data():
         db.rollback()
         return {"status": False, "message": str(e)}
     
+
+
+@app.delete("/api/dashboard/clear-leads")
+def clear_leads_data():
+    db = service_layer.db
+    cursor = db.cursor
+
+    try:
+        cursor.execute("""
+            TRUNCATE TABLE leads_data
+            RESTART IDENTITY CASCADE
+        """)
+
+        db.commit()
+        return {"status": "CLEARED"}
+
+    except Exception as e:
+        db.rollback()
+        return {"status": False, "message": str(e)}
