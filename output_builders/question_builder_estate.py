@@ -31,7 +31,6 @@ class BaseQuestions:
             "Before we start what's your name?"
         ]
     
-
     def pre_flow_base_question(self):
         button = [
             {"id" : "approved" , "title" : "start"}
@@ -55,7 +54,7 @@ class BaseQuestions:
         else:
             raise TypeError("Invalid field")
 
-        if field != "pre_flow":
+        if field != "pre_flow" and field != "budget":
             question = questions[0]
         else:
             question = questions
