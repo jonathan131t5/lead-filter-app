@@ -11,6 +11,8 @@ class LeadsFieldsRepository:
                 phone_user TEXT,
                 urgency_bot TEXT,
                 urgency_user TEXT,
+                budget_bot TEXT , 
+                budget_user TEXT,
                 updated_at TIMESTAMP
             )
         """)
@@ -46,6 +48,8 @@ class LeadsFieldsRepository:
             "phone_user",
             "urgency_bot",
             "urgency_user",
+            "budget_user" , 
+            "budget_bot",
             "updated_at"
         }
 
@@ -64,6 +68,8 @@ class LeadsFieldsRepository:
             "phone_user",
             "urgency_bot",
             "urgency_user",
+            "budget_bot" , 
+            "budget_user"
             "updated_at"
         }
 

@@ -2,7 +2,7 @@ import random
 from datetime import datetime
 import logging
 
-from output_builders.booking_questions_english import BookingQuestion
+
 
 from data_access.postgres.lead_booking_repository import LeadsBookingRepository
 from data_access.postgres.slots_repository import BookingSlotRepository

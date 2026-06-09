@@ -406,7 +406,7 @@ async def run_ai_logic(message: dict):
         
         if reply_text:
             send_start = time.time()
-            if reply_status in ["pre_flow" , "booking_interest", "booking_selection"]:
+            if reply_status in ["pre_flow" , "booking_interest", "booking_selection" , "goal"]:
                 if len(reply_text.get("buttons", [])) < 3:
                     await send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
                 else:
@@ -427,7 +427,7 @@ async def run_ai_logic(message: dict):
     
     finally:
         if phone:
-            service_layer.whatsapp_flow.leads_states.update_lead_is_processing(session_id=phone , value=0)
+            service_layer.wha.leads_states.update_lead_is_processing(session_id=phone , value=0)
 
 
 @app.get("/business")

@@ -13,8 +13,11 @@ class ConversationBuilder:
         pass
 
     def build_prompt(self , current_field , content): 
-        if current_field == "goal":
-            prompt = self.goal_analyze_prompt(content=content)
+        #if current_field == "goal":
+            #prompt = self.goal_analyze_prompt(content=content)
+
+        if current_field == "budget":
+            prompt = self.budget_analyze_prompt(content=content)
 
 
         elif current_field == "urgency":
@@ -158,6 +161,84 @@ class ConversationBuilder:
             }
         ]
     
+
+
+
+
+
+
+
+    def budget_analyze_prompt(self, content):
+        return [
+            {
+                "role": "system",
+                "content": (
+                    "Classify the user's answer for the BUDGET field.\n"
+                    "Return ONLY valid JSON.\n\n"
+
+                    "Allowed formats only:\n"
+                    "{\"status\":\"found\",\"value\":number}\n"
+                    "{\"status\":\"missing\",\"reason\":\"no_info|vague|avoid\"}\n"
+                    "{\"status\":\"confused\",\"reason\":\"meaning|answer_type|focus\"}\n\n"
+
+                    "Rules:\n"
+                    "- Symbols/no real words like '???', '...' or '-' -> missing no_info\n"
+                    "- User confused about the question -> confused meaning\n"
+                    "- User asks how to answer -> confused answer_type\n"
+                    "- Time/start-date answer -> confused focus\n"
+                    "- Goal/desired outcome answer -> confused focus\n"
+                    "- Uncertain answers like 'we'll see', 'depends' -> missing vague\n"
+                    "- Refusal/avoidance like 'not sure yet', 'prefer not to say' -> missing avoid\n"
+                    "- Clear money amount or price range -> found\n\n"
+
+                    "Budget = how much money the user is willing or able to spend.\n\n"
+
+                    "Value extraction:\n"
+                    "- Return the actual budget number, not a score.\n"
+                    "- If the user writes a number, return that number.\n"
+                    "- If the user writes the number in words, convert it to a number.\n"
+                    "- If the user gives a range, return the higher number.\n"
+                    "- If the user says 'up to X', return X.\n"
+                    "- If the user says 'around X' or 'about X', return X.\n"
+                    "- If the user uses k, for example '500k', return 500000.\n"
+                    "- If the user says million, return 1000000.\n"
+                    "- Do not return currency symbols.\n\n"
+
+                    "Examples:\n"
+                    "??? -> {\"status\":\"missing\",\"reason\":\"no_info\"}\n"
+                    "tomorrow -> {\"status\":\"confused\",\"reason\":\"focus\"}\n"
+                    "I want to buy a house -> {\"status\":\"confused\",\"reason\":\"focus\"}\n"
+                    "what do you mean -> {\"status\":\"confused\",\"reason\":\"meaning\"}\n"
+                    "we'll see -> {\"status\":\"missing\",\"reason\":\"vague\"}\n"
+                    "not sure yet -> {\"status\":\"missing\",\"reason\":\"avoid\"}\n"
+                    "450000 -> {\"status\":\"found\",\"value\":450000}\n"
+                    "450k -> {\"status\":\"found\",\"value\":450000}\n"
+                    "one million -> {\"status\":\"found\",\"value\":1000000}\n"
+                    "between 500k and 700k -> {\"status\":\"found\",\"value\":700000}\n"
+                    "up to 900000 -> {\"status\":\"found\",\"value\":900000}\n"
+                )
+            },
+            {
+                "role": "user",
+                "content": content
+            }
+        ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

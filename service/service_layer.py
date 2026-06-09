@@ -1,6 +1,6 @@
 import logging
 
-from service.whatsapp_flow import WhatsappFlow
+from service.whatsapp_flow_estate import WhatsappFlow
 from service.summary_flow import SummaryFlow
 from service.booking_service_w import BookingFlow
 
