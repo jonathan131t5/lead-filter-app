@@ -607,8 +607,8 @@ def clear_leads_data():
 
     try:
         cursor.execute("""
-            TRUNCATE TABLE leads_data
-            RESTART IDENTITY CASCADE
+            TRUNCATE TABLE leads_messages, leads_data
+            RESTART IDENTITY
         """)
 
         db.commit()
