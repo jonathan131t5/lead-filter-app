@@ -9,8 +9,10 @@ class LeadsScoresRepository:
                 goal_score INTEGER DEFAULT 0,
                 phone_score INTEGER DEFAULT 0,
                 urgency_score INTEGER DEFAULT 0,
+                budget_score,
                 goal_status TEXT,
                 urgency_status TEXT,
+                budget_status TEXT,
                 score_count INTEGER DEFAULT 0,
                 total_score INTEGER DEFAULT 0
             )
@@ -69,6 +71,8 @@ class LeadsScoresRepository:
             "goal_score",
             "phone_score",
             "urgency_score",
+            "budget_score",
+            "budget_status",
             "goal_status",
             "urgency_status"
         }
