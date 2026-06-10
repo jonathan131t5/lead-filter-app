@@ -192,8 +192,8 @@ class WhatsappFlow:
             return {"status" : "found" , "value" : content}
         
         elif current_field == "goal":
-            self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content["title"])
-            return {"status" : "found" , "value" : content["title"]}
+            self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content["id"].replace("goal_" , ""))
+            return {"status" : "found" , "value" : content["id"].replace("goal_" , "")}
 
         ai_input = self.conversation_builder.build_prompt(current_field=current_field , content=content)
 
@@ -266,7 +266,7 @@ class WhatsappFlow:
 
 
                 elif lead_info["current_field"] == "goal":
-                    self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content["title"])
+                    self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content["id"].replace("goal_" , ""))
                     lead_info["current_field"] = "budget"
 
                 
