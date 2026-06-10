@@ -619,7 +619,7 @@ def create_demo_video_data():
 
             slot_id = cursor.fetchone()[0]
 
-            if name != "James":
+            if final_status != "pending":
                 cursor.execute("""
                     INSERT INTO appointment (slot_id, lead_id, status)
                     VALUES (%s, %s, %s)
