@@ -486,7 +486,8 @@ def create_demo_video_data():
            ("Andrew", "4481059372", "Cold Lead", "completed", "2026-07-18 12:15"),
            ("Joseph", "4436847209", "Cold Lead", "cancelled", "2026-07-19 17:00"),
            ("Thomas", "4479204816", "Hot Lead", "booked", "2026-07-20 10:30"),
-           ("Chris", "4437619052", "Hot Lead", "completed", "2026-07-21 15:00")
+           ("Chris", "4437619052", "Hot Lead", "completed", "2026-07-21 15:00"),
+           ("Peter", "4495812036", "pending", "booked", "2026-07-22 11:30"),
            ]
 
         for name, phone, final_status, appointment_status, slot_date in demo_data:
@@ -506,7 +507,8 @@ def create_demo_video_data():
 
             pending_fields = {
             "James": "goal",
-            "Matthew": "name"
+            "Matthew": "goal",
+            "Peter" : "name"
             }
 
             if final_status == "pending":
