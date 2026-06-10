@@ -606,9 +606,17 @@ def clear_leads_data():
 
     try:
         cursor.execute("""
-            TRUNCATE TABLE leads_messages, leads_data
-            RESTART IDENTITY
-        """)
+        TRUNCATE TABLE
+        leads_messages,
+        leads_scores,
+        leads_fields_data,
+        leads_booking,
+        lead_conversation_states,
+        appointment,
+        leads_data, 
+        booking_slot
+    RESTART IDENTITY CASCADE
+""")
 
         db.commit()
         return {"status": "CLEARED"}
