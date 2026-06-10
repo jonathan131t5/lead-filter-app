@@ -174,8 +174,7 @@ class BookingFlow:
             ]
         
         questions = [
-            "Awesome, sounds like you're ready to get started!\n"
-            "Would you like to schedule your first session?"
+            "Sounds good! Would you like to book a call with an agent?"
         ]
         question = random.choice(questions)
 
