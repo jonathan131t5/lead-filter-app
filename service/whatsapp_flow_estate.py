@@ -224,6 +224,7 @@ class WhatsappFlow:
             attempt_number=lead_info["regular_attempt_number"],
             ack_mode=ack_mode)
 
+        print(f"QUESRION: {question}" , flush=True)
 
         if lead_info["current_field"] == "pre_flow":
             text = question["body"]
