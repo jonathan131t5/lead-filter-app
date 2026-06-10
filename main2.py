@@ -357,7 +357,6 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
         
         if phone:
             await send_whatsapp_message(number=phone , text="Something went wrong. Please try again in a moment.")
-            service_layer.db.commit()
         return {"status": "error"}
 
 
@@ -428,6 +427,7 @@ async def run_ai_logic(message: dict):
     finally:
         if phone:
             service_layer.whatsapp_flow.leads_states.update_lead_is_processing(session_id=phone , value=0)
+            service_layer.db.commit()
 
 
 @app.get("/business")
