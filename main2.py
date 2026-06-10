@@ -504,6 +504,21 @@ def create_demo_video_data():
 
             lead_id = cursor.fetchone()[0]
 
+            pending_fields = {
+            "James": "goal",
+            "Matthew": "name"
+            }
+
+            if final_status == "pending":
+                cursor.execute("""
+                    INSERT INTO lead_conversation_states (lead_id, session_id, current_field)
+                    VALUES (%s, %s, %s)
+                """, (
+                    lead_id,
+                    phone,
+                    pending_fields[name]
+                ))
+
             demo_conversations = {
                 "John": {
                     "summary": "John — Hot lead 🔥\n"
