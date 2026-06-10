@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, BackgroundTasks , Response
 from pydantic import BaseModel
 from service.service_layer import ServiceLayer
-
+import sys
 import time
 import asyncio
 
@@ -16,6 +16,18 @@ from integrations.telegram_bot import send_telegram_alert
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+
+
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - [APP] %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ],
+    force=True
+)
 
 service_layer = ServiceLayer()
 
@@ -378,7 +390,18 @@ async def run_ai_logic(message: dict):
             text = message["text"]["body"]
         elif message.get("type") == "interactive":
             int_data = message["interactive"]
-            text = {"id": int_data.get("button_reply", {}).get("id") or int_data.get("list_reply", {}).get("id")}
+           
+            button_reply = int_data.get("button_reply")
+            list_reply = int_data.get("list_reply")
+           
+            if button_reply:
+                reply_id = button_reply.get("id")
+            elif list_reply:
+                reply_id = list_reply.get("id")
+            else:
+                reply_id = None
+
+            text = {"id": reply_id}
         else:
             return
         
