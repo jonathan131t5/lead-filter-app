@@ -71,7 +71,7 @@ class BaseQuestions:
         return question
 
     def build_ack_prefix(self):
-        return f"{random.choice(['Got it', 'Nice', 'Awesome', 'Perfect'])}{random.choice([',', '.'])}"
+            return f"{random.choice(['Got it', 'Nice', 'Awesome', 'Perfect', 'Great', 'Thanks', 'Sounds good'])}{random.choice([',', '.'])}"
 
 
 class MissingQuestions:
