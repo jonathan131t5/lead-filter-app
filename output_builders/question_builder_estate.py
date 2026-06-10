@@ -8,9 +8,20 @@ class BaseQuestions:
             {"id" : "goal_sell" , "title" : "sell"} , 
             {"id" : "goal_rent" , "title" : "rent"} , 
         ]
-        question = ("Are you looking to buy, sell, or rent?")
+        question = ("Pefect , are you looking to buy, sell, or rent?")
         return {"buttons" : button , "body" : question}
 
+    
+    def pre_flow_base_question(self):
+        button = [
+            {"id" : "approved" , "title" : "start"}
+        ]
+        question = ("Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear.")
+        
+        return {"buttons" : button , "body" : question}
+    
+    
+    
     def budget_base_questions(self):
         return [
             "What's your budget?"
@@ -31,13 +42,7 @@ class BaseQuestions:
             "Before we start what's your name?"
         ]
     
-    def pre_flow_base_question(self):
-        button = [
-            {"id" : "approved" , "title" : "start"}
-        ]
-        question = ("Hey! Welcome 👋 I'll ask you a few quick questions to get started — please send one answer per message so everything stays clear.")
-        
-        return {"buttons" : button , "body" : question}
+
 
     def process_base_question(self, field, ack_mode):
         print(f"PROCESS BASE QUESTION FIELD={repr(field)} ACK_MODE={repr(ack_mode)}", flush=True)
@@ -60,7 +65,7 @@ class BaseQuestions:
             question = questions
 
         if ack_mode == 1:
-            if field != "pre_flow":
+            if field != "pre_flow" and field != "goal":
                 return f"{self.build_ack_prefix()} {question}"
 
         return question
