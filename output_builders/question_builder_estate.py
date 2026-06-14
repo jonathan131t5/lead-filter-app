@@ -253,6 +253,7 @@ class MissingQuestions:
 
 
     def process_missing_question(self, field, reason, attempt_number):
+        print(f"FIELD PROCESS: {field}" , flush=True)
         if field == "goal":
             questions = self.goal_missing_questions(reason, attempt_number)
         elif field == "budget_buy":
