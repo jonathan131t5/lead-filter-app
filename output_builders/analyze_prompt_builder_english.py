@@ -16,7 +16,7 @@ class ConversationBuilder:
         #if current_field == "goal":
             #prompt = self.goal_analyze_prompt(content=content)
 
-        if current_field == "budget":
+        if "budget" in current_field:
             prompt = self.budget_analyze_prompt(content=content)
 
 
