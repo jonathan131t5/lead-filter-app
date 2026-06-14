@@ -271,7 +271,7 @@ class MissingQuestions:
         elif field == "phone":
             questions = self.phone_missing_questions(reason, attempt_number)
         else:
-            raise TypeError("Invalid field")
+            raise TypeError(f"Invalid field: {field}")
 
         return random.choice(questions)
 
