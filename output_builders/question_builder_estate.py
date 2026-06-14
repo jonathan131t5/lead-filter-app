@@ -114,9 +114,6 @@ class BaseQuestions:
 
 class MissingQuestions:
     def goal_missing_questions(self, question_type, attempt_number):
-        if attempt_number != 2:
-            return
-
         if question_type == "no_info":
             return [
                 "Even something simple is fine, are you looking to buy, sell, or rent?"
@@ -132,9 +129,6 @@ class MissingQuestions:
 
 
     def budget_buy_missing_questions(self, question_type, attempt_number):
-        if attempt_number != 2:
-            return
-
         if question_type == "no_info":
             return [
                 "Even something simple is fine, do you have a buying budget in mind?"
@@ -150,9 +144,6 @@ class MissingQuestions:
 
 
     def budget_sell_missing_questions(self, question_type, attempt_number):
-        if attempt_number != 2:
-            return
-
         if question_type == "no_info":
             return [
                 "Even something rough is fine, what price are you hoping to sell for?"
@@ -168,9 +159,6 @@ class MissingQuestions:
 
 
     def rent_role_missing_questions(self, question_type, attempt_number):
-        if attempt_number != 2:
-            return
-
         if question_type == "no_info":
             return [
                 "Even something simple is fine, are you looking to rent a property or let one?"
@@ -186,9 +174,6 @@ class MissingQuestions:
 
 
     def budget_rent_tenant_missing_questions(self, question_type, attempt_number):
-        if attempt_number != 2:
-            return
-
         if question_type == "no_info":
             return [
                 "Even something rough is fine, what's your monthly rental budget?"
@@ -204,9 +189,6 @@ class MissingQuestions:
 
 
     def budget_rent_landlord_missing_questions(self, question_type, attempt_number):
-        if attempt_number != 2:
-            return
-
         if question_type == "no_info":
             return [
                 "Even something rough is fine, what monthly rent are you hoping to get?"
@@ -222,9 +204,6 @@ class MissingQuestions:
 
 
     def urgency_missing_questions(self, question_type, attempt_number):
-        if attempt_number != 2:
-            return
-
         if question_type == "no_info":
             return [
                 "Do you have a rough timeframe in mind?"
@@ -262,9 +241,9 @@ class MissingQuestions:
             questions = self.budget_sell_missing_questions(reason, attempt_number)
         elif field == "rent_role":
             questions = self.rent_role_missing_questions(reason, attempt_number)
-        elif field == "budget_rent_tenant":
+        elif field == "budget_rent_renting":
             questions = self.budget_rent_tenant_missing_questions(reason, attempt_number)
-        elif field == "budget_rent_landlord":
+        elif field == "budget_rent_letting":
             questions = self.budget_rent_landlord_missing_questions(reason, attempt_number)
         elif field == "urgency":
             questions = self.urgency_missing_questions(reason, attempt_number)
@@ -385,9 +364,9 @@ class ConfuseQuestions:
             questions = self.budget_sell_confuse_questions(reason)
         elif field == "rent_role":
             questions = self.rent_role_confuse_questions(reason)
-        elif field == "budget_rent_tenant":
+        elif field == "budget_rent_renting":
             questions = self.budget_rent_tenant_confuse_questions(reason)
-        elif field == "budget_rent_landlord":
+        elif field == "budget_rent_letting":
             questions = self.budget_rent_landlord_confuse_questions(reason)
         elif field == "urgency":
             questions = self.urgency_confuse_questions(reason)
@@ -499,9 +478,9 @@ class FallBackQuestions:
             questions = self.budget_sell_fallback_questions(fallback_type=reason)
         elif field == "rent_role":
             questions = self.rent_role_fallback_questions(fallback_type=reason)
-        elif field == "budget_rent_tenant":
+        elif field == "budget_rent_renting":
             questions = self.budget_rent_tenant_fallback_questions(fallback_type=reason)
-        elif field == "budget_rent_landlord":
+        elif field == "budget_rent_letting":
             questions = self.budget_rent_landlord_fallback_questions(fallback_type=reason)
         elif field == "phone":
             questions = self.phone_fallback_question(fallback_type=reason)
