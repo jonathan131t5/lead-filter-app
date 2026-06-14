@@ -239,6 +239,11 @@ class WhatsappFlow:
             text = question["body"]
             message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
         
+        elif lead_info["current_field"] == "rent_role":
+            text = question["body"]
+            message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
+
+
         else:
             message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
 
