@@ -194,6 +194,11 @@ class WhatsappFlow:
         elif current_field == "goal":
             self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content["id"].replace("goal_" , ""))
             return {"status" : "found" , "value" : content["id"].replace("goal_" , "")}
+        
+
+        elif current_field == "rent_role":
+            self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content["id"].replace("goal_" , ""))
+            return {"status" : "found" , "value" : content["id"].replace("rent_" , "")}
 
         ai_input = self.conversation_builder.build_prompt(current_field=current_field , content=content)
 
@@ -245,8 +250,28 @@ class WhatsappFlow:
 
 
 
+    def handle_goal(self ,  ai_response , lead_info):
+        if ai_response["value"] == "buy":
+            lead_info["current_field"] = "budget_buy"
+        
+        elif ai_response["value"] == "sell": 
+            lead_info["current_field"] = "budget_sell"
+        
+        elif ai_response["value"] == "rent":
+            lead_info["current_field"] = "rent_role"
+
+        return lead_info["current_field"]
+    
 
 
+    def handle_rent_role(self , ai_response , lead_info):
+        if ai_response["value"] == "renting":
+            lead_info["current_field"] == "budget_rent_renting"
+
+        elif ai_response["value"] == "letting":
+            lead_info["current_field"] == "budget_rent_letting"
+
+        return lead_info["current_field"]
 
 
 
@@ -267,10 +292,14 @@ class WhatsappFlow:
 
                 elif lead_info["current_field"] == "goal":
                     self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content["id"].replace("goal_" , ""))
-                    lead_info["current_field"] = "budget"
+                    lead_info["current_field"] = self.handle_goal(ai_response=ai_response , lead_info=lead_info)
 
                 
-                elif lead_info["current_field"] == "budget":
+                elif lead_info["current_field"] == "rent_role":
+                        lead_info["current_field"] = self.handle_rent_role(ai_response=ai_response , lead_info=lead_info)
+
+                
+                elif "budget" in lead_info["current_field"]:
                     self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="budget_user" , value=content)
                     lead_info["current_field"] = "urgency"
                     
@@ -343,7 +372,11 @@ class WhatsappFlow:
             return True
         
     
-    
+
+
+
+
+
     def handle_unresolved_fallbacks(self , ai_response , lead_info):
         print(lead_info["current_field"], flush=True)
         if ai_response["status"] == "missing" or ai_response["status"] == "confused":
@@ -382,6 +415,9 @@ class WhatsappFlow:
             return
         
         if current_field == "goal":
+            return
+        
+        if current_field == "rent_role":
             return
         
         lead_message_score = self.message_scorer.score_estate_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason)
