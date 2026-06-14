@@ -67,7 +67,8 @@ class LeadsScoresRepository:
 
 
     def update_lead_score_info(self, lead_id, score_count, total_score, score_field, value):
-
+        if "budget" in score_field:
+            score_field = "budget"
         self.cursor.execute(
             f"""
             UPDATE leads_scores
