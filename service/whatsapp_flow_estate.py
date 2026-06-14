@@ -400,7 +400,7 @@ class WhatsappFlow:
                 if lead_info["current_field"] == "goal":
                     lead_info["current_field"] = "budget"
                 
-                if lead_info["current_field"] == "budget":
+                if "budget" in lead_info["current_field"]:
                     lead_info["current_field"] = "urgency"
 
 
