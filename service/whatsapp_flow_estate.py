@@ -274,10 +274,10 @@ class WhatsappFlow:
 
     def handle_rent_role(self , ai_response , lead_info):
         if ai_response["value"] == "renting":
-            lead_info["current_field"] == "budget_rent_renting"
+            lead_info["current_field"] = "budget_rent_renting"
 
         elif ai_response["value"] == "letting":
-            lead_info["current_field"] == "budget_rent_letting"
+            lead_info["current_field"] = "budget_rent_letting"
 
         return lead_info["current_field"]
 
