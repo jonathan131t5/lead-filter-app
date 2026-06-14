@@ -43,7 +43,7 @@ class MessagesRepository:
             SELECT role, content, created_at
             FROM leads_messages
             WHERE lead_id = %s
-            ORDER BY created_at ASC
+            ORDER BY created_at ASC, message_id ASC
         """, (lead_id,))
 
         rows = self.cursor.fetchall()
