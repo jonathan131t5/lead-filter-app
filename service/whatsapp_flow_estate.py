@@ -195,13 +195,21 @@ class WhatsappFlow:
             return {"status" : "found" , "value" : content}
         
         elif current_field == "goal":
-            self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content["id"].replace("goal_" , ""))
-            return {"status" : "found" , "value" : content["id"].replace("goal_" , "")}
+            if isinstance(content , str):
+                self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content)
+                return {"status" : "found" , "value" : content}
+            else:
+                self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content["id"].replace("goal_" , ""))
+                return {"status" : "found" , "value" : content["id"].replace("goal_" , "")}
         
 
         elif current_field == "rent_role":
-            self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content["id"].replace("goal_" , ""))
-            return {"status" : "found" , "value" : content["id"].replace("rent_" , "")}
+            if isinstance(content , str):
+                self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content)
+                return {"status" : "found" , "value" : content}
+            else:
+                self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content["id"].replace("goal_" , ""))
+                return {"status" : "found" , "value" : content["id"].replace("rent_" , "")}
 
         ai_input = self.conversation_builder.build_prompt(current_field=current_field , content=content)
 
@@ -299,12 +307,16 @@ class WhatsappFlow:
 
 
                 elif lead_info["current_field"] == "goal":
+                    if isinstance(content , str):
+                        return True
                     self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="goal_user" , value=content["id"].replace("goal_" , ""))
                     lead_info["current_field"] = self.handle_goal(ai_response=ai_response , lead_info=lead_info)
 
                 
                 elif lead_info["current_field"] == "rent_role":
-                        lead_info["current_field"] = self.handle_rent_role(ai_response=ai_response , lead_info=lead_info)
+                    if isinstance(content , str):
+                        return True
+                    lead_info["current_field"] = self.handle_rent_role(ai_response=ai_response , lead_info=lead_info)
 
                 
                 elif "budget" in lead_info["current_field"]:
