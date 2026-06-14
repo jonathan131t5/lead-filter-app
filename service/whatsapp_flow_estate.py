@@ -151,6 +151,9 @@ class WhatsappFlow:
         
         elif lead_all_data["lead_conversation_states_data"]["current_field"] == "goal":
             return {"status" : "goal" , "message" : question}
+        
+        elif lead_all_data["lead_conversation_states_data"]["current_field"] == "rent_role":
+            return {"status" : "rent_role" , "message" : question}
 
         return {"status" : "output" , "message" : question}
 
