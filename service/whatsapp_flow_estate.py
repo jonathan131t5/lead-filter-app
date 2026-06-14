@@ -426,8 +426,12 @@ class WhatsappFlow:
             return
 
         if lead_message_score["status"] == "unknown":
-            self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score , message_field=f"{current_field}_status")
-            self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field=f"{current_field}_status" , value=lead_message_score["status"])
+            if "budget" in current_field:
+                self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score , message_field="budget")
+                self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field="budget" , value=lead_message_score["status"])
+            else:
+                self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score , message_field=f"{current_field}_status")
+                self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field=f"{current_field}_status" , value=lead_message_score["status"])
         
         else:
             print(f"lead_message_score: {lead_message_score}")

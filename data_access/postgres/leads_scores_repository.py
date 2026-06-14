@@ -67,18 +67,6 @@ class LeadsScoresRepository:
 
 
     def update_lead_score_info(self, lead_id, score_count, total_score, score_field, value):
-        allowed_score_fields = {
-            "goal_score",
-            "phone_score",
-            "urgency_score",
-            "budget_score",
-            "budget_status",
-            "goal_status",
-            "urgency_status"
-        }
-
-        if score_field not in allowed_score_fields:
-            raise ValueError("Invalid score field")
 
         self.cursor.execute(
             f"""
