@@ -23,25 +23,27 @@ class BaseQuestions:
 
 
 
-    def eligibility_base_questions(self, goal_value=None):
+    def eligibility_base_questions(self, field):
         button = [
             {"id": "eligibility_yes", "title": "Yes"},
             {"id": "eligibility_no", "title": "No"}
         ]
 
-        if goal_value == "skilled_worker":
+        print(f"FIELD")
+
+        if field == "skilled_worker":
             question = "Do you have a job offer from a UK employer?"
 
-        elif goal_value == "student":
+        elif field == "student":
             question = "Do you have an offer from a UK university or college?"
 
-        elif goal_value == "family_spouse":
+        elif field == "family_spouse":
             question = "Does your partner or family member have UK settled status or British citizenship?"
 
-        elif goal_value == "ilr":
+        elif field == "ilr":
             question = "Have you been living in the UK for at least 5 years?"
 
-        elif goal_value == "not_sure":
+        elif field == "not_sure":
             question = "Do you already know which UK visa you may qualify for?"
 
         return {
@@ -68,13 +70,13 @@ class BaseQuestions:
         ]
 
 
-    def process_base_question(self, field, ack_mode, goal_value=None):
+    def process_base_question(self, field, ack_mode):
         print(f"PROCESS BASE QUESTION FIELD={repr(field)} ACK_MODE={repr(ack_mode)}", flush=True)
 
         if field == "goal":
             questions = self.goal_base_questions()
         elif field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
-            questions = self.eligibility_base_questions(goal_value=goal_value)
+            questions = self.eligibility_base_questions(field=field)
         elif field == "urgency":
             questions = self.urgency_base_questions()
         elif field == "name":

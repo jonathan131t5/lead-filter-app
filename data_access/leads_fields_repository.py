@@ -16,6 +16,7 @@ class LeadsFieldsRepository:
         phone_user TEXT ,
         urgency_bot TEXT ,
         urgency_user TEXT ,
+        
         updated_at TIMESTAMP
         )
         """)
