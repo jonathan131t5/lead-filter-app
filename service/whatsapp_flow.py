@@ -236,12 +236,6 @@ class WhatsappFlow:
 
 
 
-
-
-
-
-
-
     def advance_on_found(self , ai_response , lead_info , content):
             need_to_change = None
 

@@ -11,7 +11,7 @@ class BaseQuestions:
             {"id": "goal_not_sure", "title": "Not sure"},
         ]
         question = "What type of UK visa are you interested in?"
-        return {"buttons": button, "body": question}
+        return {"buttons": button, "body": question , "button_label" : "View visa options"}
 
 
     def pre_flow_base_question(self):
