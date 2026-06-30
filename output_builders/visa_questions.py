@@ -193,12 +193,11 @@ class ProcessQuestion:
         self.fallback_questions = fallback_questions
 
 
-    def get_question(self, field, question_state, reason, attempt_number, ack_mode, goal_value=None):
+    def get_question(self, field, question_state, reason, attempt_number, ack_mode):
         if question_state == "base":
             return self.base_questions.process_base_question(
                 field=field,
-                ack_mode=ack_mode,
-                goal_value=goal_value
+                ack_mode=ack_mode
             )
 
         elif question_state == "missing":
