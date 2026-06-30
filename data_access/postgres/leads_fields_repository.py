@@ -8,11 +8,11 @@ class LeadsFieldsRepository:
                 lead_id INTEGER PRIMARY KEY,
                 goal_bot TEXT,
                 goal_user TEXT,
+                eligibility_user TEXT, 
+                eligibility_bot TEXT,
                 phone_user TEXT,
                 urgency_bot TEXT,
                 urgency_user TEXT,
-                budget_bot TEXT , 
-                budget_user TEXT,
                 updated_at TIMESTAMP
             )
         """)
@@ -48,8 +48,8 @@ class LeadsFieldsRepository:
             "phone_user",
             "urgency_bot",
             "urgency_user",
-            "budget_user" , 
-            "budget_bot",
+            "eligibility_user" , 
+            "eligibility_bot",
             "updated_at"
         }
 
@@ -68,8 +68,8 @@ class LeadsFieldsRepository:
             "phone_user",
             "urgency_bot",
             "urgency_user",
-            "budget_bot" , 
-            "budget_user"
+            "eligibility_user" , 
+            "eligibility_bot",
             "updated_at"
         }
 

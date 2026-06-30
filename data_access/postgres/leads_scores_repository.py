@@ -9,10 +9,10 @@ class LeadsScoresRepository:
                 goal_score INTEGER DEFAULT 0,
                 phone_score INTEGER DEFAULT 0,
                 urgency_score INTEGER DEFAULT 0,
-                budget_score,
+                eligibility_score INTEGER DEFAULT 0 ,
                 goal_status TEXT,
                 urgency_status TEXT,
-                budget_status TEXT,
+                eligibility_status TEXT,
                 score_count INTEGER DEFAULT 0,
                 total_score INTEGER DEFAULT 0
             )
@@ -28,7 +28,7 @@ class LeadsScoresRepository:
 
     def get_lead_score_data(self, lead_id):
         self.cursor.execute("""
-            SELECT total_score, score_count, goal_score, urgency_score, goal_status, urgency_status
+            SELECT total_score, score_count, goal_score, urgency_score, goal_status, urgency_status , eligibility_score , eligibility_status
             FROM leads_scores
             WHERE lead_id = %s
         """, (lead_id,))
@@ -45,7 +45,9 @@ class LeadsScoresRepository:
             "goal_score": result[2],
             "urgency_score": result[3],
             "goal_status": result[4],
-            "urgency_status": result[5]
+            "urgency_status": result[5] , 
+            "eligibility_score" : result[6] , 
+            "eligibility_status" : result[7]
         }
 
 
