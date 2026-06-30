@@ -428,7 +428,7 @@ async def run_ai_logic(message: dict):
         
         if reply_text:
             send_start = time.time()
-            if reply_status in ["pre_flow" , "booking_interest", "booking_selection" , "goal"  , "rent_role"]:
+            if reply_status in ["pre_flow" , "booking_interest", "booking_selection" , "goal" , "eligibility"]:
                 if len(reply_text.get("buttons", [])) <= 3:
                     await send_whatsapp_buttons(body=reply_text["body"], buttons=reply_text["buttons"], to=phone)
                 else:
