@@ -101,7 +101,15 @@ class BaseQuestions:
           question = questions
 
         if ack_mode == 1:
-            if field != "pre_flow" and field != "goal":
+            if field not in [
+                "pre_flow",
+                "goal",
+                "skilled_worker",
+                "student",
+                "family_spouse",
+                "ilr",
+                "not_sure"
+                ]:
                 return f"{self.build_ack_prefix()} {question}"
 
         return question
