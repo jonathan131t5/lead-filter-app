@@ -71,7 +71,7 @@ class WhatsappFlow:
             
 
         self.leads_data.update_lead_last_interaction(last_interaction=datetime.now(timezone.utc) , lead_id=prepare_lead_context["lead_base_data"]["lead_id"])
-        self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"])
+        self.apply_message_score(current_field=prepare_lead_context["lead_conversation_states_data"]["current_field"] , lead_info=prepare_lead_context["lead_scores_data"] , ai_analyze_response=generate_ai_analysis , reason=prepare_lead_context["lead_conversation_states_data"]["question_reason"] , question_index=prepare_lead_context["lead_conversation_states_data"]["question_index"])
         
         logging.info(f"Lead scores updated, lead_id={prepare_lead_context['lead_base_data']['lead_id']} | current_field={prepare_lead_context['lead_conversation_states_data']['current_field']} | score_count={prepare_lead_context['lead_scores_data']['score_count']} | total_score={prepare_lead_context['lead_scores_data']['total_score']}")
         logging.debug(prepare_lead_context['lead_scores_data'])
@@ -381,7 +381,7 @@ class WhatsappFlow:
                 lead_info["confuse_attempt_number"] = 1
     
     
-    def apply_message_score(self , lead_info , current_field , ai_analyze_response , reason):
+    def apply_message_score(self , lead_info , current_field , ai_analyze_response , reason , question_index):
         if current_field == "name":
             return
         
@@ -392,7 +392,7 @@ class WhatsappFlow:
             return
         
         
-        lead_message_score = self.message_scorer.score_visa_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason)
+        lead_message_score = self.message_scorer.score_visa_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason , question_index=question_index)
         
         if lead_message_score["status"] == "invaild":
             return
