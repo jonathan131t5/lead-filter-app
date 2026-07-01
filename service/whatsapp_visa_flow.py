@@ -419,7 +419,7 @@ class WhatsappFlow:
 
     
     def finalize_lead_status(self , lead_info):
-        if lead_info["score_count"] == 2:
+        if lead_info["score_count"] == 6:
             final_lead_status = self.lead_classifier.classify_lead_score(lead_info)
             
             if final_lead_status:
