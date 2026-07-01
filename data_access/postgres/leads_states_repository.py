@@ -58,10 +58,12 @@ class LeadsStatesRepository:
     def get_lead_conversation_states(self, lead_id):
         self.cursor.execute("""
             SELECT current_field,
-                   regular_attempt_number,
-                   confuse_attempt_number,
-                   question_state,
-                   question_reason
+                regular_attempt_number,
+                confuse_attempt_number,
+                question_state,
+                question_reason,
+                question_index
+                    
             FROM lead_conversation_states
             WHERE lead_id = %s
         """, (lead_id,))
@@ -77,7 +79,8 @@ class LeadsStatesRepository:
             "regular_attempt_number": result[1],
             "confuse_attempt_number": result[2],
             "question_state": result[3],
-            "question_reason": result[4]
+            "question_reason": result[4], 
+            "question_index" : result[5]
         }
 
 
