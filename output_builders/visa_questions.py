@@ -15,7 +15,7 @@ class BaseQuestions:
     def goal_base_questions(self):
         button = [
             {"id": "goal_skilled_worker", "title": "Skilled Worker Visa"},
-            {"id": "goal_health_care", "title": "Health & Care Worker Visa"},
+            {"id": "goal_health_care", "title": "Health Care Visa"},
             {"id": "goal_student", "title": "Student Visa"},
             {"id": "goal_family_spouse", "title": "Family / Spouse Visa"},
             {"id": "goal_ilr", "title": "Settlement / ILR"},
@@ -298,4 +298,4 @@ class ProcessQuestion:
                 reason=reason
             )
 
-        raise TypeError("Invalid question state")
+        raise TypeError("Invalid question state")   
