@@ -12,7 +12,7 @@ class LeadScoreManager:
         
         
         elif lead_message_score["status"] == "eligibility_failed":
-            lead_score_info["score_count"] += 2
+            lead_score_info["score_count"] += 6
             lead_score_info["total_score"] += lead_message_score["rank_score"]
             lead_score_info[message_field] = lead_message_score["rank_score"]
         

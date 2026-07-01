@@ -5,10 +5,10 @@ class LeadClassifier:
     
     
     def classify_lead_score(self , lead_score_info):
-        if lead_score_info["score_count"] < 2:
+        if lead_score_info["score_count"] < 6:
             return None
         
-        elif lead_score_info["total_score"] >= 4:
+        elif lead_score_info["total_score"] >= 11:
             return "Hot Lead"
           
         else:

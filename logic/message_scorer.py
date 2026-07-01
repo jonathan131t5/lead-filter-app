@@ -95,7 +95,7 @@ class MessageScorer:
 
 
 
-    def score_visa_message(self , message_to_rank , field , reason):
+    def score_visa_message(self , message_to_rank , field , reason , question_index):
         rank_score = 0
 
         if message_to_rank["status"] == "missing" or message_to_rank["status"] == "confused":
@@ -105,12 +105,20 @@ class MessageScorer:
 
         elif message_to_rank["status"] == "found":
             
-            if field == "eligibility":
-                if message_to_rank["value"] == "yes":
-                    rank_score += 2
+            if field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
+                if question_index == 1:
+                    if message_to_rank["value"] == "yes":
+                        rank_score += 3
+                    else:
+                        return {"status" : "eligibility_failed" , "rank_score" : rank_score}
                 else:
-                    return {"status" : "eligibility_failed" , "rank_score" : rank_score}
-
+                    if message_to_rank["value"] == "yes":
+                        rank_score += 2
+                    elif message_to_rank["value"] == "not_sure":
+                        rank_score += 1
+                    else:
+                        rank_score += 0
+        
         
             elif field == "urgency":
                 if 8 <= float(message_to_rank["value"]) <= 10:

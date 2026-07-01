@@ -12,6 +12,7 @@ class LeadsStatesRepository:
                 confuse_attempt_number INTEGER DEFAULT 1,
                 question_state TEXT DEFAULT 'base',
                 question_reason TEXT DEFAULT 'base',
+                question_index INTEGER DEFAULT 1,
                 is_processing INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP,
@@ -87,6 +88,14 @@ class LeadsStatesRepository:
             SET current_field = %s
             WHERE lead_id = %s
         """, (updated_field, lead_id))
+
+    
+    def update_lead_question_index(self , lead_id , value):
+        self.cursor.execute("""
+        UPDATE lead_conversation_states
+        SET question_index = %s
+        WHERE lead_id = %s
+        """, (value, lead_id))
 
 
 

@@ -152,7 +152,7 @@ class WhatsappFlow:
         elif lead_all_data["lead_conversation_states_data"]["current_field"] == "goal":
             return {"status" : "goal" , "message" : question}
         
-        elif lead_all_data["lead_conversation_states_data"]["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
+        elif lead_all_data["lead_conversation_states_data"]["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
             return {"status" : "eligibility" , "message" : question}
 
         return {"status" : "output" , "message" : question}
@@ -203,7 +203,7 @@ class WhatsappFlow:
                 return {"status" : "found" , "value" : content["id"].replace("goal_" , "")}
         
 
-        elif current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
+        elif current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
             if isinstance(content , str):
                 self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content)
                 return {"status" : "found" , "value" : content}
@@ -238,7 +238,8 @@ class WhatsappFlow:
             question_state=lead_info["question_state"] , 
             reason=lead_info["question_reason"] , 
             attempt_number=lead_info["regular_attempt_number"],
-            ack_mode=ack_mode)
+            ack_mode=ack_mode,
+            question_index=lead_info["question_index"])
 
         print(f"QUESRION: {question}" , flush=True)
 
@@ -250,7 +251,7 @@ class WhatsappFlow:
             text = question["body"]
             message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
         
-        elif lead_info["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
+        elif lead_info["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
             text = question["body"]
             message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
 
@@ -287,12 +288,14 @@ class WhatsappFlow:
 
                 
 
-                elif lead_info["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
+                elif lead_info["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
                     if isinstance(content , str):
                         return True
                     self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="eligibility_user" , value=content["id"].replace("eligibility_" , ""))
-                    lead_info["current_field"] = "urgency"
-                    
+                    if lead_info["question_index"] >= 5:
+                        lead_info["current_field"] = "urgency"
+                    else:
+                        lead_info["question_index"] += 1
 
                 elif lead_info["current_field"] == "urgency":
                     need_to_change = True
@@ -300,6 +303,7 @@ class WhatsappFlow:
                     self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="urgency_user" , value=content)
 
                 self.leads_states.update_lead_current_field(lead_id=lead_info["lead_id"] , updated_field=lead_info["current_field"])
+                self.leads_states.update_lead_question_index(lead_id=lead_info["lead_id"] , value=lead_info["question_index"])
                 self.leads_states.update_lead_regular_attempt_number(lead_id=lead_info["lead_id"] , number=1)
                 self.leads_states.update_lead_confuse_attempt_number(lead_id=lead_info["lead_id"] , number=1)
 
@@ -388,13 +392,13 @@ class WhatsappFlow:
             return
         
         
-        lead_message_score = self.message_scorer.score_estate_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason)
+        lead_message_score = self.message_scorer.score_visa_message(message_to_rank=ai_analyze_response , field=current_field , reason=reason)
         
         if lead_message_score["status"] == "invaild":
             return
 
         if lead_message_score["status"] == "unknown":
-            if current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
+            if current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
                 self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score , message_field="eligibility_status")
                 self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field="eligibility_status" , value=lead_message_score["status"])
             else:
@@ -402,7 +406,7 @@ class WhatsappFlow:
                 self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field=f"{current_field}_status" , value=lead_message_score["status"])
         
         else:
-            if current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
+            if current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
                 self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score , message_field="eligibility_status")
                 self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field="eligibility_status" , value=lead_message_score["status"])
             else:
