@@ -332,7 +332,7 @@ class WhatsappFlow:
                     #if isinstance(content , str):
                         #return True
                     self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field=f"eligibility_user{lead_info["question_index"]}" , value=ai_response["value"])
-                    if lead_info["question_index"] >= 6:
+                    if lead_info["question_index"] >= 5:
                         lead_info["current_field"] = "urgency"
                     else:
                         lead_info["question_index"] += 1
