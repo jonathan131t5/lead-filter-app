@@ -43,16 +43,17 @@ class LeadsFieldsRepository:
         }
 
     def update_lead_field_data(self, lead_id, field, value):
-        allowed_fields = {
-            "goal_bot",
+        allowed_fields ={
             "goal_user",
             "phone_user",
-            "urgency_bot",
             "urgency_user",
-            "eligibility_user" , 
-            "eligibility_bot",
+            "eligibility_user1",
+            "eligibility_user2",
+            "eligibility_user3",
+            "eligibility_user4",
+            "eligibility_user5",
             "updated_at"
-        }
+            }
 
         if field not in allowed_fields:
             raise ValueError("Invalid field")
@@ -63,16 +64,17 @@ class LeadsFieldsRepository:
         )
 
     def get_lead_specific_field_data(self, lead_id, field):
-        allowed_fields = {
-            "goal_bot",
+        allowed_fields ={
             "goal_user",
             "phone_user",
-            "urgency_bot",
             "urgency_user",
-            "eligibility_user" , 
-            "eligibility_bot",
+            "eligibility_user1",
+            "eligibility_user2",
+            "eligibility_user3",
+            "eligibility_user4",
+            "eligibility_user5",
             "updated_at"
-        }
+            }
 
         if field not in allowed_fields:
             raise ValueError("Invalid field")
