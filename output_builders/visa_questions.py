@@ -64,9 +64,8 @@ class BaseQuestions:
             or field == "visitor_visa" and question_index == 1
             or field == "not_sure" and question_index == 0
         ):
-            return [
-                question
-            ]
+            return question
+        
     
         elif field == "work_permit" and question_index == 1:
             return {
