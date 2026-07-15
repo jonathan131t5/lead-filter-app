@@ -285,10 +285,10 @@ class WhatsappFlow:
             "business_immigration",
             "not_sure"
         ]:
-            if isinstance(question, list):
-                text = question[0]
-            else:
+            if isinstance(question, dict):
                 text = question["body"]
+            else:
+                text = question
 
             message_id = self.messages.add_lead_message(
                 lead_id=lead_info["lead_id"],
