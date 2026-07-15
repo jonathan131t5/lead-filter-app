@@ -2,11 +2,12 @@ import random
 
 
 VISA_FIELDS = [
-    "skilled_worker",
-    "health_care",
-    "student",
-    "family_spouse",
-    "ilr",
+    "permanent_residence",
+    "work_permit",
+    "study_permit",
+    "family_sponsorship",
+    "visitor_visa",
+    "business_immigration",
     "not_sure"
 ]
 
@@ -14,15 +15,16 @@ VISA_FIELDS = [
 class BaseQuestions:
     def goal_base_questions(self):
         button = [
-            {"id": "goal_skilled_worker", "title": "Skilled Worker Visa"},
-            {"id": "goal_health_care", "title": "Health Care Visa"},
-            {"id": "goal_student", "title": "Student Visa"},
-            {"id": "goal_family_spouse", "title": "Family / Spouse Visa"},
-            {"id": "goal_ilr", "title": "Settlement / ILR"},
-            {"id": "goal_not_sure", "title": "Not sure"},
+            {"id": "goal_permanent_residence", "title": "Permanent Residence"},
+            {"id": "goal_work_permit", "title": "Work Permit"},
+            {"id": "goal_study_permit", "title": "Study Permit"},
+            {"id": "goal_family_sponsorship", "title": "Family Sponsorship"},
+            {"id": "goal_visitor_visa", "title": "Visitor Visa"},
+            {"id": "goal_business_immigration", "title": "Business Immigration"},
+            {"id": "goal_not_sure", "title": "Not sure"}
         ]
 
-        question = "What type of UK visa are you interested in?"
+        question = "What type of Canadian immigration service are you interested in?"
 
         return {
             "buttons": button,
@@ -44,84 +46,160 @@ class BaseQuestions:
         }
 
 
-    def eligibility_base_questions(self, field, question_index=1):
-        questions = {
-            "skilled_worker": [
-                "Do you have a job offer from a UK employer?",
-                "Is your employer licensed to sponsor visas?",
-                "Is the job full-time?",
-                "Do you meet the English language requirement?",
-                "Do you have enough funds to support yourself initially?"
-            ],
-
-            "health_care": [
-                "Do you have a job offer in health or social care from a UK employer?",
-                "Is your employer licensed to sponsor visas?",
-                "Is your job on the UK's eligible occupations list?",
-                "Do you meet the English language requirement?",
-                "Do you have enough funds to support yourself initially?"
-            ],
-
-            "student": [
-                "Do you have an offer from a UK university or college?",
-                "Is the institution licensed to sponsor international students?",
-                "Do you meet the English language requirement?",
-                "Can you cover your tuition fees?",
-                "Can you cover your living expenses in the UK?"
-            ],
-
-            "family_spouse": [
-                "Does your partner or family member have British citizenship or settled status?",
-                "Are you married, engaged, or in a long-term relationship?",
-                "Do you have evidence of your relationship?",
-                "Do you plan to live together in the UK?",
-                "Does your sponsor meet the financial requirements?"
-            ],
-
-            "ilr": [
-                "Have you been living in the UK for at least 5 years?",
-                "Do you currently hold a valid UK visa?",
-                "Have you passed the Life in the UK test?",
-                "Do you meet the English language requirement?",
-                "Have you complied with your visa conditions during your stay?"
-            ],
-
-            "not_sure": [
-                "Can you briefly describe your situation and what you're hoping to do in the UK?"
-            ]
-        }
-
-        yes_no_buttons = [
-            {"id": "eligibility_yes", "title": "Yes"},
-            {"id": "eligibility_no", "title": "No"}
-        ]
-
+    
+    def eligibility_buttons(self , field , question , raw_index=1):
         yes_no_not_sure_buttons = [
             {"id": "eligibility_yes", "title": "Yes"},
             {"id": "eligibility_no", "title": "No"},
             {"id": "eligibility_not_sure", "title": "Not sure"}
         ]
-
-        question = questions[field][question_index - 1]
-
-        if field == "not_sure":
-            return question
-
+        
+        question_index = raw_index - 1
+        
         if (
-            field == "skilled_worker" and question_index == 2
-            or field == "health_care" and question_index in [2, 3]
-            or field == "student" and question_index == 2
-            or field == "family_spouse" and question_index == 5
-            or field == "ilr" and question_index == 3
+            field == "permanent_residence" and question_index in [0 , 2]
+            or field == "work_permit" and question_index == 2
+            or field == "study_permit" and question_index == 2
+            or field == "family_sponsorship" and question_index == 2
+            or field == "visitor_visa" and question_index == 1
+            or field == "not_sure" and question_index == 0
         ):
-            buttons = yes_no_not_sure_buttons
-        else:
-            buttons = yes_no_buttons
-
-        return {
-            "buttons": buttons,
+            return [
+                question
+            ]
+    
+        elif field == "work_permit" and question_index == 1:
+            return {
+                "buttons": [
+                    {"id": "eligibility_specific", "title": "Specific offer"},
+                    {"id": "eligibility_explore", "title": "Still exploring"},
+                    {"id": "eligibility_not_sure", "title": "Not sure"}
+                    ],
+                
+                "body": question
+                }
+        
+        elif field == "work_permit" and question_index == 3:
+            return {
+                "buttons": [
+                {"id": "eligibility_permanent", "title": "Permanent"},
+                {"id": "eligibility_temporary", "title": "Temporary"},
+                {"id": "eligibility_not_sure", "title": "Not sure"}
+                ],
             "body": question
         }
+        
+        elif field == "study_permit" and question_index == 0:
+            return {
+                "buttons": [
+                {"id": "eligibility_college", "title": "College"},
+                {"id": "eligibility_undergrad", "title": "Undergrad"},
+                {"id": "eligibility_grad", "title": "Grad"}
+                ],
+            "body": question
+        }
+
+        elif field == "family_sponsorship" and question_index == 0:
+            return {
+                "buttons": [
+                {"id": "eligibility_spouse_partner", "title": "Spouse/Partner"},
+                {"id": "eligibility_parent", "title": "Parent"},
+                {"id": "eligibility_child", "title": "Child"} , 
+                {"id": "eligibility_other", "title": "Other"} ,
+                ],
+            "body": question , 
+            "button_label": "View options"
+        }
+
+        elif field == "visitor_visa" and question_index == 0:
+            return {
+                "buttons": [
+                {"id": "eligibility_tourism", "title": "Tourism"},
+                {"id": "eligibility_family", "title": "Family"},
+                {"id": "eligibility_business", "title": "Business"} 
+                ],
+            "body": question
+        }
+
+        elif field == "business_immigration" and question_index == 0:
+            return {
+                "buttons": [
+                {"id": "eligibility_invest", "title": "Invest"},
+                {"id": "eligibility_start_my_own", "title": "Start my own"},
+                {"id": "eligibility_not_sure", "title": "Not sure"} 
+                ],
+            "body": question
+        }
+
+        else:
+            return {
+                "buttons" : yes_no_not_sure_buttons ,
+                "body" : question
+            }
+
+        
+    
+    
+    def eligibility_base_questions(self, field, question_index=1):
+        questions = {
+            "permanent_residence": [
+                "What's your current occupation and years of experience?",
+                "Do you have a job offer in Canada?",
+                "What's your highest level of education?",
+                "Have you taken an English or French proficiency test?",
+                "Have you lived or worked in Canada before?"
+            ],
+
+            "work_permit": [
+                "Do you already have a job offer from a Canadian employer?",
+                "Do you have a specific job offer, or are you exploring general work options?",
+                "What's your occupation/field?",
+                "Are you looking to stay in Canada permanently, or just temporarily?",
+                "Have you applied for a work permit before?"
+            ],
+
+            "study_permit": [
+                "What level of study are you planning to apply for: college, undergraduate, or graduate?",
+                "Do you have an acceptance letter from a Canadian institution?",
+                "What's your intended field of study?",
+                "Do you have proof of funds for tuition and living costs?",
+                "Is this your first time applying for a study permit?"
+            ],
+
+            "family_sponsorship": [
+                "What's your relationship to the person you're sponsoring/being sponsored by?",
+                "Is the sponsor currently a Canadian citizen or permanent resident?",
+                "Where does the applicant currently live?",
+                "Has a sponsorship application been submitted before?",
+                "Have you had any visa applications refused before?"
+            ],
+
+            "visitor_visa": [
+                "What's the purpose of the visit?",
+                "How long do you plan to stay?",
+                "Have you traveled to Canada before?",
+                "Have you traveled internationally before?",
+                "Have you had any visa applications refused before?"
+            ],
+
+            "business_immigration": [
+                "Are you looking to invest in a business, or start your own?",
+                "Do you have investment funds ready?",
+                "Do you have business ownership/management experience?",
+                "Do you have a specific province in mind?",
+                "Do you have a business plan prepared?"
+            ],
+
+            "not_sure": [
+                "Can you briefly describe your situation and what you're hoping to do in Canada?"
+            ]
+        }
+
+        
+        question = questions[field][question_index - 1]
+
+        return self.eligibility_buttons(field=field , question=question , raw_index=question_index)
+
 
 
     def urgency_base_questions(self):

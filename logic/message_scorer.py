@@ -105,19 +105,20 @@ class MessageScorer:
 
         elif message_to_rank["status"] == "found":
             
-            if field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "not_sure"]:
-                if question_index == 1:
-                    if message_to_rank["value"] == "yes":
-                        rank_score += 3
-                    else:
-                        return {"status" : "eligibility_failed" , "rank_score" : rank_score}
-                else:
-                    if message_to_rank["value"] == "yes":
-                        rank_score += 2
-                    elif message_to_rank["value"] == "not_sure":
-                        rank_score += 1
-                    else:
-                        rank_score += 0
+            if field in ["permanent_residence", "work_permit", "study_permit", "family_sponsorship", "visitor_visa", "business_immigration", "not_sure"]:
+                rank_score += 5
+                #if question_index == 1:
+                    #if message_to_rank["value"] == "yes":
+                        #rank_score += 20
+                    #else:
+                        #return {"status" : "eligibility_failed" , "rank_score" : rank_score}
+                #else:
+                    #if message_to_rank["value"] == "yes":
+                        #rank_score += 2
+                    #elif message_to_rank["value"] == "not_sure":
+                        #rank_score += 1
+                    #else:
+                        #rank_score += 0
         
         
             elif field == "urgency":

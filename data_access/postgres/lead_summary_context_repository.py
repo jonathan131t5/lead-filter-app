@@ -11,6 +11,11 @@ class LeadSummaryContextRepository:
 
                 lfd.goal_user,
                 lfd.urgency_user,
+                lfd.eligibility_user1,
+                lfd.eligibility_user2, 
+                lfd.eligibility_user3, 
+                lfd.eligibility_user4, 
+                lfd.eligibility_user5,
 
                 ls.total_score,
                 ls.goal_status,
@@ -39,7 +44,12 @@ class LeadSummaryContextRepository:
             "final_status": row[2],
             "goal_user": row[3],
             "urgency_user": row[4],
-            "total_score": row[5],
-            "goal_status": row[6],
-            "urgency_status": row[7]
+            "eligibility_user1": row[5],
+            "eligibility_user2": row[6],
+            "eligibility_user3": row[7],
+            "eligibility_user4": row[8],
+            "eligibility_user5": row[9],
+            "total_score": row[10],
+            "goal_status": row[11],
+            "urgency_status": row[12]
         }

@@ -141,6 +141,27 @@ class WhatsappFlow:
 
         
 
+
+    def get_eligibility_status(self, field, raw_index):
+        question_index = raw_index - 1
+
+        text_questions = {
+            "permanent_residence": [0, 2],
+            "work_permit": [2],
+            "study_permit": [2],
+            "family_sponsorship": [2],
+            "visitor_visa": [1],
+            "business_immigration": [],
+            "not_sure": [0]
+        }
+
+        if question_index in text_questions.get(field, []):
+            return "text_eligibility"
+
+        return "button_eligibility"
+
+
+
     def generate_lead_question(self , lead_all_data , external_message_id , ack_mode=0):
         question = self.generate_question(lead_info=lead_all_data["lead_conversation_states_data"] , ack_mode=ack_mode , final_status=lead_all_data["lead_base_data"]["final_status"] , external_message_id=external_message_id)
         if question is None:
@@ -152,8 +173,12 @@ class WhatsappFlow:
         elif lead_all_data["lead_conversation_states_data"]["current_field"] == "goal":
             return {"status" : "goal" , "message" : question}
         
-        elif lead_all_data["lead_conversation_states_data"]["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
-            return {"status" : "eligibility" , "message" : question}
+        elif lead_all_data["lead_conversation_states_data"]["current_field"] in ["permanent_residence", "work_permit", "study_permit", "family_sponsorship", "visitor_visa", "business_immigration", "not_sure"]:
+            status = self.get_eligibility_status(
+                field=lead_all_data["lead_conversation_states_data"]["current_field"],
+                raw_index=lead_all_data["lead_conversation_states_data"]["question_index"]
+                )
+            return {"status" : status , "message" : question}
 
         return {"status" : "output" , "message" : question}
 
@@ -203,7 +228,7 @@ class WhatsappFlow:
                 return {"status" : "found" , "value" : content["id"].replace("goal_" , "")}
         
 
-        elif current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
+        elif current_field in ["permanent_residence", "work_permit", "study_permit", "family_sponsorship", "visitor_visa", "business_immigration", "not_sure"]:
             if isinstance(content , str):
                 self.messages.add_lead_message(lead_id=lead_id , role="user" , content=content)
                 return {"status" : "found" , "value" : content}
@@ -251,10 +276,25 @@ class WhatsappFlow:
             text = question["body"]
             message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
         
-        elif lead_info["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
-            text = question["body"]
-            message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=text)
+        elif lead_info["current_field"] in [
+            "permanent_residence",
+            "work_permit",
+            "study_permit",
+            "family_sponsorship",
+            "visitor_visa",
+            "business_immigration",
+            "not_sure"
+        ]:
+            if isinstance(question, list):
+                text = question[0]
+            else:
+                text = question["body"]
 
+            message_id = self.messages.add_lead_message(
+                lead_id=lead_info["lead_id"],
+                role="assistant",
+                content=text
+            )
 
         else:
             message_id = self.messages.add_lead_message(lead_id=lead_info["lead_id"] , role="assistant" , content=question)
@@ -288,11 +328,11 @@ class WhatsappFlow:
 
                 
 
-                elif lead_info["current_field"] in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
-                    if isinstance(content , str):
-                        return True
-                    self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field="eligibility_user" , value=content["id"].replace("eligibility_" , ""))
-                    if lead_info["question_index"] >= 5:
+                elif lead_info["current_field"] in ["permanent_residence", "work_permit", "study_permit", "family_sponsorship", "visitor_visa", "business_immigration", "not_sure"]:
+                    #if isinstance(content , str):
+                        #return True
+                    self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field=f"eligibility_user{lead_info["question_index"]}" , value=ai_response["value"])
+                    if lead_info["question_index"] >= 6:
                         lead_info["current_field"] = "urgency"
                     else:
                         lead_info["question_index"] += 1
@@ -398,7 +438,7 @@ class WhatsappFlow:
             return
 
         if lead_message_score["status"] == "unknown":
-            if current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
+            if current_field in ["permanent_residence", "work_permit", "study_permit", "family_sponsorship", "visitor_visa", "business_immigration", "not_sure"]:
                 self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score , message_field="eligibility_status")
                 self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field="eligibility_status" , value=lead_message_score["status"])
             else:
@@ -406,7 +446,7 @@ class WhatsappFlow:
                 self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field=f"{current_field}_status" , value=lead_message_score["status"])
         
         else:
-            if current_field in ["skilled_worker" , "student" , "family_spouse" , "ilr" , "health_care" , "not_sure"]:
+            if current_field in ["permanent_residence", "work_permit", "study_permit", "family_sponsorship", "visitor_visa", "business_immigration", "not_sure"]:
                 self.lead_score_manager.update_lead_score_info(lead_score_info=lead_info , lead_message_score=lead_message_score , message_field="eligibility_status")
                 self.leads_scores.update_lead_score_info(lead_id=lead_info["lead_id"] , score_count=lead_info["score_count"] , total_score=lead_info["total_score"] , score_field="eligibility_status" , value=lead_message_score["status"])
             else:

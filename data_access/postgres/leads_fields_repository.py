@@ -6,13 +6,14 @@ class LeadsFieldsRepository:
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS leads_fields_data (
                 lead_id INTEGER PRIMARY KEY,
-                goal_bot TEXT,
                 goal_user TEXT,
-                eligibility_user TEXT, 
-                eligibility_bot TEXT,
                 phone_user TEXT,
-                urgency_bot TEXT,
                 urgency_user TEXT,
+                eligibility_user1 TEXT,
+                eligibility_user2 TEXT, 
+                eligibility_user3 TEXT, 
+                eligibility_user4 TEXT, 
+                eligibility_user5 TEXT, 
                 updated_at TIMESTAMP
             )
         """)
