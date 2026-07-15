@@ -174,7 +174,7 @@ class BookingFlow:
             ]
         
         questions = [
-            "Sounds good! Would you like to book a call with an agent?"
+            "Sounds good! Would you like to book a call with an immigration consultant?"
         ]
         question = random.choice(questions)
 

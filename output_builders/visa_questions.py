@@ -203,7 +203,7 @@ class BaseQuestions:
 
     def urgency_base_questions(self):
         return [
-            "When are you looking to get started?"
+            "When are you looking to start the process?"
         ]
 
 
@@ -295,7 +295,7 @@ class ConfuseQuestions:
     def urgency_confuse_questions(self, question_type):
         if question_type == "meaning":
             return [
-                "I mean when you'd like to get started."
+                "I mean when are you would like to start the process?"
             ]
 
         elif question_type == "answer_type":
@@ -322,7 +322,7 @@ class FallBackQuestions:
     def urgency_fallback_questions(self, fallback_type):
         if fallback_type == "after_fallback":
             return [
-                "All good, when are you looking to get started?"
+                "All good, when are you looking to start the process?"
             ]
 
         elif fallback_type == "regular_fallback":
