@@ -60,15 +60,29 @@ class SummaryFlow:
             summary_info=summary_info
         )
 
-        eligibility_text = "\n".join(eligibility_sentences)
+        eligibility_text = "\n".join(
+            [f"• {sentence}" for sentence in eligibility_sentences]
+        )
+
+        goal = summary_info["goal_user"].replace("_", " ").title()
 
         text = (
             f"{summary_info['name']} — {final_status_context}\n\n"
-            f"Interested in {summary_info['goal_user'].replace('_', ' ').title()}\n\n"
+
+            f"🎯 Goal\n"
+            f"{goal}\n\n"
+
+            f"👤 Client Profile\n"
             f"{eligibility_text}\n\n"
-            f"Wants to get started {summary_info['urgency_user']}\n\n"
-            f"Score: {summary_info['total_score']}\n"
-            f"Phone: {summary_info['phone_number']}"
+
+            f"⏱ Intent\n"
+            f"{summary_info['urgency_user']}\n\n"
+
+            f"🔥 Lead Score\n"
+            f"{summary_info['total_score']}/30\n\n"
+
+            f"📞 Phone\n"
+            f"{summary_info['phone_number']}"
         )
 
         return text
