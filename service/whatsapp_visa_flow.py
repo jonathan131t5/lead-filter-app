@@ -195,6 +195,9 @@ class WhatsappFlow:
                 self.handle_unresolved_fallbacks(lead_info=lead_all_data["lead_conversation_states_data"] , ai_response=ai_response)
 
 
+    
+    
+    
     def determine_final_status(self , lead_all_data):
         finalize_lead_status = self.finalize_lead_status(lead_info=lead_all_data["lead_scores_data"])
         
@@ -305,6 +308,34 @@ class WhatsappFlow:
 
 
 
+    def is_button_answer_as_text(self, field, question_index, content):
+        button_question_indexes = {
+            "permanent_residence": [3, 5, 6],
+            "work_permit": [2, 3, 5, 6],
+            "study_permit": [2, 3, 5, 6],
+            "family_sponsorship": [2, 3, 5, 6],
+            "visitor_visa": [2, 4, 5, 6],
+            "business_immigration": [2, 3, 4, 5, 6],
+            "not_sure": []
+        }
+
+        field_button_indexes = button_question_indexes[field]
+
+        if question_index in field_button_indexes:
+            is_button_question = True
+        else:
+            is_button_question = False
+
+        if is_button_question == True and isinstance(content, str):
+            return True
+
+        return False
+
+
+
+
+
+
     def advance_on_found(self , ai_response , lead_info , content):
             need_to_change = None
 
@@ -329,13 +360,16 @@ class WhatsappFlow:
                 
 
                 elif lead_info["current_field"] in ["permanent_residence", "work_permit", "study_permit", "family_sponsorship", "visitor_visa", "business_immigration", "not_sure"]:
-                    #if isinstance(content , str):
-                        #return True
+                    if self.is_button_answer_as_text(field=lead_info["current_field"] , question_index=lead_info["question_index"] , content=content) == True:
+                        return True
+                    
                     self.leads_fields.update_lead_field_data(lead_id=lead_info["lead_id"] , field=f"eligibility_user{lead_info["question_index"]}" , value=ai_response["value"])
+                    
                     if lead_info["question_index"] >= 5:
                         lead_info["current_field"] = "urgency"
                     else:
                         lead_info["question_index"] += 1
+
 
                 elif lead_info["current_field"] == "urgency":
                     need_to_change = True

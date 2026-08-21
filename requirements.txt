@@ -5,3 +5,4 @@ fastapi
 uvicorn
 sendgrid
 psycopg2-binary
+httpx
