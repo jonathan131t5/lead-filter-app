@@ -70,12 +70,15 @@ class BaseQuestions:
         elif field == "work_permit" and question_index == 1:
             return {
                 "buttons": [
-                    {"id": "eligibility_specific", "title": "Specific offer"},
-                    {"id": "eligibility_explore", "title": "Still exploring"},
-                    {"id": "eligibility_not_sure", "title": "Not sure"}
+                    {"id": "eligibility_outside_canada", "title": "Outside Canada"},
+                    {"id": "eligibility_visito", "title": "Visitor in Canada"},
+                    {"id": "eligibility_student", "title": "Student in Canada"},
+                    {"id": "eligibility_worker", "title": "Worker in Canada"},
+                    {"id": "eligibility_w_other", "title": "Other"},
                     ],
                 
-                "body": question
+                "body": question , 
+                "button_label": "View options"
                 }
         
         elif field == "work_permit" and question_index == 3:
@@ -151,7 +154,7 @@ class BaseQuestions:
 
             "work_permit": [
                 "Do you already have a job offer from a Canadian employer?",
-                "Do you have a specific job offer, or are you exploring general work options?",
+                "What is your current location and status?",
                 "What's your occupation/field?",
                 "Are you looking to stay in Canada permanently, or just temporarily?",
                 "Have you applied for a work permit before?"
